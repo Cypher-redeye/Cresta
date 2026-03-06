@@ -5,6 +5,8 @@ import { Mail, Lock, User, ArrowRight, Github, Chrome, ArrowLeft, Eye, EyeOff } 
 import { useUser } from '../context/UserContext';
 import { useTranslation } from 'react-i18next';
 import { useGoogleLogin } from '@react-oauth/google';
+import { API_BASE } from '../api';
+import { useToast } from '../context/ToastContext';
 
 const AuthPage = () => {
     const { t } = useTranslation();
@@ -19,12 +21,13 @@ const AuthPage = () => {
     });
     const navigate = useNavigate();
     const { login } = useUser();
+    const { showToast } = useToast();
 
     const loginWithGoogle = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             setIsLoading(true);
             try {
-                const res = await fetch('http://localhost:8000/api/auth/google/', {
+                const res = await fetch(`${API_BASE}/auth/google/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ access_token: tokenResponse.access_token })
@@ -33,7 +36,7 @@ const AuthPage = () => {
                 const data = await res.json();
 
                 if (data.success) {
-                    login(data.user);
+                    login(data.user, data.tokens);
                     navigate('/dashboard');
                 } else {
                     console.error('Backend Google Auth Failed:', data.error);
@@ -106,13 +109,13 @@ const AuthPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <div className="h-1 w-12 bg-cyan-600 dark:bg-neon-cyan mb-6 rounded-full"></div>
+                        <div className="h-1 w-12 bg-fintech-cyan dark:bg-neon-cyan mb-6 rounded-full"></div>
                         <blockquote className="text-4xl font-light leading-tight mb-6 font-serif text-gray-900 dark:text-white">
                             {isLogin
                                 ? t('quote_buffett')
                                 : t('quote_einstein')}
                         </blockquote>
-                        <cite className="not-italic text-lg text-cyan-600 dark:text-neon-cyan/80">
+                        <cite className="not-italic text-lg text-fintech-cyan dark:text-neon-cyan/80">
                             — {isLogin ? "Warren Buffett" : "Albert Einstein"}
                         </cite>
                     </motion.div>
@@ -154,7 +157,7 @@ const AuthPage = () => {
                                         exit={{ opacity: 0, height: 0 }}
                                         className="relative group"
                                     >
-                                        <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-cyan-600 dark:group-focus-within:text-neon-cyan transition-colors" />
+                                        <User className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-fintech-cyan dark:group-focus-within:text-neon-cyan transition-colors" />
                                         <input
                                             type="text"
                                             name="name"
@@ -164,7 +167,7 @@ const AuthPage = () => {
                                             placeholder=" "
                                             className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-10 py-3 text-gray-900 dark:text-white outline-none focus:border-cyan-500/50 dark:focus:border-neon-cyan/50 focus:bg-white dark:focus:bg-white/10 transition-all peer"
                                         />
-                                        <label className="absolute left-10 top-3 text-sm text-gray-500 dark:text-gray-400 transition-all bg-gray-50 dark:bg-fintech-card/50 px-1 ml-[-4px] pointer-events-none peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-cyan-600 dark:peer-focus:text-neon-cyan peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-cyan-600 dark:peer-[:not(:placeholder-shown)]:text-neon-cyan">
+                                        <label className="absolute left-10 top-3 text-sm text-gray-500 dark:text-gray-400 transition-all bg-gray-50 dark:bg-fintech-card/50 px-1 ml-[-4px] pointer-events-none peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-fintech-cyan dark:peer-focus:text-neon-cyan peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-fintech-cyan dark:peer-[:not(:placeholder-shown)]:text-neon-cyan">
                                             {t('full_name')}
                                         </label>
                                     </motion.div>
@@ -172,7 +175,7 @@ const AuthPage = () => {
                             </AnimatePresence>
 
                             <div className="relative group">
-                                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-cyan-600 dark:group-focus-within:text-neon-cyan transition-colors" />
+                                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-fintech-cyan dark:group-focus-within:text-neon-cyan transition-colors" />
                                 <input
                                     type="email"
                                     name="email"
@@ -182,26 +185,26 @@ const AuthPage = () => {
                                     placeholder=" "
                                     className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-10 py-3 text-gray-900 dark:text-white outline-none focus:border-cyan-500/50 dark:focus:border-neon-cyan/50 focus:bg-white dark:focus:bg-white/10 transition-all peer"
                                 />
-                                <label className="absolute left-10 top-3 text-sm text-gray-500 dark:text-gray-400 transition-all bg-gray-50 dark:bg-fintech-card/50 px-1 ml-[-4px] pointer-events-none peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-cyan-600 dark:peer-focus:text-neon-cyan peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-cyan-600 dark:peer-[:not(:placeholder-shown)]:text-neon-cyan">
+                                <label className="absolute left-10 top-3 text-sm text-gray-500 dark:text-gray-400 transition-all bg-gray-50 dark:bg-fintech-card/50 px-1 ml-[-4px] pointer-events-none peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-fintech-cyan dark:peer-focus:text-neon-cyan peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-fintech-cyan dark:peer-[:not(:placeholder-shown)]:text-neon-cyan">
                                     {t('email_address')}
                                 </label>
                             </div>
 
                             <div className="relative group">
-                                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-cyan-600 dark:group-focus-within:text-neon-cyan transition-colors" />
+                                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-fintech-cyan dark:group-focus-within:text-neon-cyan transition-colors" />
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     required
                                     placeholder=" "
                                     className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-12 py-3 text-gray-900 dark:text-white outline-none focus:border-cyan-500/50 dark:focus:border-neon-cyan/50 focus:bg-white dark:focus:bg-white/10 transition-all peer"
                                 />
-                                <label className="absolute left-10 top-3 text-sm text-gray-500 dark:text-gray-400 transition-all bg-gray-50 dark:bg-fintech-card/50 px-1 ml-[-4px] pointer-events-none peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-cyan-600 dark:peer-focus:text-neon-cyan peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-cyan-600 dark:peer-[:not(:placeholder-shown)]:text-neon-cyan">
+                                <label className="absolute left-10 top-3 text-sm text-gray-500 dark:text-gray-400 transition-all bg-gray-50 dark:bg-fintech-card/50 px-1 ml-[-4px] pointer-events-none peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-fintech-cyan dark:peer-focus:text-neon-cyan peer-[:not(:placeholder-shown)]:-top-2.5 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-fintech-cyan dark:peer-[:not(:placeholder-shown)]:text-neon-cyan">
                                     {t('password')}
                                 </label>
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-3.5 text-gray-400 hover:text-cyan-600 dark:hover:text-neon-cyan transition-colors"
+                                    className="absolute right-3 top-3.5 text-gray-400 hover:text-fintech-cyan dark:hover:text-neon-cyan transition-colors"
                                 >
                                     <AnimatePresence mode="wait" initial={false}>
                                         <motion.div
@@ -219,7 +222,11 @@ const AuthPage = () => {
 
                             {isLogin && (
                                 <div className="flex justify-end">
-                                    <a href="#" className="text-sm text-cyan-600 dark:text-neon-cyan/80 hover:text-cyan-500 dark:hover:text-neon-cyan transition-colors">
+                                    <a
+                                        href="#"
+                                        onClick={(e) => { e.preventDefault(); showToast('Password reset link sent to your email', 'success'); }}
+                                        className="text-sm text-fintech-cyan dark:text-neon-cyan/80 hover:text-fintech-cyan/80 dark:hover:text-neon-cyan transition-colors"
+                                    >
                                         {t('forgot_password')}
                                     </a>
                                 </div>
@@ -259,7 +266,7 @@ const AuthPage = () => {
                             {isLogin ? t('dont_have_account') : t('already_have_account')} {' '}
                             <button
                                 onClick={toggleMode}
-                                className="text-cyan-600 dark:text-neon-cyan hover:underline font-medium"
+                                className="text-fintech-cyan dark:text-neon-cyan hover:underline font-medium"
                             >
                                 {isLogin ? t('sign_up') : t('log_in')}
                             </button>

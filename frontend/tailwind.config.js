@@ -11,9 +11,14 @@ export default {
                 'fintech-bg': '#0B1120',
                 'fintech-card': '#1E293B',
                 'fintech-primary': '#0F172A',
+                // Dark mode accents (Neon)
                 'neon-cyan': '#22D3EE',
                 'neon-emerald': '#34D399',
                 'neon-blue': '#3B82F6',
+                // Light mode accents (Darker, more readable)
+                'fintech-cyan': '#0891B2',    // cyan-600
+                'fintech-emerald': '#059669', // emerald-600
+                'fintech-blue': '#2563EB',    // blue-600
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],

@@ -5,8 +5,9 @@ import { Globe } from 'lucide-react';
 const LanguageSelector = () => {
     const { i18n } = useTranslation();
 
-    const changeLanguage = (lng) => {
-        i18n.changeLanguage(lng);
+    const changeLanguage = async (lng) => {
+        const { loadLanguage } = await import('../../i18n');
+        await loadLanguage(lng);
     };
 
     return (

@@ -11,15 +11,43 @@
 }
 
 @layer utilities {
+
+  /* Global Lucide icon hover and active animations */
+  .lucide {
+    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
+    will-change: transform;
+    transform-origin: center;
+  }
+
+  .lucide:hover,
+  button:hover .lucide,
+  a:hover .lucide,
+  .group:hover .lucide {
+    transform: scale(1.15) !important;
+  }
+
+  .lucide:active,
+  button:active .lucide,
+  a:active .lucide,
+  .group:active .lucide {
+    transform: scale(0.9) !important;
+  }
+
   .glass-panel {
     @apply bg-white/70 backdrop-blur-lg border border-gray-200 shadow-xl dark:bg-white/5 dark:border-white/10;
   }
 
   .glass-btn {
-    @apply bg-gradient-to-r from-cyan-500/10 to-blue-500/10 dark:from-neon-cyan/20 dark:to-neon-blue/20 backdrop-blur-md border border-gray-200 dark:border-white/10 hover:border-cyan-500/50 dark:hover:border-neon-cyan/50 transition-all duration-300;
+    @apply bg-gradient-to-r from-fintech-cyan/10 to-fintech-blue/10 dark:from-neon-cyan/20 dark:to-neon-blue/20 backdrop-blur-md border border-gray-200 dark:border-white/10 hover:border-fintech-cyan/50 dark:hover:border-neon-cyan/50 transition-all duration-300;
   }
 
   .text-glow {
+    text-shadow: 0 0 15px rgba(8, 145, 178, 0.4);
+    /* fintech-cyan glow */
+  }
+
+  .dark .text-glow {
     text-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
+    /* neon-cyan glow */
   }
 }

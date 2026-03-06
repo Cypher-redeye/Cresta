@@ -2,8 +2,8 @@ import React from 'react';
 import Navbar from '../components/layout/Navbar';
 import Hero from '../components/landing/Hero';
 import Features from '../components/landing/Features';
+import About from '../components/landing/About';
 import Footer from '../components/layout/Footer';
-
 import BackgroundEffects from '../components/common/BackgroundEffects';
 
 const LandingPage = () => {
@@ -15,6 +15,7 @@ const LandingPage = () => {
             <main>
                 <Hero />
                 <Features />
+                <About />
             </main>
             <Footer />
         </div>

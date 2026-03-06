@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { API_BASE, refreshToken } from '../api';
 
 const UserContext = createContext();
 
@@ -8,18 +9,70 @@ export const UserProvider = ({ children }) => {
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
-    const login = (userData) => {
+    const [hasCompletedRiskAssessment, setHasCompletedRiskAssessment] = useState(() => {
+        return localStorage.getItem('risk_assessment_completed') === 'true';
+    });
+
+    // On mount, validate the token by calling /auth/me/
+    useEffect(() => {
+        const validateSession = async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token || !user) return;
+
+            try {
+                let res = await fetch(`${API_BASE}/auth/me/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                // Try refresh if expired
+                if (res.status === 401) {
+                    const refreshed = await refreshToken();
+                    if (refreshed) {
+                        const newToken = localStorage.getItem('access_token');
+                        res = await fetch(`${API_BASE}/auth/me/`, {
+                            headers: { 'Authorization': `Bearer ${newToken}` }
+                        });
+                    }
+                }
+
+                if (!res.ok) {
+                    // Token invalid — logout
+                    logout();
+                }
+            } catch {
+                // Network error — keep user logged in (offline mode)
+            }
+        };
+
+        validateSession();
+    }, []);
+
+    const login = (userData, tokens) => {
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
+        if (tokens) {
+            localStorage.setItem('access_token', tokens.access);
+            localStorage.setItem('refresh_token', tokens.refresh);
+        }
     };
 
     const logout = () => {
         setUser(null);
+        setHasCompletedRiskAssessment(false);
         localStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('risk_assessment_completed');
+        localStorage.removeItem('ai_insights_data');
+    };
+
+    const completeRiskAssessment = () => {
+        setHasCompletedRiskAssessment(true);
+        localStorage.setItem('risk_assessment_completed', 'true');
     };
 
     return (
-        <UserContext.Provider value={{ user, login, logout }}>
+        <UserContext.Provider value={{ user, login, logout, hasCompletedRiskAssessment, completeRiskAssessment }}>
             {children}
         </UserContext.Provider>
     );

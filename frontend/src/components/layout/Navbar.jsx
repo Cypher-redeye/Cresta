@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, X, Activity } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from '../common/ThemeToggle';
 
 const Navbar = () => {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
+    const location = useLocation();
 
     return (
         <nav className="fixed w-full z-50 top-0 start-0 border-b border-gray-200 dark:border-white/10 glass-panel">
@@ -38,16 +39,17 @@ const Navbar = () => {
                 <div className={`${isOpen ? 'block' : 'hidden'} w-full md:block md:w-auto`} id="navbar-default">
                     <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 dark:border-white/10 rounded-lg bg-white dark:bg-fintech-card md:bg-transparent md:flex-row md:items-center md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0">
                         <li>
-                            <Link to="/" className="block py-2 px-3 text-cyan-700 dark:text-white bg-cyan-50 dark:bg-neon-cyan/10 rounded md:bg-transparent md:text-cyan-600 dark:md:text-neon-cyan md:p-0 hover:text-cyan-600 dark:hover:text-neon-cyan transition-colors" aria-current="page">{t('dashboard')}</Link>
+                            <Link to="/" className="block py-2 px-3 text-fintech-cyan dark:text-white bg-cyan-50 dark:bg-neon-cyan/10 rounded md:bg-transparent md:text-fintech-cyan dark:md:text-neon-cyan md:p-0 hover:text-fintech-cyan dark:hover:text-neon-cyan transition-colors" aria-current="page">{t('dashboard')}</Link>
                         </li>
                         <li>
-                            <Link to="/" className="block py-2 px-3 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-white/10 md:hover:bg-transparent md:border-0 md:hover:text-cyan-600 dark:md:hover:text-neon-cyan md:p-0 transition-colors">{t('markets')}</Link>
-                        </li>
-                        <li>
-                            <Link to="/" className="block py-2 px-3 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-white/10 md:hover:bg-transparent md:border-0 md:hover:text-cyan-600 dark:md:hover:text-neon-cyan md:p-0 transition-colors">{t('about')}</Link>
+                            {location.pathname === '/' ? (
+                                <a href="#about" className="block py-2 px-3 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-white/10 md:hover:bg-transparent md:border-0 md:hover:text-fintech-cyan dark:md:hover:text-neon-cyan md:p-0 transition-colors">{t('about')}</a>
+                            ) : (
+                                <Link to="/#about" className="block py-2 px-3 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-white/10 md:hover:bg-transparent md:border-0 md:hover:text-fintech-cyan dark:md:hover:text-neon-cyan md:p-0 transition-colors">{t('about')}</Link>
+                            )}
                         </li>
                         <li className="mt-4 md:mt-0 p-2 md:p-0">
-                            <Link to="/auth" className="block w-full md:w-auto text-center px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-500/10 dark:from-neon-cyan/20 dark:to-neon-blue/20 border border-cyan-500/50 dark:border-neon-cyan/50 text-cyan-600 dark:text-neon-cyan font-semibold hover:border-cyan-400 dark:hover:border-neon-cyan hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300">
+                            <Link to="/auth" className="block w-full md:w-auto text-center px-6 py-2 rounded-lg bg-gradient-to-r from-fintech-cyan/10 to-fintech-blue/10 dark:from-neon-cyan/20 dark:to-neon-blue/20 border border-fintech-cyan/50 dark:border-neon-cyan/50 text-fintech-cyan dark:text-neon-cyan font-semibold hover:border-fintech-cyan dark:hover:border-neon-cyan hover:shadow-[0_0_15px_rgba(8,145,178,0.2)] dark:hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300">
                                 {t('login')}
                             </Link>
                         </li>

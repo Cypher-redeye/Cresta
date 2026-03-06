@@ -1,48 +1,65 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Lightbulb, AlertTriangle, TrendingUp, ArrowRight, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lightbulb, AlertTriangle, TrendingUp, ChevronDown, ChevronUp, BarChart3, Newspaper, Shield, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import PredictiveChart from './PredictiveChart';
 
 const AIInsights = ({ delay }) => {
-    const [insights, setInsights] = React.useState([
-        {
-            id: 1,
-            type: 'opportunity',
-            icon: Lightbulb,
-            color: 'text-yellow-400',
-            bg: 'bg-yellow-400/10',
-            title: 'Tech Sector Rally',
-            message: 'AI stocks are showing strong momentum. Consider increasing exposure by 5%.',
-            timestamp: '2h ago'
-        },
-        {
-            id: 2,
-            type: 'warning',
-            icon: AlertTriangle,
-            color: 'text-red-400',
-            bg: 'bg-red-400/10',
-            title: 'High Volatility Detected',
-            message: 'Market volatility index (VIX) is up. Defensive assets recommended.',
-            timestamp: '5h ago'
-        },
-        {
-            id: 3,
-            type: 'success',
-            icon: TrendingUp,
-            color: 'text-emerald-500',
-            bg: 'bg-emerald-500/10',
-            title: 'Portfolio Performance',
-            message: 'Your conservative strategy outperformed the S&P 500 this week.',
-            timestamp: '1d ago'
-        }
-    ]);
+    const [insights, setInsights] = useState([]);
+    const [expandedId, setExpandedId] = useState(null);
+    const [chartTicker, setChartTicker] = useState(null);
+    const { t } = useTranslation();
 
-    const removeInsight = (id) => {
-        setInsights(current => current.filter(item => item.id !== id));
+    useEffect(() => {
+        const localData = localStorage.getItem('ai_insights_data');
+        if (localData) {
+            try {
+                const data = JSON.parse(localData);
+                if (data.Recommended_Stocks && data.Recommended_Stocks.length > 0) {
+                    const userClass = data.Assigned_Class || 'Moderate';
+                    const newInsights = data.Recommended_Stocks.map((rec, index) => ({
+                        id: `ai-rec-${index}`,
+                        ticker: rec.Ticker,
+                        name: rec.Name || rec.Ticker.replace('.NS', ''),
+                        price: rec.Price || 0,
+                        sector: rec.Sector || 'Market',
+                        confidence: rec.Confidence || 70,
+                        reasoning: rec.Reasoning || '',
+                        headlines: rec.Headlines || [],
+                        userClass: userClass,
+                        xai: rec.xai || null,
+                    }));
+                    setInsights(newInsights);
+                }
+            } catch (e) {
+                console.error("Error formatting insights", e);
+            }
+        } else {
+            setInsights([]);
+        }
+    }, []);
+
+    const toggleExpand = (id) => {
+        setExpandedId(expandedId === id ? null : id);
+        if (expandedId !== id) setChartTicker(null);
     };
 
-    const handleRestore = () => {
-        // Optional: logic to restore dismissed cards, not strictly needed for MVP
+    const getConfidenceColor = (c) => {
+        if (c >= 75) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+        if (c >= 55) return 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20';
+        return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    };
+
+    const getConfidenceLabel = (c) => {
+        if (c >= 75) return t('strong_match');
+        if (c >= 55) return t('good_match');
+        return t('worth_watching');
+    };
+
+    const getSentimentDot = (s) => {
+        if (s === 'positive') return '🟢';
+        if (s === 'negative') return '🔴';
+        return '🟡';
     };
 
     return (
@@ -55,58 +72,179 @@ const AIInsights = ({ delay }) => {
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-neon-cyan animate-pulse"></span>
-                    AI Insights
-                    <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">({insights.length})</span>
+                    {t('ai_stock_advisor')}
+                    <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">({insights.length} {t('picks')})</span>
                 </h3>
-                {insights.length === 0 && (
-                    <button onClick={() => window.location.reload()} className="text-xs text-cyan-600 dark:text-neon-cyan hover:underline">
-                        Refresh
-                    </button>
-                )}
             </div>
 
-            <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-3 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                 <AnimatePresence mode='popLayout'>
                     {insights.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="flex flex-col items-center justify-center h-40 text-gray-500 text-center"
+                            className="flex flex-col items-center justify-center h-40 text-center"
                         >
-                            <p>All caught up!</p>
-                            <p className="text-xs mt-1">No new insights for now.</p>
+                            <AlertTriangle className="text-yellow-500 mb-3" size={28} />
+                            <p className="text-gray-500 font-semibold">{t('setup_required')}</p>
+                            <p className="text-xs text-gray-400 mt-1">{t('complete_risk_for_ai')}</p>
                         </motion.div>
                     ) : (
-                        insights.map((insight) => (
+                        insights.map((stock) => (
                             <motion.div
-                                key={insight.id}
+                                key={stock.id}
                                 layout
-                                initial={{ opacity: 0, scale: 0.9 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, x: 20 }}
-                                className="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 group relative"
+                                className="rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 overflow-hidden"
                             >
+                                {/* Stock Header */}
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeInsight(insight.id);
-                                    }}
-                                    className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => toggleExpand(stock.id)}
+                                    className="w-full p-4 flex items-center gap-3 hover:bg-gray-100/50 dark:hover:bg-white/[0.02] transition-colors text-left"
                                 >
-                                    <X size={14} />
-                                </button>
-                                <div className="flex items-start gap-4">
-                                    <div className={`p-2 rounded-lg ${insight.bg} ${insight.color} shrink-0`}>
-                                        <insight.icon size={18} />
+                                    <div className="p-2 rounded-lg bg-cyan-400/10 text-cyan-400 shrink-0">
+                                        <Lightbulb size={16} />
                                     </div>
-                                    <div className="flex-1 pr-6">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-sm">{insight.title}</h4>
-                                            <span className="text-[10px] text-gray-400">{insight.timestamp}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-bold text-gray-800 dark:text-gray-200 text-sm truncate">{stock.name}</h4>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-xs text-gray-500">₹{stock.price.toLocaleString()}</span>
+                                            <span className="text-[10px] text-gray-400">• {stock.sector}</span>
                                         </div>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{insight.message}</p>
                                     </div>
-                                </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <div className="flex flex-col items-end">
+                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${getConfidenceColor(stock.confidence)}`}>
+                                                {getConfidenceLabel(stock.confidence)}
+                                            </span>
+                                        </div>
+                                        {expandedId === stock.id ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
+                                    </div>
+                                </button>
+
+                                {/* Expanded Analysis */}
+                                <AnimatePresence>
+                                    {expandedId === stock.id && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            className="border-t border-gray-100 dark:border-white/5"
+                                        >
+                                            <div className="p-4 space-y-4">
+                                                {/* XAI: Sentiment Meter + Score Breakdown */}
+                                                {stock.xai && (
+                                                    <div className="space-y-3">
+                                                        <h5 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
+                                                            <BarChart3 size={10} /> {t('ai_score_breakdown')}
+                                                        </h5>
+                                                        {/* Sentiment Meter */}
+                                                        <div className="space-y-1">
+                                                            <div className="flex justify-between items-center text-[10px]">
+                                                                <span className="text-red-400">{t('bearish')}</span>
+                                                                <span className="font-bold" style={{ color: stock.xai.sentiment_score > 0.1 ? '#10b981' : stock.xai.sentiment_score < -0.1 ? '#ef4444' : '#eab308' }}>
+                                                                    {stock.xai.sentiment_score > 0 ? '+' : ''}{stock.xai.sentiment_score.toFixed(2)}
+                                                                </span>
+                                                                <span className="text-emerald-400">{t('bullish')}</span>
+                                                            </div>
+                                                            <div className="w-full h-2 bg-gray-200 dark:bg-white/10 rounded-full relative overflow-hidden">
+                                                                <div className="absolute inset-0 flex">
+                                                                    <div className="w-1/2 bg-gradient-to-r from-red-500/30 to-yellow-500/30"></div>
+                                                                    <div className="w-1/2 bg-gradient-to-r from-yellow-500/30 to-emerald-500/30"></div>
+                                                                </div>
+                                                                <div
+                                                                    className="absolute top-0 w-3 h-2 rounded-full bg-white border-2 border-cyan-500 shadow-lg"
+                                                                    style={{ left: `${Math.max(2, Math.min(96, (stock.xai.sentiment_score + 1) * 50))}%`, transform: 'translateX(-50%)' }}
+                                                                ></div>
+                                                            </div>
+                                                        </div>
+                                                        {/* Score Bars */}
+                                                        {[
+                                                            { label: t('sentiment'), pts: stock.xai.sentiment_pts, max: 40, color: '#06b6d4' },
+                                                            { label: t('risk_fit'), pts: stock.xai.risk_fit_pts, max: 40, color: '#8b5cf6' },
+                                                            { label: t('valuation'), pts: stock.xai.valuation_pts, max: 20, color: '#f59e0b' },
+                                                        ].map((bar) => (
+                                                            <div key={bar.label} className="space-y-0.5">
+                                                                <div className="flex justify-between text-[10px]">
+                                                                    <span className="text-gray-500 dark:text-gray-400">{bar.label}</span>
+                                                                    <span className="font-bold text-gray-600 dark:text-gray-300">{bar.pts.toFixed(0)}/{bar.max}</span>
+                                                                </div>
+                                                                <div className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                                                                    <div
+                                                                        className="h-full rounded-full transition-all"
+                                                                        style={{ width: `${(bar.pts / bar.max) * 100}%`, backgroundColor: bar.color }}
+                                                                    ></div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        <div className="text-[10px] text-gray-400 flex items-center gap-2">
+                                                            <span>β = {stock.xai.beta}</span>
+                                                            <span>•</span>
+                                                            <span>52W pos: {(stock.xai.price_position_52w * 100).toFixed(0)}%</span>
+                                                            <span>•</span>
+                                                            <span>Conf: {(stock.xai.sentiment_confidence * 100).toFixed(0)}%</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Why AI recommends this */}
+                                                <div className="space-y-1.5">
+                                                    <h5 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
+                                                        <Shield size={10} /> {t('why_recommend')}
+                                                    </h5>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                                        Based on your <span className="font-bold text-fintech-cyan dark:text-cyan-500">{stock.userClass}</span> risk profile and our analysis of current market trends, {stock.reasoning.charAt(0).toLowerCase() + stock.reasoning.slice(1)}
+                                                    </p>
+                                                </div>
+
+                                                {/* News Headlines */}
+                                                {stock.headlines && stock.headlines.length > 0 && (
+                                                    <div className="space-y-1.5">
+                                                        <h5 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-1.5">
+                                                            <Newspaper size={10} /> {t('latest_news')}
+                                                        </h5>
+                                                        <div className="space-y-1.5">
+                                                            {stock.headlines.map((hl, i) => (
+                                                                <div key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                                                    <span className="shrink-0 mt-0.5 text-[10px]">{getSentimentDot(hl.sentiment)}</span>
+                                                                    <span className="leading-relaxed">{hl.text}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* View Chart Button */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setChartTicker(chartTicker === stock.ticker ? null : stock.ticker);
+                                                    }}
+                                                    className="w-full py-2.5 bg-fintech-cyan/10 dark:bg-cyan-500/10 hover:bg-fintech-cyan/20 dark:hover:bg-cyan-500/20 text-fintech-cyan dark:text-neon-cyan border border-fintech-cyan/20 dark:border-cyan-500/20 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 group"
+                                                >
+                                                    <BarChart3 size={14} />
+                                                    {chartTicker === stock.ticker ? t('hide_growth_chart') : t('view_growth_chart')}
+                                                    <TrendingUp size={14} className="group-hover:translate-x-1 transition-transform" />
+                                                </button>
+
+                                                {/* Inline Chart */}
+                                                <AnimatePresence>
+                                                    {chartTicker === stock.ticker && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: 'auto' }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                        >
+                                                            <PredictiveChart symbol={stock.ticker} onClose={() => setChartTicker(null)} />
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </motion.div>
                         ))
                     )}

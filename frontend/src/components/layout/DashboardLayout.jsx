@@ -1,6 +1,7 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 import Header from './DashboardHeader';
+import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react'; // Import icons for mobile menu toggle
 
 
@@ -14,7 +15,7 @@ const DashboardLayout = ({ children }) => {
             {/* Mobile Header & Sidebar Overlay */}
             <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-fintech-bg border-b border-gray-200 dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors duration-300">
                 <span className="text-xl font-bold tracking-wide text-gray-900 dark:text-white">
-                    <span className="text-neon-cyan">Cresta</span>
+                    <span className="text-fintech-cyan dark:text-neon-cyan">Cresta</span>
                 </span>
                 <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600 dark:text-gray-300">
                     {isMobileMenuOpen ? <X /> : <Menu />}
@@ -26,9 +27,9 @@ const DashboardLayout = ({ children }) => {
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 z-40 bg-gray-50 dark:bg-fintech-bg pt-16 px-4 md:hidden transition-colors duration-300">
                     <nav className="flex flex-col space-y-4">
-                        <a href="/dashboard" className="text-lg font-medium text-cyan-600 dark:text-neon-cyan">Portfolio</a>
+                        <a href="/dashboard" className="text-lg font-medium text-fintech-cyan dark:text-neon-cyan">Portfolio</a>
                         <a href="/markets" className="text-lg font-medium text-gray-600 dark:text-gray-400">Market Watch</a>
-                        <a href="/risk" className="text-lg font-medium text-gray-600 dark:text-gray-400">Risk Assessment</a>
+                        <Link to="/risk-assessment" className="text-lg font-medium text-gray-600 dark:text-gray-400">Risk Assessment</Link>
                         <a href="/settings" className="text-lg font-medium text-gray-600 dark:text-gray-400">Settings</a>
                     </nav>
                 </div>
