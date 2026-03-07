@@ -74,3 +74,50 @@ class WatchlistItem(models.Model):
     def __str__(self):
         return f"{self.user.email} watching {self.ticker}"
 
+class StockPrediction(models.Model):
+    """Cached LSTM + Ensemble predictions for a stock."""
+    ticker = models.CharField(max_length=20)
+    history_array = models.JSONField()          # last 30 days history
+    future_forecast_array = models.JSONField()  # 7-day future predictions
+    metrics = models.JSONField(null=True, blank=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('ticker',)
+
+    def __str__(self):
+        return f"Prediction target for {self.ticker}"
+
+
+class PaperTrade(models.Model):
+    """Simulated trading environment tracking fake P&L."""
+    ACTION_CHOICES = [('BUY', 'Buy'), ('SELL', 'Sell')]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='paper_trades')
+    ticker = models.CharField(max_length=20)
+    action = models.CharField(max_length=4, choices=ACTION_CHOICES)
+    quantity = models.IntegerField()
+    price_at_trade = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Paper {self.action} {self.quantity}x {self.ticker} @ ₹{self.price_at_trade}"
+
+
+class WatchlistAlert(models.Model):
+    """Price threshold triggers for background Celery tasks."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='price_alerts')
+    ticker = models.CharField(max_length=20)
+    target_price = models.DecimalField(max_digits=10, decimal_places=2)
+    condition = models.CharField(max_length=15, choices=[('ABOVE', 'Moves Above'), ('BELOW', 'Drops Below')])
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"Alert: {self.ticker} {self.condition} ₹{self.target_price} (Active: {self.is_active})"

@@ -132,3 +132,96 @@ def daily_ml_refresh():
         'sentiment': sentiment_result,
         'lstm': lstm_result,
     }
+
+
+# ============= ALERTING & MONITORING =============
+
+@shared_task
+def check_price_alerts():
+    """
+    Checks active WatchlistAlerts against live yfinance prices.
+    Designed to run every 15 mins during market hours.
+    """
+    from advisor.models import WatchlistAlert
+    import yfinance as yf
+    
+    active_alerts = WatchlistAlert.objects.filter(is_active=True)
+    if not active_alerts.exists():
+        return "No active alerts"
+        
+    print(f"[CELERY] Checking {active_alerts.count()} price alerts...")
+    triggered = 0
+    
+    # Batch fetch live prices to reduce yfinance hits
+    tickers = list(active_alerts.values_list('ticker', flat=True).distinct())
+    prices = {}
+    
+    for ticker in tickers:
+        try:
+            prices[ticker] = yf.Ticker(ticker).history(period='1d')['Close'].iloc[-1]
+        except Exception:
+            continue
+            
+    for alert in active_alerts:
+        live_price = prices.get(alert.ticker)
+        if not live_price:
+            continue
+            
+        is_triggered = False
+        if alert.condition == 'ABOVE' and live_price >= float(alert.target_price):
+            is_triggered = True
+        elif alert.condition == 'BELOW' and live_price <= float(alert.target_price):
+            is_triggered = True
+            
+        if is_triggered:
+            # Here we would integrate with email/push notification logic
+            print(f"🚨 ALERT TRIGGERED: {alert.ticker} dropped {alert.condition} ₹{alert.target_price}")
+            alert.is_active = False # Deactivate after firing once
+            alert.save()
+            triggered += 1
+            
+    return f"Checked {active_alerts.count()} alerts, triggered {triggered}"
+
+
+@shared_task
+def check_model_drift():
+    """
+    Daily check of LSTM cached predictions against actual market close prices
+    to detect if models are drifting out of alignment with reality.
+    """
+    from advisor.models import StockPrediction
+    import yfinance as yf
+    
+    predictions = StockPrediction.objects.all()
+    print(f"[CELERY] Checking drift for {predictions.count()} cached models...")
+    
+    drift_count = 0
+    
+    for pred in predictions:
+        try:
+            forecasts = pred.future_forecast_array
+            if not forecasts or len(forecasts) < 1:
+                continue
+                
+            first_pred_date = forecasts[0]['date']
+            first_pred_price = forecasts[0]['price']
+            
+            # Fetch actual price for that 'future' date if it has passed
+            actual_data = yf.Ticker(pred.ticker).history(start=first_pred_date, end=first_pred_date)
+            
+            if not actual_data.empty:
+                actual_price = actual_data['Close'].iloc[0]
+                error_margin = abs(actual_price - first_pred_price) / actual_price
+                
+                # If error is greater than 5% on Day 1 forecast, we have drift
+                if error_margin > 0.05:
+                    print(f"⚠️ DRIFT DETECTED for {pred.ticker}: Predicted ₹{first_pred_price}, Actual ₹{actual_price:.2f}")
+                    drift_count += 1
+                    
+                    # Force eviction of this model from the persistent cache
+                    pred.delete() 
+                    
+        except Exception as e:
+            pass
+            
+    return f"Drift check complete. Evicted {drift_count} stale models."

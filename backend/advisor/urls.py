@@ -20,6 +20,7 @@ urlpatterns = [
     # ML
     path("recommend/", views.recommend_api),
     path("prediction/", views.get_prediction),
+    path("api/sector-sentiment/", views.sector_sentiment),
     # Portfolio CRUD (JWT-protected)
     path("holdings/", views.get_holdings),
     path("holdings/add/", views.add_holding),

@@ -40,3 +40,33 @@ class UserProfileSerializer(serializers.Serializer):
 
 class WatchlistSerializer(serializers.Serializer):
     ticker = serializers.CharField(max_length=20)
+
+
+class PaperTradeSerializer(serializers.ModelSerializer):
+    current_pnl = serializers.SerializerMethodField()
+    
+    class Meta:
+        from .models import PaperTrade
+        model = PaperTrade
+        fields = ['id', 'ticker', 'action', 'quantity', 'price_at_trade', 'created_at', 'current_pnl']
+        read_only_fields = ['id', 'created_at', 'current_pnl']
+    
+    def get_current_pnl(self, obj):
+        from django.core.cache import cache
+        
+        # Use Redis cached price — NOT live yfinance call
+        cache_key = f"price:{obj.ticker}"
+        current = cache.get(cache_key)
+        
+        if not current:
+            # Fallback for missing cache to avoid null PNLs, but try not to block long
+            try:
+                import yfinance as yf
+                current = round(yf.Ticker(obj.ticker).history(period='1d')['Close'].iloc[-1], 2)
+                cache.set(cache_key, current, timeout=300) # cache for 5 mins
+            except Exception:
+                return None  # return null, don't block
+                
+        if obj.action == 'BUY':
+            return round((float(current) - float(obj.price_at_trade)) * float(obj.quantity), 2)
+        return round((float(obj.price_at_trade) - float(current)) * float(obj.quantity), 2)

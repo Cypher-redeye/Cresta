@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split, cross_val_score, Stratifie
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.utils.class_weight import compute_sample_weight
 import joblib
 import xgboost as xgb
 
@@ -87,7 +88,14 @@ def train_model():
     # --- Final Training on Full Train Set ---
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
     
-    best_model.fit(X_train, y_train)
+    # Calculate sample weights for class imbalance
+    sample_weights = compute_sample_weight(
+        class_weight='balanced',
+        y=y_train
+    )
+    
+    # Fit considering severe class imbalances
+    best_model.fit(X_train, y_train, sample_weight=sample_weights)
     y_pred_num = best_model.predict(X_test)
     
     final_acc = accuracy_score(y_test, y_pred_num)

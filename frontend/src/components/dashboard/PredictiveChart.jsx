@@ -42,9 +42,13 @@ const PredictiveChart = ({ symbol, onClose }) => {
                         // Add bridge point: if next item is future, also set future to current price
                         if (index < arr.length - 1 && arr[index + 1].isFuture) {
                             entry.future = item.price;
+                            entry.lower_bound = item.price;
+                            entry.upper_bound = item.price;
                         }
                     } else {
                         entry.future = item.price;
+                        entry.lower_bound = item.lower_bound;
+                        entry.upper_bound = item.upper_bound;
                     }
 
                     return entry;
@@ -69,9 +73,16 @@ const PredictiveChart = ({ symbol, onClose }) => {
                     <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">{item.date}</p>
                     <p className="text-sm font-extrabold text-white">₹{price?.toLocaleString()}</p>
                     {item.isFuture && (
-                        <div className="mt-1 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-                            <span className="text-[10px] text-blue-400 font-bold">{t('ai_forecast')}</span>
+                        <div className="mt-1 flex flex-col gap-1">
+                            <div className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                                <span className="text-[10px] text-blue-400 font-bold">{t('ai_forecast')}</span>
+                            </div>
+                            {item.lower_bound && item.upper_bound && (
+                                <p className="text-[9px] text-gray-500 font-medium">
+                                    80% CI: ₹{item.lower_bound?.toLocaleString()} - ₹{item.upper_bound?.toLocaleString()}
+                                </p>
+                            )}
                         </div>
                     )}
                 </div>
@@ -154,6 +165,24 @@ const PredictiveChart = ({ symbol, onClose }) => {
                                 connectNulls={false}
                                 isAnimationActive={true}
                                 dot={false}
+                            />
+
+                            {/* Confidence Interval Band (Subtle fill) */}
+                            <Area
+                                type="monotone"
+                                dataKey="upper_bound"
+                                stroke="none"
+                                fill="#3B82F6"
+                                fillOpacity={0.1}
+                                isAnimationActive={true}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="lower_bound"
+                                stroke="none"
+                                fill="#0f172a" // Masking the area below the lower bound to fake a floating band
+                                fillOpacity={0.8}
+                                isAnimationActive={true}
                             />
 
                             {/* Future line (dashed blue) */}

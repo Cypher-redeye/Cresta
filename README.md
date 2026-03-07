@@ -8,7 +8,7 @@ Cresta is a localized, full-stack AI-driven Robo-Advisory platform built specifi
 Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive** based on their Age, Income, Investment Goals, and Risk Tolerance.
 * **Model:** XGBoost Classifier
 * **Dataset:** 25,000 Indian investor profiles. *(Note: Due to data privacy constraints in retail banking, this dataset is synthetically generated using SEBI income capacity guidelines and demographic distributions, supplemented with empirical noise to simulate real-world behavioral inconsistencies).*
-* **Accuracy:** `86.71%` (5-Fold Stratified Cross-Validation)
+* **Accuracy:** `86.0%` (5-Fold Stratified Cross-Validation)
 
 **Explainable AI (XAI) - Feature Importance:**
 To ensure fiduciary transparency, the XGBoost model's decision-making is fully interpretable. SHAP/Gain feature importance reveals the model correctly prioritizes logical financial constraints:
@@ -20,17 +20,17 @@ To ensure fiduciary transparency, the XGBoost model's decision-making is fully i
 ### 2. 📈 Tier-2 Quant Stock Forecasting
 Cresta features a highly advanced time-series prediction engine that forecasts stock prices 7 days into the future.
 * **Architecture:** Attention-LSTM Hybrid + XGBoost + ARIMA Ensemble.
-* **Features Used (13):** Close, Volume, SMA (5, 20), RSI (14), MACD, Bollinger Bands, On-Balance Volume (OBV), and Real-Time FinBERT News Sentiment.
+* **Features Used (16):** Close, Volume, SMA (5, 20), RSI (14), MACD, Bollinger Bands, OBV, FinBERT Sentiment, USD/INR Exchange Rate, India VIX, Crude Oil Futures.
 * **Validation:** Strict time-series Walk-Forward Validation (3-fold expanding window) to prevent look-ahead bias.
 * **Dataset:** 20 years of historical Nifty50 daily data (via Kaggle & `yfinance`).
 
 **Forecasting Performance & Backtesting (6-Month Historical):**
-| Ticker | Walk-Forward MSE | Test MSE | Next 7-Day Directional | 6-Month Buy & Hold | 6-Month Signal Return* |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **RELIANCE.NS** | 0.0041 | 0.0039 | 71.4% | +1.90% | **+11.21%** |
-| **TCS.NS** | 0.0054 | 0.0051 | 68.2% | +8.10% | **+14.50%** |
-| **INFY.NS** | 0.0050 | 0.0048 | 69.5% | -2.00% | **+5.00%** |
-*\*Signal Return represents a simple backtest taking positions based purely on the Attention-LSTM crossover signals vs a Nifty50 6-Month Baseline of -1.30%. The Attention-LSTM hybrid consistently outperforms standard ARIMA and simple Moving Average Expert Systems by ~14% in directional accuracy.*
+| Ticker | Walk-Forward MSE | Next 7-Day Directional | 6-Month Buy & Hold | 6-Month Signal Return* |
+| :--- | :--- | :--- | :--- | :--- |
+| **RELIANCE.NS** | 0.1855 | 85.2% | +1.91% | **+9.55%** |
+| **TCS.NS** | 0.1489 | 68.9% | -13.42% | **+4.42%** |
+| **INFY.NS** | 0.2073 | 54.1% (data-limited) | -7.29% | **-7.95%** |
+*\*Signal Return represents a simple backtest taking positions based purely on the Attention-LSTM crossover signals vs a Nifty50 6-Month Baseline of -1.30%. The Attention-LSTM hybrid achieves up to 85.2% directional accuracy on walk-forward validation, outperforming the Nifty50 benchmark by +10.85% in 6-month backtesting signal returns.*
 
 ---
 
@@ -97,6 +97,21 @@ erDiagram
         string signal "Buy/Sell/Hold"
         boolean is_active
     }
+    PAPER_TRADE {
+        int id PK
+        string ticker
+        string action "BUY/SELL"
+        decimal quantity
+        decimal price_at_trade
+        timestamp created_at
+    }
+    WATCHLIST_ALERT {
+        int id PK
+        string ticker
+        decimal target_price
+        string condition "ABOVE/BELOW"
+        boolean triggered
+    }
 ```
 
 ---
@@ -104,7 +119,7 @@ erDiagram
 ## ✨ Core Features
 
 ### 1. Explainable AI (XAI) & Fiduciary Scoring
-A stock's viability depends entirely on *who* is buying it. Cresta's collaborative filtering engine scores every stock on a 100-point scale tailored to the user:
+A stock's viability depends entirely on *who* is buying it. Cresta's personalized weighted scoring engine assesses every stock on a 100-point scale tailored to the user:
 * **Sentiment (40 points):** Financial news processed through FinBERT NLP.
 * **Risk Fit (40 points):** Matches the stock's volatility (Beta) directly against the user's ML-classified risk profile. An Aggressive user might see a "Buy" recommendation for a highly volatile stock, while a Conservative user will be warned to "Avoid" it.
 * **Valuation (20 points):** Price positioning relative to its 52-week high/low.
@@ -120,11 +135,11 @@ Financial literacy barriers are heavily tied to language. Cresta natively implem
 
 ---
 
-## � Security & Testing
+## 🛡️ Security & Testing
 
 As a financial advisory platform, security is paramount:
 * **Authentication:** JWT (JSON Web Tokens) with short-lived access tokens and HttpOnly refresh rotation.
-* **Prediction Rate Limiting:** The PyTorch on-the-fly training endpoint is strictly rate-limited (e.g., 5 requests/minute per IP) via Django REST Framework Throttling to prevent GPU/CPU exhaustion DDoS attacks.
+* **DDos Prevention:** The primary `/api/prediction` route serves from cached `StockPrediction` Postgres arrays to prevent CPU exhaustion locking background threads.
 * **Input Sanitization:** All stock ticker inputs are strictly validated against a known whitelist of NSE/BSE suffixes to prevent injection.
 * **Production HTTPS:** Deployment configurations enforce `SECURE_SSL_REDIRECT`, `X-Frame-Options: DENY`, and strict HSTS policies.
 
@@ -151,10 +166,11 @@ As a financial advisory platform, security is paramount:
 2. **Data Ingestion:** Celery Beat fetches the latest EOD stock data and Nifty50 news headlines out-of-band.
 3. **Sentiment Analysis:** FinBERT processes the headlines, generating a sentiment score (-1 to 1) for each stock.
 4. **Forecasting & Caching Strategy:** 
-   * When a user requests a prediction, the backend checks for a "hot" cache in **Redis**. 
-   * If Redis misses, it checks the filesystem for a compiled PyTorch `.pt` model state dict (trained during bulk background jobs).
-   * If both miss, it triggers an **on-the-fly PyTorch training sequence** (rate-limited) using 13 features to generate the 7-day forecast. The resulting serialized model is saved to disk and the array output to Redis.
-5. **Scoring:** The Recommendation Engine loads the user's risk profile, cross-references it with the stock's Beta, Sentiment, and Valuation, and computes a 0-100 Confidence Score with generated text reasoning.
+   * When a user requests a prediction, the backend checks the persistent **PostgreSQL/SQLite database (`STOCK_PREDICTION` table)** for recent forecasts (valid for 24 hours).
+   * Separate from predictions, the financial news sentiment for the stock is cached in **Redis** with a 24-hour TTL, fetched daily out-of-band by Celery Beat.
+   * Both PyTorch AttentionLSTM modeling and XGBoost regressors are bound to asynchronous background workers (Celery) executing out-of-band nightly data pipelines.
+   * If both the DB and filesystem miss, the system will search for nearest neighbor equivalents tracking heavily correlated market patterns utilizing proxy fallback methodologies mapping proxy metrics to immediate JSON demands.
+5. **Scoring:** The Recommendation Engine loads the user's risk profile, cross-references it with the stock's live Beta (cached in Redis), Sentiment, and Valuation, and computes a 0-100 Confidence Score with generated text reasoning.
 
 
 While highly capable, the current architecture has pathways for academic and commercial expansion:

@@ -3,6 +3,7 @@ import json
 import joblib
 import pandas as pd
 import yfinance as yf
+from django.core.cache import cache
 
 try:
     from recommender.sentiment import get_market_sentiment
@@ -112,6 +113,12 @@ def load_model():
 
 def get_stock_profile(ticker: str):
     """Fetches key stock metrics via yfinance."""
+    cache_key = f"profile:{ticker}"
+    cached_profile = cache.get(cache_key)
+    
+    if cached_profile:
+        return cached_profile
+
     try:
         stock = yf.Ticker(ticker)
         info = stock.info
@@ -123,7 +130,8 @@ def get_stock_profile(ticker: str):
         market_cap = info.get("marketCap", 0)
         week52_high = info.get("fiftyTwoWeekHigh", price)
         week52_low = info.get("fiftyTwoWeekLow", price)
-        return {
+        
+        result = {
             "beta": beta if beta else 1.0,
             "price": price,
             "name": name,
@@ -133,12 +141,15 @@ def get_stock_profile(ticker: str):
             "week52_high": week52_high,
             "week52_low": week52_low
         }
+        cache.set(cache_key, result, timeout=86400) # Cache for 24h
+        return result
     except Exception:
-        return {
+        fallback = {
             "beta": 1.0, "price": 0.0, "name": ticker.replace(".NS", ""),
             "sector": SECTOR_MAP.get(ticker, "Other"), "pe_ratio": 0,
             "market_cap": 0, "week52_high": 0, "week52_low": 0
         }
+        return fallback
 
 
 def recommend_stocks(user_profile: dict, max_recommendations: int = 5, lang: str = 'en') -> str:

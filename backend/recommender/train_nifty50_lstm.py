@@ -45,37 +45,62 @@ LEARNING_RATE = 0.001
 PATIENCE = 8  # Early stopping patience
 
 
-def load_kaggle_csv(filepath):
+def load_full_data(filepath, ticker):
     """
-    Load and standardize a Kaggle Nifty50 CSV.
-    Kaggle columns: Date, Symbol, Prev Close, Open, High, Low, Last, Close, VWAP, Volume, ...
-    We need:         Date (index), Open, High, Low, Close, Volume
+    Load Kaggle Nifty50 CSV base and merge with recent yfinance data for a full training set.
     """
-    df = pd.read_csv(filepath)
+    df_kaggle = pd.read_csv(filepath)
 
     # Standardize column names
-    df.columns = df.columns.str.strip()
+    df_kaggle.columns = df_kaggle.columns.str.strip()
 
     # Parse date
-    if 'Date' in df.columns:
-        df['Date'] = pd.to_datetime(df['Date'])
-        df = df.set_index('Date')
+    if 'Date' in df_kaggle.columns:
+        df_kaggle['Date'] = pd.to_datetime(df_kaggle['Date'])
+        df_kaggle = df_kaggle.set_index('Date')
     else:
         raise ValueError(f"No 'Date' column in {filepath}")
 
     # Ensure required columns exist
     required = ['Open', 'High', 'Low', 'Close', 'Volume']
     for col in required:
-        if col not in df.columns:
+        if col not in df_kaggle.columns:
             raise ValueError(f"Missing column '{col}' in {filepath}")
 
-    # Clean: drop rows with zero/NaN close
-    df = df[df['Close'] > 0].dropna(subset=['Close', 'Volume'])
-
-    # Sort by date
-    df = df.sort_index()
-
-    return df[required]
+    # Clean Kaggle Data
+    df_kaggle = df_kaggle[df_kaggle['Close'] > 0].dropna(subset=['Close', 'Volume'])
+    df_kaggle = df_kaggle.sort_index()[required]
+    
+    # Append recent data via yfinance that Kaggle doesn't have
+    try:
+        import yfinance as yf
+        ticker_ns = ticker if ticker.endswith('.NS') else f"{ticker}.NS"
+        df_recent = yf.Ticker(ticker_ns).history(
+            start="2021-01-01", 
+            auto_adjust=True
+        )
+        if not df_recent.empty:
+            df_recent.index = df_recent.index.tz_localize(None)
+            df_recent = df_recent[required]
+            
+            # Merge and deduplicate
+            df_full = pd.concat([df_kaggle, df_recent])
+            df_full = df_full[~df_full.index.duplicated(keep='last')]
+            df_full = df_full.sort_index()
+            
+            if len(df_full) < 500:
+                print(f"  ⚠ {ticker}: Insufficient data ({len(df_full)} rows). Skipping.")
+                return None
+                
+            return df_full
+    except Exception as e:
+        print(f"  ⚠ Could not fetch yfinance data for merge: {e}")
+        
+    if len(df_kaggle) < 500:
+        print(f"  ⚠ {ticker}: Insufficient data ({len(df_kaggle)} rows). Skipping.")
+        return None
+        
+    return df_kaggle
 
 
 def train_single_stock(filepath, ticker_name):
@@ -86,13 +111,12 @@ def train_single_stock(filepath, ticker_name):
 
     start_time = time.time()
 
-    # 1. Load data
-    df = load_kaggle_csv(filepath)
-    print(f"  Data: {len(df)} days ({df.index[0].date()} to {df.index[-1].date()})")
-
-    if len(df) < LOOKBACK + FORECAST_DAYS + 50:
-        print(f"  ⚠ Skipping {ticker_name}: insufficient data ({len(df)} rows)")
+    # 1. Load merged data
+    df = load_full_data(filepath, ticker_name)
+    if df is None:
         return False
+        
+    print(f"  Data: {len(df)} days ({df.index[0].date()} to {df.index[-1].date()})")
 
     # 2. Prepare features (sentiment = 0 for historical training)
     features_df = prepare_features(df, sentiment_score=0.0)

@@ -116,3 +116,41 @@ def get_prediction(request):
             })
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def sector_sentiment(request):
+    """
+    Returns FinBERT sentiment for all Nifty50 stocks
+    grouped by sector — used by SectorHeatmap component.
+    """
+    from django.core.cache import cache
+    
+    sectors = {
+        'IT': ['TCS.NS', 'INFY.NS', 'WIPRO.NS', 'HCLTECH.NS'],
+        'Banking': ['HDFCBANK.NS', 'ICICIBANK.NS', 'SBIN.NS'],
+        'Energy': ['RELIANCE.NS', 'ONGC.NS', 'NTPC.NS'],
+        'Auto': ['MARUTI.NS', 'TATAMOTORS.NS'],
+        'Pharma': ['SUNPHARMA.NS', 'DRREDDY.NS'],
+    }
+    
+    result = {}
+    for sector, tickers in sectors.items():
+        result[sector] = {}
+        for ticker in tickers:
+            # Assuming sentiment scores are stored in cache as floats
+            sentiment = cache.get(f"sentiment:{ticker}", 0)
+            
+            # If not in cache, try fetching from dict structure used by get_cached_sentiment
+            if sentiment == 0:
+                try:
+                    from advisor.tasks import get_cached_sentiment
+                    data = get_cached_sentiment(ticker)
+                    sentiment = data.get('score', 0.0)
+                except Exception:
+                    sentiment = 0.0
+                    
+            result[sector][ticker] = sentiment
+            
+    return Response(result)

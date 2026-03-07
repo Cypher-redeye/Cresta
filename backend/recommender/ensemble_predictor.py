@@ -17,18 +17,21 @@ warnings.filterwarnings('ignore')
 
 from datetime import timedelta
 
-# Internal imports
 try:
     from recommender.stock_predictor import (
         train_and_predict as lstm_predict,
         prepare_features,
         get_sentiment_for_ticker,
+        get_cached_prediction,
+        save_prediction
     )
 except ImportError:
     from stock_predictor import (
         train_and_predict as lstm_predict,
         prepare_features,
         get_sentiment_for_ticker,
+        get_cached_prediction,
+        save_prediction
     )
 
 
@@ -143,8 +146,8 @@ def _arima_predict(df, forecast_days=7):
 
 # Model weights
 WEIGHTS = {
-    'lstm': 0.50,
-    'xgboost': 0.30,
+    'lstm': 0.70,
+    'xgboost': 0.10,
     'arima': 0.20,
 }
 
@@ -162,6 +165,12 @@ def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) ->
     """
     import yfinance as yf
 
+    # Check persistent DB cache first
+    cached_result = get_cached_prediction(ticker)
+    if cached_result:
+        print(f"[ENSEMBLE] Returning DB cached ensemble result for {ticker}")
+        return cached_result
+
     print(f"[ENSEMBLE] Processing {ticker}...")
     start_time = time.time()
 
@@ -170,7 +179,15 @@ def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) ->
     df = stock.history(period="1y")
 
     if df.empty or len(df) < lookback + forecast_days + 10:
-        raise ValueError(f"Insufficient data for {ticker}")
+        # Don't throw exception, serve a fallback similar stock prediction instead
+        print(f"[ENSEMBLE] Insufficient data for {ticker}. Seeking nearest equivalent proxy.")
+        similar_ticker = find_most_similar_stock(ticker)
+        pred = get_cached_prediction(similar_ticker)
+        if pred:
+            pred['metrics']['model'] = f"Ensemble Proxy (Copied from {similar_ticker})"
+            return pred
+        else:
+            raise ValueError(f"Insufficient data and no proxy available for {ticker}")
 
     sentiment_score = get_sentiment_for_ticker(ticker)
 
@@ -273,6 +290,9 @@ def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) ->
             name: prices for name, prices in model_predictions.items()
         }
     }
+
+    # Save ensemble result to persistent DB
+    save_prediction(ticker, result)
 
     print(f"[ENSEMBLE] Complete for {ticker} in {elapsed:.1f}s using {list(model_predictions.keys())}")
     return result

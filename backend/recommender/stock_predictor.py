@@ -24,8 +24,39 @@ MODEL_DIR = os.path.join(os.path.dirname(__file__), 'saved_models')
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 # --- Model Cache ---
-_model_cache = {}  # {ticker: {'model': ..., 'scaler': ..., 'timestamp': ..., 'result': ...}}
-CACHE_DURATION = 86400  # 24 hours
+from django.utils import timezone
+import logging
+logger = logging.getLogger(__name__)
+
+def get_cached_prediction(ticker):
+    try:
+        from advisor.models import StockPrediction
+        obj = StockPrediction.objects.get(ticker=ticker)
+        # Check if stale (older than 24 hours)
+        age = timezone.now() - obj.last_updated
+        if age.total_seconds() < 86400:
+            return {
+                "history": obj.history_array,
+                "predictions": obj.future_forecast_array,
+                "metrics": obj.metrics
+            }
+    except Exception as e:
+        logger.debug(f"Cache miss for {ticker}: {e}")
+    return None
+
+def save_prediction(ticker, result_dict):
+    try:
+        from advisor.models import StockPrediction
+        StockPrediction.objects.update_or_create(
+            ticker=ticker,
+            defaults={
+                'history_array': result_dict['history'],
+                'future_forecast_array': result_dict['predictions'],
+                'metrics': result_dict.get('metrics', {})
+            }
+        )
+    except Exception as e:
+        logger.error(f"Failed to save prediction for {ticker} to DB: {e}")
 
 
 # ============================================================
@@ -171,6 +202,27 @@ def prepare_features(df, sentiment_score=0.0):
 
     features['OBV'] = compute_obv(df['Close'], df['Volume'])
 
+    # Tier 3 Macro Features
+    start_date = df.index[0]
+    try:
+        usd_inr = yf.download("INR=X", start=start_date, progress=False)['Close']
+        vix = yf.download("^INDIAVIX", start=start_date, progress=False)['Close']
+        crude = yf.download("CL=F", start=start_date, progress=False)['Close']
+        
+        # We need to flatten MultiIndex columns if yfinance returns them
+        if isinstance(usd_inr, pd.DataFrame): usd_inr = usd_inr.iloc[:, 0]
+        if isinstance(vix, pd.DataFrame): vix = vix.iloc[:, 0]
+        if isinstance(crude, pd.DataFrame): crude = crude.iloc[:, 0]
+
+        features['USD_INR'] = usd_inr.reindex(df.index).ffill().bfill()
+        features['VIX'] = vix.reindex(df.index).ffill().bfill()
+        features['CRUDE'] = crude.reindex(df.index).ffill().bfill()
+    except Exception as e:
+        logger.error(f"Failed to fetch macro features: {e}")
+        features['USD_INR'] = 0.0
+        features['VIX'] = 0.0
+        features['CRUDE'] = 0.0
+
     # Sentiment as a constant feature (from FinBERT)
     features['Sentiment'] = sentiment_score
 
@@ -310,11 +362,11 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
     Uses saved models when available, otherwise trains from scratch.
     Returns dict with 'history' and 'predictions'.
     """
-    # Check in-memory cache
-    if ticker in _model_cache:
-        cached = _model_cache[ticker]
-        if time.time() - cached['timestamp'] < CACHE_DURATION:
-            return cached['result']
+    # Check persistent DB cache
+    cached_result = get_cached_prediction(ticker)
+    if cached_result:
+        print(f"[LSTM] Returning DB cached result for {ticker}")
+        return cached_result
 
     print(f"[LSTM] Processing {ticker}...")
 
@@ -419,17 +471,40 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
         # Save model to disk
         save_model(ticker, model, scaler, num_features)
 
-    # 6. Predict future using the last `lookback` days
+    # 6. Predict future using the last `lookback` days with Monte Carlo Dropout
     last_sequence = scaled_data[-lookback:]
     last_sequence_t = torch.FloatTensor(last_sequence).unsqueeze(0)
 
-    with torch.no_grad():
-        future_scaled = model(last_sequence_t).numpy()[0]
+    # Enable dropout during inference for Monte Carlo estimates
+    model.train()  
+    
+    n_samples = 50
+    mc_predictions = []
+    
+    for _ in range(n_samples):
+        with torch.no_grad():
+            mc_pred = model(last_sequence_t).numpy()[0]
+            mc_predictions.append(mc_pred)
+            
+    mc_predictions_np = np.array(mc_predictions) # Shape: (50, 7)
+    
+    # Calculate Mean, 10th percentile (lower), 90th percentile (upper)
+    future_scaled = mc_predictions_np.mean(axis=0)
+    lower_scaled = np.percentile(mc_predictions_np, 10, axis=0)
+    upper_scaled = np.percentile(mc_predictions_np, 90, axis=0)
 
-    # Inverse transform predictions
-    dummy = np.zeros((forecast_days, num_features))
-    dummy[:, 0] = future_scaled  # Close is column 0
-    future_prices = scaler.inverse_transform(dummy)[:, 0]
+    # Inverse transform predictions mapping columns to 0
+    dummy_mean = np.zeros((forecast_days, num_features))
+    dummy_lower = np.zeros((forecast_days, num_features))
+    dummy_upper = np.zeros((forecast_days, num_features))
+    
+    dummy_mean[:, 0] = future_scaled
+    dummy_lower[:, 0] = lower_scaled
+    dummy_upper[:, 0] = upper_scaled
+    
+    future_prices = scaler.inverse_transform(dummy_mean)[:, 0]
+    lower_prices = scaler.inverse_transform(dummy_lower)[:, 0]
+    upper_prices = scaler.inverse_transform(dummy_upper)[:, 0]
 
     # Build history (last 30 days)
     history = []
@@ -451,6 +526,8 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
         predictions.append({
             "date": next_date.strftime('%Y-%m-%d'),
             "price": round(float(future_prices[i]), 2),
+            "lower_bound": round(float(lower_prices[i]), 2),
+            "upper_bound": round(float(upper_prices[i]), 2),
             "isFuture": True
         })
 
@@ -466,11 +543,8 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
         }
     }
 
-    # Cache in memory
-    _model_cache[ticker] = {
-        'result': result,
-        'timestamp': time.time()
-    }
+    # Save to persistent database
+    save_prediction(ticker, result)
 
     print(f"[LSTM] Prediction complete for {ticker}")
     return result
