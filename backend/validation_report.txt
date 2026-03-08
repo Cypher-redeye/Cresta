@@ -6,22 +6,22 @@ Starting Cresta Master Validation Script...
 ============================================================
 
 --- Processing LSTM Walk-Forward for RELIANCE.NS ---
-  Fold 1: MSE_scaled=0.343990 | MAPE=15.48% | Directional=80.0%
-  Fold 2: MSE_scaled=0.265301 | MAPE=13.66% | Directional=24.4%
-  Fold 3: MSE_scaled=0.061228 | MAPE=6.50% | Directional=0.0%
-  --> RELIANCE.NS Summary: Avg MSE=0.223507 | Avg MAPE=11.88% | Avg Directional=34.8%
+  Fold 1: MSE_scaled=0.438956 | MAPE=18.32% | Directional=80.0%
+  Fold 2: MSE_scaled=0.180637 | MAPE=10.74% | Directional=75.6%
+  Fold 3: MSE_scaled=0.144414 | MAPE=10.69% | Directional=100.0%
+  --> RELIANCE.NS Summary: Avg MSE=0.254669 | Avg MAPE=13.25% | Avg Directional=85.2%
 
 --- Processing LSTM Walk-Forward for TCS.NS ---
-  Fold 1: MSE_scaled=0.067121 | MAPE=5.81% | Directional=33.3%
-  Fold 2: MSE_scaled=0.121256 | MAPE=9.05% | Directional=73.3%
-  Fold 3: MSE_scaled=0.096108 | MAPE=9.71% | Directional=0.0%
-  --> TCS.NS Summary: Avg MSE=0.094828 | Avg MAPE=8.19% | Avg Directional=35.6%
+  Fold 1: MSE_scaled=0.201683 | MAPE=13.84% | Directional=66.7%
+  Fold 2: MSE_scaled=0.145003 | MAPE=10.50% | Directional=73.3%
+  Fold 3: MSE_scaled=0.065524 | MAPE=9.24% | Directional=100.0%
+  --> TCS.NS Summary: Avg MSE=0.137403 | Avg MAPE=11.20% | Avg Directional=80.0%
 
 --- Processing LSTM Walk-Forward for INFY.NS ---
-  Fold 1: MSE_scaled=0.297572 | MAPE=13.57% | Directional=80.0%
-  Fold 2: MSE_scaled=0.325451 | MAPE=12.96% | Directional=17.8%
-  Fold 3: MSE_scaled=0.042751 | MAPE=5.74% | Directional=0.0%
-  --> INFY.NS Summary: Avg MSE=0.221925 | Avg MAPE=10.76% | Avg Directional=32.6%
+  Fold 1: MSE_scaled=0.288575 | MAPE=13.41% | Directional=80.0%
+  Fold 2: MSE_scaled=0.204600 | MAPE=10.39% | Directional=17.8%
+  Fold 3: MSE_scaled=0.148989 | MAPE=11.07% | Directional=0.0%
+  --> INFY.NS Summary: Avg MSE=0.214055 | Avg MAPE=11.62% | Avg Directional=32.6%
 
 ============================================================
 === SECTION 2: XGBOOST RISK PROFILER EVALUATION ===
@@ -32,21 +32,21 @@ Running XGBoost prediction on 2000 synthetic held-out profiles...
 --- Classification Report ---
               precision    recall  f1-score   support
 
-  Aggressive       0.89      0.90      0.90       923
-Conservative       0.51      0.84      0.64       129
-    Moderate       0.87      0.79      0.83       948
+  Aggressive       1.00      0.04      0.09       923
+Conservative       0.15      0.94      0.27       129
+    Moderate       0.31      0.38      0.34       948
 
-    accuracy                           0.84      2000
-   macro avg       0.76      0.84      0.79      2000
-weighted avg       0.86      0.84      0.85      2000
+    accuracy                           0.26      2000
+   macro avg       0.49      0.46      0.23      2000
+weighted avg       0.62      0.26      0.22      2000
 
 
 --- Confusion Matrix ---
              | Pred Aggr | Pred Cons | Pred Mode
 ------------------------------------------------
-True Aggr    | 832      | 0        | 91      
-True Cons    | 0        | 109      | 20      
-True Mode    | 100      | 103      | 745     
+True Aggr    | 41       | 77       | 805     
+True Cons    | 0        | 121      | 8       
+True Mode    | 0        | 585      | 363     
 
 ============================================================
 === SECTION 3: ENSEMBLE VS INDIVIDUAL COMPARISON ===
@@ -54,26 +54,26 @@ True Mode    | 100      | 103      | 745
 
 --- Comparing Models for RELIANCE.NS ---
   Prices to array match check:
-  LSTM      | MAPE:  3.72% | DIR_ACC:   0.0% | MSE: 3330
+  LSTM      | MAPE:  4.37% | DIR_ACC: 100.0% | MSE: 4460
   XGBoost   | MAPE:  2.15% | DIR_ACC: 100.0% | MSE: 1246
   ARIMA     | MAPE:  3.17% | DIR_ACC: 100.0% | MSE: 2398
-  Ensemble  | MAPE:  3.33% | DIR_ACC:   0.0% | MSE: 2482
+  Ensemble  | MAPE:  4.11% | DIR_ACC:   0.0% | MSE: 3821
   --> Winner for RELIANCE.NS: XGBoost (2.15% error)
 
 --- Comparing Models for TCS.NS ---
   Prices to array match check:
-  LSTM      | MAPE: 17.25% | DIR_ACC:   0.0% | MSE: 203541
+  LSTM      | MAPE: 17.28% | DIR_ACC:   0.0% | MSE: 203616
   XGBoost   | MAPE:  4.42% | DIR_ACC:   0.0% | MSE: 22151
   ARIMA     | MAPE:  2.00% | DIR_ACC: 100.0% | MSE: 3253
-  Ensemble  | MAPE: 12.25% | DIR_ACC:   0.0% | MSE: 103073
+  Ensemble  | MAPE: 12.88% | DIR_ACC:   0.0% | MSE: 114228
   --> Winner for TCS.NS: ARIMA (2.00% error)
 
 --- Comparing Models for INFY.NS ---
   Prices to array match check:
-  LSTM      | MAPE: 16.87% | DIR_ACC: 100.0% | MSE: 48362
+  LSTM      | MAPE: 17.80% | DIR_ACC: 100.0% | MSE: 53667
   XGBoost   | MAPE:  1.96% | DIR_ACC:   0.0% | MSE: 901
   ARIMA     | MAPE:  0.43% | DIR_ACC: 100.0% | MSE: 38
-  Ensemble  | MAPE: 12.23% | DIR_ACC: 100.0% | MSE: 25295
+  Ensemble  | MAPE: 11.40% | DIR_ACC: 100.0% | MSE: 22596
   --> Winner for INFY.NS: ARIMA (0.43% error)
 
 ============================================================
@@ -103,14 +103,14 @@ Note: Backtest does not account for transaction costs or slippage.
 === FINAL VALIDATION SUMMARY TABLE ===
 ============================================================
      Ticker    Model      MAPE  Directional_Accuracy           MSE
-RELIANCE.NS     LSTM 11.881533             34.814815      0.223507
-     TCS.NS     LSTM  8.190988             35.555556      0.094828
-    INFY.NS     LSTM 10.756024             32.592593      0.221925
-RELIANCE.NS Ensemble  3.328638              0.000000   2481.613413
-     TCS.NS Ensemble 12.245070              0.000000 103073.055179
-    INFY.NS Ensemble 12.226727            100.000000  25294.817262
+RELIANCE.NS     LSTM 13.246161             85.185185      0.254669
+     TCS.NS     LSTM 11.195288             80.000000      0.137403
+    INFY.NS     LSTM 11.619684             32.592593      0.214055
+RELIANCE.NS Ensemble  4.105241              0.000000   3821.375057
+     TCS.NS Ensemble 12.879393              0.000000 114227.944092
+    INFY.NS Ensemble 11.395658            100.000000  22596.125405
 
 ------------------------------------------------------------
-Average Ensemble MAPE across test set: 9.27%
+Average Ensemble MAPE across test set: 9.46%
 
-Validation complete in 55.6 seconds.
+Validation complete in 225.5 seconds.

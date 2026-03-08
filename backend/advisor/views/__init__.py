@@ -13,7 +13,7 @@ from .markets import (
 
 from .auth import google_login, token_refresh, get_me
 
-from .ml import recommend_api, get_prediction
+from .ml import recommend_api, get_prediction, sector_sentiment
 
 from .portfolio import (
     get_holdings,

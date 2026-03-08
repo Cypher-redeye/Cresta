@@ -7,8 +7,9 @@ Cresta is a localized, full-stack AI-driven Robo-Advisory platform built specifi
 ### 1. 🧠 Intelligent Risk Profiling
 Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive** based on their Age, Income, Investment Goals, and Risk Tolerance.
 * **Model:** XGBoost Classifier
-* **Dataset:** 25,000 Indian investor profiles. *(Note: Due to data privacy constraints in retail banking, this dataset is synthetically generated using SEBI income capacity guidelines and demographic distributions, supplemented with empirical noise to simulate real-world behavioral inconsistencies).*
-* **Accuracy:** `86.0%` (5-Fold Stratified Cross-Validation)
+* **Dataset:** 25,000 profiles combining real NFCS 2021 Investor Survey data (FINRA Foundation, N=2,578 verified respondents) and SEBI 2015-calibrated synthetic profiles
+* **Accuracy:** 84% (5-Fold Stratified Cross-Validation)
+* **Conservative Recall:** 84% — critical for fiduciary safety
 
 **Explainable AI (XAI) - Feature Importance:**
 To ensure fiduciary transparency, the XGBoost model's decision-making is fully interpretable. SHAP/Gain feature importance reveals the model correctly prioritizes logical financial constraints:

@@ -26,13 +26,13 @@ def train_model():
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Data not found at {data_path}. Run data_generator.py first.")
         
-    df = pd.read_csv(data_path)
+    df = pd.read_csv('recommender/training_data_final.csv')
     print(f"Dataset loaded: {len(df)} samples")
     print(f"Class distribution:\n{df['User_Class'].value_counts()}\n")
     
     # Encode categorical features
     goal_encoder = LabelEncoder()
-    df['Investment_Goal_Encoded'] = goal_encoder.fit_transform(df['Investment_Goal'])
+    goal_encoder.classes_ = np.array(['Education', 'Income', 'Retirement', 'Tax', 'Wealth'])
     
     feature_cols = ['Age', 'Income', 'Risk_Tolerance', 'Investment_Goal_Encoded']
     
