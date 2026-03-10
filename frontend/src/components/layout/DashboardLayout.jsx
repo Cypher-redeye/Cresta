@@ -1,12 +1,30 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 import Header from './DashboardHeader';
-import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react'; // Import icons for mobile menu toggle
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Menu, X, PieChart, TrendingUp, Activity, Settings, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useUser } from '../../context/UserContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 const DashboardLayout = ({ children }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+    const { t } = useTranslation();
+    const { logout } = useUser();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/auth');
+    };
+
+    const navItems = [
+        { icon: PieChart, label: t('portfolio'), path: '/dashboard' },
+        { icon: TrendingUp, label: t('market_watch'), path: '/markets' },
+        { icon: Activity, label: t('risk_assessment'), path: '/risk-assessment' },
+        { icon: Settings, label: t('settings'), path: '/settings' },
+    ];
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-fintech-bg text-gray-900 dark:text-white flex transition-colors duration-300">
@@ -23,17 +41,46 @@ const DashboardLayout = ({ children }) => {
             </div>
 
 
-            {/* Mobile Sidebar Content (basic implementation) */}
-            {isMobileMenuOpen && (
-                <div className="fixed inset-0 z-40 bg-gray-50 dark:bg-fintech-bg pt-16 px-4 md:hidden transition-colors duration-300">
-                    <nav className="flex flex-col space-y-4">
-                        <a href="/dashboard" className="text-lg font-medium text-fintech-cyan dark:text-neon-cyan">Portfolio</a>
-                        <a href="/markets" className="text-lg font-medium text-gray-600 dark:text-gray-400">Market Watch</a>
-                        <Link to="/risk-assessment" className="text-lg font-medium text-gray-600 dark:text-gray-400">Risk Assessment</Link>
-                        <a href="/settings" className="text-lg font-medium text-gray-600 dark:text-gray-400">Settings</a>
-                    </nav>
-                </div>
-            )}
+            {/* Mobile Sidebar Content */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-40 bg-gray-50/95 dark:bg-fintech-bg/95 backdrop-blur-md pt-20 px-6 md:hidden transition-colors"
+                    >
+                        <nav className="flex flex-col space-y-2">
+                            {navItems.map((item) => (
+                                <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={({ isActive }) => `
+                                        flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-200 text-lg font-medium
+                                        ${isActive
+                                            ? 'bg-cyan-50 dark:bg-neon-cyan/10 text-fintech-cyan dark:text-neon-cyan'
+                                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900'}
+                                    `}
+                                >
+                                    <item.icon size={24} />
+                                    <span>{item.label}</span>
+                                </NavLink>
+                            ))}
+                        </nav>
+                        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/10">
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-4 px-4 py-4 w-full rounded-xl text-lg font-medium text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 transition-colors"
+                            >
+                                <LogOut size={24} />
+                                <span>{t('logout')}</span>
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
 
             <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">

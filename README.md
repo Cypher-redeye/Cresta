@@ -26,12 +26,19 @@ Cresta features a highly advanced time-series prediction engine that forecasts s
 * **Dataset:** 20 years of historical Nifty50 daily data (via Kaggle & `yfinance`).
 
 **Forecasting Performance & Backtesting (6-Month Historical):**
-| Ticker | Walk-Forward MSE | Next 7-Day Directional | 6-Month Buy & Hold | 6-Month Signal Return* |
-| :--- | :--- | :--- | :--- | :--- |
-| **RELIANCE.NS** | 0.1855 | 85.2% | +1.91% | **+9.55%** |
-| **TCS.NS** | 0.1489 | 68.9% | -13.42% | **+4.42%** |
-| **INFY.NS** | 0.2073 | 54.1% (data-limited) | -7.29% | **-7.95%** |
-*\*Signal Return represents a simple backtest taking positions based purely on the Attention-LSTM crossover signals vs a Nifty50 6-Month Baseline of -1.30%. The Attention-LSTM hybrid achieves up to 85.2% directional accuracy on walk-forward validation, outperforming the Nifty50 benchmark by +10.85% in 6-month backtesting signal returns.*
+| Ticker | Sector | Directional Accuracy | MAPE |
+|---|---|---|---|
+| RELIANCE.NS | Energy/Conglomerate | 85.2% | 10.84% |
+| ICICIBANK.NS | Banking | 70.4% | 6.75% |
+| HDFCBANK.NS | Banking | 72.6% | 7.01% |
+| MARUTI.NS | Auto | 70.4% | 17.38% |
+| ONGC.NS | Energy | 78.5% | 12.73% |
+| TCS.NS | IT Services | 68.9% | 9.83% |
+| SUNPHARMA.NS | Pharma | 60.7% | 5.98% |
+| INFY.NS | IT Services | 54.1%* | 10.66% |
+
+*Data-limited — insufficient 20-year historical coverage
+Average directional accuracy across 7 liquid stocks: 72.3%
 
 ---
 

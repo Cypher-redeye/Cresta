@@ -21,12 +21,17 @@ warnings.filterwarnings('ignore')
 
 from recommender.stock_predictor import (
     AttentionLSTM, prepare_features, create_sequences,
-    walk_forward_split, load_saved_model, get_sentiment_for_ticker
+    walk_forward_split, load_saved_model, get_sentiment_for_ticker,
+    set_seed
 )
 from recommender.ensemble_predictor import ensemble_predict, _xgboost_predict, _arima_predict
 
 
-TICKERS = ["RELIANCE.NS", "TCS.NS", "INFY.NS"]
+TICKERS = [
+    "RELIANCE.NS", "TCS.NS", "INFY.NS",
+    "HDFCBANK.NS", "ICICIBANK.NS",
+    "SUNPHARMA.NS", "MARUTI.NS", "ONGC.NS"
+]
 FORECAST_DAYS = 7
 LOOKBACK = 60
 
@@ -409,6 +414,7 @@ def print_final_summary():
 
 if __name__ == "__main__":
     p("Starting Cresta Master Validation Script...\n")
+    set_seed(42)  # Added fixed random seed for reproducibility
     start = time.time()
     
     run_section_1()

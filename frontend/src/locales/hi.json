@@ -208,5 +208,10 @@
     "no_losers_data": "कोई हानि डेटा उपलब्ध नहीं है।",
     "backend_not_running": "सुनिश्चित करें कि बैकएंड चल रहा है।",
     "no_news_available": "इस समय कोई समाचार उपलब्ध नहीं है।",
-    "troubleshooting": "समस्या निवारण"
+    "troubleshooting": "समस्या निवारण",
+    "portfolio_growth": "पोर्टफोलियो विकास",
+    "whats_happening_today": "आज आपके पोर्टफोलियो में क्या हो रहा है, यहाँ देखें।",
+    "premium_investor": "प्रीमियम निवेशक",
+    "based_on_risk_prefix": "आपके",
+    "based_on_risk_suffix": "जोखिम प्रोफाइल और वर्तमान बाजार रुझानों के हमारे विश्लेषण के आधार पर,"
 }

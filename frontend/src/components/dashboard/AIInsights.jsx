@@ -195,7 +195,7 @@ const AIInsights = ({ delay }) => {
                                                         <Shield size={10} /> {t('why_recommend')}
                                                     </h5>
                                                     <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                                                        Based on your <span className="font-bold text-fintech-cyan dark:text-cyan-500">{stock.userClass}</span> risk profile and our analysis of current market trends, {stock.reasoning.charAt(0).toLowerCase() + stock.reasoning.slice(1)}
+                                                        {t('based_on_risk_prefix')} <span className="font-bold text-fintech-cyan dark:text-cyan-500">{t(`profile_${stock.userClass.toLowerCase()}`, stock.userClass)}</span> {t('based_on_risk_suffix')} {stock.reasoning.charAt(0).toLowerCase() + stock.reasoning.slice(1)}
                                                     </p>
                                                 </div>
 

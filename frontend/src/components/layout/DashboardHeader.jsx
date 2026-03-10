@@ -5,11 +5,13 @@ import { useUser } from '../../context/UserContext';
 import ThemeToggle from '../common/ThemeToggle';
 import { useSearch } from '../../context/SearchContext';
 import { useToast } from '../../context/ToastContext';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
     const { user } = useUser();
     const { setSearchQuery } = useSearch();
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const displayName = user?.name || 'Investor';
     const location = useLocation();
 
@@ -22,12 +24,12 @@ const Header = () => {
 
 
     return (
-        <header className="flex items-center justify-between px-8 py-5 border-b border-gray-200 dark:border-white/10 bg-white/50 dark:bg-fintech-bg/50 backdrop-blur-md sticky top-0 z-10 transition-colors duration-300">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Welcome back, <span className="text-fintech-cyan dark:text-neon-cyan">{displayName}</span>
+        <header className="flex items-center justify-between px-4 md:px-8 py-4 md:py-5 border-b border-gray-200 dark:border-white/10 bg-white/50 dark:bg-fintech-bg/50 backdrop-blur-md sticky top-0 z-10 transition-colors duration-300 w-full overflow-hidden">
+            <div className="min-w-0 pr-4">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">
+                    {t('welcome_back')}, <span className="text-fintech-cyan dark:text-neon-cyan">{displayName}</span>
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Here's what's happening with your portfolio today.</p>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 hidden sm:block truncate">{t('whats_happening_today')}</p>
             </div>
 
             <div className="flex items-center gap-6">
@@ -37,7 +39,7 @@ const Header = () => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search assets (e.g. RELIANCE)..."
+                            placeholder={t('search_placeholder')}
                             onKeyDown={handleSearch}
                             className="bg-gray-100 dark:bg-fintech-card/50 border border-transparent dark:border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:bg-white dark:focus:bg-fintech-card focus:border-fintech-cyan/50 dark:focus:border-neon-cyan/50 focus:ring-2 ring-fintech-cyan/10 dark:ring-neon-cyan/10 w-64 transition-all placeholder:text-gray-500"
                         />
@@ -60,7 +62,7 @@ const Header = () => {
                 <div className="flex items-center gap-3 pl-6 border-l border-gray-200 dark:border-white/10">
                     <div className="text-right hidden sm:block">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">{displayName}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Premium Investor</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{t('premium_investor')}</div>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-fintech-cyan to-fintech-blue dark:from-neon-cyan dark:to-neon-blue p-[2px]">
                         <div className="w-full h-full rounded-full bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden">

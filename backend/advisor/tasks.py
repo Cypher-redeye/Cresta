@@ -143,6 +143,8 @@ def check_price_alerts():
     Designed to run every 15 mins during market hours.
     """
     from advisor.models import WatchlistAlert
+    from django.core.mail import send_mail
+    from django.conf import settings
     import yfinance as yf
     
     active_alerts = WatchlistAlert.objects.filter(is_active=True)
@@ -174,8 +176,26 @@ def check_price_alerts():
             is_triggered = True
             
         if is_triggered:
-            # Here we would integrate with email/push notification logic
+            # Here we integrate with email/push notification logic
             print(f"🚨 ALERT TRIGGERED: {alert.ticker} dropped {alert.condition} ₹{alert.target_price}")
+            
+            subject = f"🚨 Cresta Alert: {alert.ticker} {alert.condition} ₹{alert.target_price}"
+            body = (
+                f"Your price alert has triggered.\n\n"
+                f"Stock: {alert.ticker}\n"
+                f"Condition: Price went {alert.condition} ₹{alert.target_price}\n"
+                f"Check your Cresta dashboard for details.\n\n"
+                f"— Cresta Robo-Advisor"
+            )
+            
+            send_mail(
+                subject=subject,
+                message=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[alert.user.email],
+                fail_silently=True  # don't crash the task if email fails
+            )
+            
             alert.is_active = False # Deactivate after firing once
             alert.save()
             triggered += 1

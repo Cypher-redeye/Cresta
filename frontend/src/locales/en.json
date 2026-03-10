@@ -208,5 +208,10 @@
     "no_losers_data": "No losers data available.",
     "backend_not_running": "Make sure the backend is running.",
     "no_news_available": "No news available at the moment.",
-    "troubleshooting": "Troubleshooting"
+    "troubleshooting": "Troubleshooting",
+    "portfolio_growth": "Portfolio Growth",
+    "whats_happening_today": "Here's what's happening with your portfolio today.",
+    "premium_investor": "Premium Investor",
+    "based_on_risk_prefix": "Based on your",
+    "based_on_risk_suffix": "risk profile and our analysis of current market trends,"
 }
