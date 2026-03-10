@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Typewriter from '../common/Typewriter';
+import IndiaGlobe from './IndiaGlobe';
 
 const Hero = () => {
     return (
@@ -60,41 +61,9 @@ const Hero = () => {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1 }}
-                    className="relative h-[400px] w-full flex items-center justify-center"
+                    className="relative w-full"
                 >
-                    <div className="relative w-64 h-64 md:w-80 md:h-80">
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 rounded-full border border-gray-200 dark:border-white/10 border-t-cyan-500 dark:border-t-neon-cyan border-b-blue-500 dark:border-b-neon-blue shadow-[0_0_30px_rgba(34,211,238,0.2)]"
-                        >
-                        </motion.div>
-
-                        <motion.div
-                            animate={{ rotate: -360 }}
-                            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-[20px] rounded-full border border-gray-100 dark:border-white/5 border-l-emerald-500 dark:border-l-neon-emerald border-r-cyan-500 dark:border-r-neon-cyan"
-                        >
-                        </motion.div>
-
-                        <motion.div
-                            animate={{ y: [0, -20, 0] }}
-                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute top-1/4 left-1/4 p-4 glass-panel rounded-lg border-l-4 border-l-cyan-500 dark:border-l-neon-cyan"
-                        >
-                            <div className="text-xs text-gray-500 dark:text-gray-400">Portfolio Growth</div>
-                            <div className="text-xl font-bold text-gray-900 dark:text-white">+24.5%</div>
-                        </motion.div>
-
-                        <motion.div
-                            animate={{ y: [0, 20, 0] }}
-                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                            className="absolute bottom-1/4 right-0 p-4 glass-panel rounded-lg border-l-4 border-l-emerald-500 dark:border-l-neon-emerald"
-                        >
-                            <div className="text-xs text-gray-500 dark:text-gray-400">Risk Level</div>
-                            <div className="text-xl font-bold text-gray-900 dark:text-white">Optimal</div>
-                        </motion.div>
-                    </div>
+                    <IndiaGlobe />
                 </motion.div>
             </div>
         </section>

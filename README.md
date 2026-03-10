@@ -126,18 +126,29 @@ erDiagram
 
 ## ✨ Core Features
 
-### 1. Explainable AI (XAI) & Fiduciary Scoring
+### 1. 🌍 Interactive 3D Global Exchange Globe
+The landing page features a stunning **interactive 3D globe** (powered by [cobe](https://github.com/shuding/cobe)) that showcases major global stock exchanges in real-time:
+* **7 Global Exchanges:** BSE SENSEX, NSE NIFTY 50 (India), FTSE 100 (London), NYSE/DOW (New York), IBOVESPA (São Paulo), NIKKEI 225 (Tokyo), ASX 200 (Sydney).
+* **Geographic Sync:** As the globe rotates, exchange cards automatically update to match the front-facing continent with angular-distance detection.
+* **Live Connector Lines:** SVG dashed connector lines with pulsing dots track from exchange cards to their precise city coordinates on the globe surface.
+* **Theme-Aware:** The globe adapts its palette for both Light Mode (soft blue-grey sphere) and Dark Mode (deep space aesthetic) using the app's `ThemeContext`.
+* **Live Data:** BSE SENSEX and NSE NIFTY 50 prices are fetched live from the backend API.
+
+### 2. Explainable AI (XAI) & Fiduciary Scoring
 A stock's viability depends entirely on *who* is buying it. Cresta's personalized weighted scoring engine assesses every stock on a 100-point scale tailored to the user:
 * **Sentiment (40 points):** Financial news processed through FinBERT NLP.
 * **Risk Fit (40 points):** Matches the stock's volatility (Beta) directly against the user's ML-classified risk profile. An Aggressive user might see a "Buy" recommendation for a highly volatile stock, while a Conservative user will be warned to "Avoid" it.
 * **Valuation (20 points):** Price positioning relative to its 52-week high/low.
 * **Explainability:** The system translates these mathematical weights into natural language reasoning (e.g., *"This high-volatility stock fits your aggressive profile, and recent news is highly positive."*), ensuring fiduciary transparency.
 
-### 2. Comprehensive Portfolio Management
+### 3. Comprehensive Portfolio Management
 * **Real-time Tracking:** Live market data integration via `yfinance`.
 * **Smart Alerts:** Automated Buy/Sell/Hold signals based on real-time moving average crossovers for assets currently in your portfolio.
 
-### 3. Deep Localization for India (i18n)
+### 4. 🎨 Light & Dark Theme
+Full Light/Dark theme support across the entire platform, including the 3D globe, exchange cards, connector lines, and all dashboard components. Theme preference is persisted in `localStorage` and respects system preference on first visit.
+
+### 5. Deep Localization for India (i18n)
 Financial literacy barriers are heavily tied to language. Cresta natively implements `react-i18next` to provide deep localization across the entire platform. Every UI component, ML reasoning string, and alert is seamlessly translatable between **English, Hindi, and Punjabi**, ensuring accessibility for a vastly wider domestic demographic.
 
 
@@ -160,7 +171,7 @@ As a financial advisory platform, security is paramount:
 
 ## 🛠️ Technology Stack
 
-**Frontend:** React 18, Vite, Tailwind CSS, Recharts, Framer Motion, i18next.  
+**Frontend:** React 18, Vite, Tailwind CSS, Recharts, Framer Motion, i18next, Cobe (3D Globe).  
 **Backend:** Django 5, DRF, PostgreSQL, Redis, Celery.  
 **Machine Learning:** PyTorch (LSTM), Scikit-Learn/XGBoost, HuggingFace (FinBERT).  
 **Tracking & MLOps:** MLflow (Tracking 5-fold CV loss curves, model versions, and hyperparameters).  
