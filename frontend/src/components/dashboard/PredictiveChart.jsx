@@ -111,7 +111,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
 
             <div className="mb-4">
                 <div className="flex items-center gap-2 mb-1">
-                    <TrendingUp className="text-fintech-cyan dark:text-cyan-400 w-4 h-4" />
+                    <TrendingUp className="text-fintech-emerald dark:text-emerald-400 w-4 h-4" />
                     <h4 className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">{t('growth_forecast')}</h4>
                 </div>
                 <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
@@ -121,7 +121,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">
-                    <Loader2 className="w-8 h-8 text-fintech-cyan dark:text-cyan-500 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-fintech-emerald dark:text-emerald-500 animate-spin" />
                     <p className="text-xs text-gray-500">{t('analyzing_trends')}</p>
                 </div>
             ) : error ? (
@@ -207,7 +207,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
 
                     <div className="mt-2 flex items-center justify-between text-[9px] font-bold uppercase tracking-tighter">
                         <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-0.5 bg-cyan-400 rounded"></div>
+                            <div className="w-3 h-0.5 bg-emerald-400 rounded"></div>
                             <span className="text-gray-400">{t('past_30_days')}</span>
                         </div>
                         <div className="flex items-center gap-1.5">

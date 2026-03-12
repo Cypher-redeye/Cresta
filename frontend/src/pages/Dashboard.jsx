@@ -205,7 +205,7 @@ const Dashboard = () => {
                     >
                         <div className="flex justify-center flex-wrap gap-12 mb-8">
                             <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 rounded-2xl bg-fintech-cyan/20 dark:bg-cyan-500/20 flex items-center justify-center text-fintech-cyan dark:text-cyan-400">
+                                <div className="w-16 h-16 rounded-2xl bg-fintech-emerald/20 dark:bg-emerald-500/20 flex items-center justify-center text-fintech-emerald dark:text-emerald-400">
                                     <Rocket size={32} />
                                 </div>
                                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('personalized_journey')}</span>
@@ -234,7 +234,7 @@ const Dashboard = () => {
                         <div className="pt-8">
                             <Link
                                 to="/risk-assessment"
-                                className="px-10 py-5 bg-gradient-to-r from-neon-cyan to-neon-blue rounded-2xl text-white font-bold text-lg hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transform hover:-translate-y-1 transition-all inline-flex items-center gap-3 group"
+                                className="px-10 py-5 bg-gradient-to-r from-neon-emerald to-neon-blue rounded-2xl text-white font-bold text-lg hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transform hover:-translate-y-1 transition-all inline-flex items-center gap-3 group"
                             >
                                 {t('start_risk_assessment')}
                                 <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
@@ -329,7 +329,7 @@ const Dashboard = () => {
                             <div className="flex justify-end mb-3">
                                 <button
                                     onClick={() => setShowAddModal(true)}
-                                    className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-lg hover:shadow-cyan-500/25"
+                                    className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-lg hover:shadow-emerald-500/25"
                                 >
                                     <Plus size={16} /> {t('add_stock')}
                                 </button>

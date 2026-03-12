@@ -228,17 +228,17 @@ const MarketsPage = () => {
 
                     {/* Search Status */}
                     {searchQuery && !user && (
-                        <div className="mt-4 p-3 bg-fintech-cyan/10 dark:bg-cyan-500/10 border border-fintech-cyan/20 dark:border-cyan-500/20 rounded-lg text-sm text-fintech-cyan dark:text-neon-cyan flex items-center gap-2">
+                        <div className="mt-4 p-3 bg-fintech-emerald/10 dark:bg-emerald-500/10 border border-fintech-emerald/20 dark:border-emerald-500/20 rounded-lg text-sm text-fintech-emerald dark:text-neon-emerald flex items-center gap-2">
                             <Clock className="w-4 h-4" />
                             <span>{t('sign_in_unlock')}</span>
                         </div>
                     )}
-                    {searchLoading && <p className="text-fintech-cyan dark:text-cyan-600 mt-2 animate-pulse">{t('searching_for')} "{searchQuery}"...</p>}
+                    {searchLoading && <p className="text-fintech-emerald dark:text-emerald-600 mt-2 animate-pulse">{t('searching_for')} "{searchQuery}"...</p>}
                     {searchError && <p className="text-red-500 mt-2">Error: {searchError}</p>}
 
                     {/* Main Status Indicators */}
                     {loading && !indicesData.length && (
-                        <div className="flex items-center gap-2 mt-2 text-fintech-cyan dark:text-neon-cyan animate-pulse">
+                        <div className="flex items-center gap-2 mt-2 text-fintech-emerald dark:text-neon-emerald animate-pulse">
                             <span className="w-2 h-2 bg-current rounded-full"></span>
                             <span className="text-sm font-medium">{t('fetching_live_data')}</span>
                         </div>

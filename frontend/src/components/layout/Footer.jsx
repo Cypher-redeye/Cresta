@@ -11,9 +11,9 @@ const Footer = () => {
             <div className="container mx-auto px-6 text-center text-gray-600 dark:text-gray-500">
                 <p>&copy; {new Date().getFullYear()} Cresta AI. {t('rights_reserved')}</p>
                 <div className="flex justify-center space-x-6 mt-4">
-                    <a href="#" onClick={(e) => { e.preventDefault(); showToast('Privacy Policy opening...', 'info'); }} className="hover:text-fintech-cyan dark:hover:text-neon-cyan transition-colors">{t('privacy_policy')}</a>
-                    <a href="#" onClick={(e) => { e.preventDefault(); showToast('Terms of Service opening...', 'info'); }} className="hover:text-fintech-cyan dark:hover:text-neon-cyan transition-colors">{t('terms_of_service')}</a>
-                    <a href="#" onClick={(e) => { e.preventDefault(); showToast('Contact support initialized...', 'info'); }} className="hover:text-fintech-cyan dark:hover:text-neon-cyan transition-colors">{t('contact')}</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); showToast('Privacy Policy opening...', 'info'); }} className="hover:text-fintech-emerald dark:hover:text-neon-emerald transition-colors">{t('privacy_policy')}</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); showToast('Terms of Service opening...', 'info'); }} className="hover:text-fintech-emerald dark:hover:text-neon-emerald transition-colors">{t('terms_of_service')}</a>
+                    <a href="#" onClick={(e) => { e.preventDefault(); showToast('Contact support initialized...', 'info'); }} className="hover:text-fintech-emerald dark:hover:text-neon-emerald transition-colors">{t('contact')}</a>
                 </div>
             </div>
         </footer>

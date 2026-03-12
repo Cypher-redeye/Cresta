@@ -5,13 +5,13 @@ import { CheckCircle, AlertTriangle, Info, X } from 'lucide-react';
 const icons = {
     success: <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />,
     error: <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />,
-    info: <Info className="w-5 h-5 text-cyan-400 shrink-0" />,
+    info: <Info className="w-5 h-5 text-emerald-400 shrink-0" />,
 };
 
 const bgColors = {
     success: 'bg-emerald-900/80 border-emerald-500/40',
     error: 'bg-red-900/80 border-red-500/40',
-    info: 'bg-gray-800/90 border-cyan-500/40',
+    info: 'bg-gray-800/90 border-emerald-500/40',
 };
 
 const Toast = ({ message, type = 'info', onDismiss }) => {

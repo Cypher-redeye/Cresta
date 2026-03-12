@@ -17,13 +17,13 @@ const ResultsPanel = ({ riskProfile, goal, isLoadingAI }) => {
             className="w-full max-w-5xl mx-auto py-12"
         >
             <div className="text-center mb-12">
-                <span className="px-4 py-1.5 rounded-full bg-cyan-600/10 text-cyan-600 text-xs font-black uppercase tracking-widest border border-cyan-600/20">Analysis Complete</span>
+                <span className="px-4 py-1.5 rounded-full bg-emerald-600/10 text-emerald-600 text-xs font-black uppercase tracking-widest border border-emerald-600/20">Analysis Complete</span>
                 <h1 className="text-5xl font-black text-gray-900 dark:text-white mt-4 tracking-tight">Your Investor DNA</h1>
                 <p className="text-gray-500 dark:text-gray-400 mt-2 text-xl">We've mapped your mindset to our core strategies.</p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-12 bg-white/50 dark:bg-fintech-card/30 p-12 rounded-[3rem] border-2 border-gray-100 dark:border-white/5 backdrop-blur-3xl relative overflow-hidden shadow-2xl">
-                <div className="absolute -top-24 -left-24 w-64 h-64 bg-cyan-600/20 blur-[120px] rounded-full"></div>
+                <div className="absolute -top-24 -left-24 w-64 h-64 bg-emerald-600/20 blur-[120px] rounded-full"></div>
                 <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-600/20 blur-[120px] rounded-full"></div>
 
                 <div className="space-y-10 relative z-10">

@@ -21,16 +21,16 @@ const SearchResultCard = ({
         <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-panel p-6 rounded-2xl border border-cyan-500/30 bg-cyan-50/10 dark:bg-cyan-900/10 backdrop-blur-xl mb-6 relative overflow-hidden"
+            className="glass-panel p-6 rounded-2xl border border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-900/10 backdrop-blur-xl mb-6 relative overflow-hidden"
         >
             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <TrendingUp className="w-24 h-24 text-fintech-cyan dark:text-cyan-500" />
+                <TrendingUp className="w-24 h-24 text-fintech-emerald dark:text-emerald-500" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('search_result')}</h2>
             <div className="flex flex-wrap items-center gap-8">
                 <div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">{t('symbol')}</div>
-                    <div className="text-2xl font-bold text-fintech-cyan dark:text-neon-cyan">{searchResult.symbol}</div>
+                    <div className="text-2xl font-bold text-fintech-emerald dark:text-neon-emerald">{searchResult.symbol}</div>
                     <div className="text-sm text-gray-600 dark:text-gray-300">{searchResult.name}</div>
                 </div>
                 <div>
@@ -101,8 +101,8 @@ const SearchResultCard = ({
                     <button
                         onClick={() => setShowSearchChart(!showSearchChart)}
                         className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${showSearchChart
-                            ? 'bg-fintech-cyan/20 dark:bg-cyan-500/20 text-fintech-cyan dark:text-cyan-400 border border-fintech-cyan/30 dark:border-cyan-500/30'
-                            : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:border-fintech-cyan/30 dark:hover:border-cyan-500/30'
+                            ? 'bg-fintech-emerald/20 dark:bg-emerald-500/20 text-fintech-emerald dark:text-emerald-400 border border-fintech-emerald/30 dark:border-emerald-500/30'
+                            : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:border-fintech-emerald/30 dark:hover:border-emerald-500/30'
                             }`}
                     >
                         <BarChart2 size={16} />

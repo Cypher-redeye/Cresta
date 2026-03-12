@@ -95,7 +95,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                     {/* Header */}
                     <div className="p-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <Plus size={18} className="text-fintech-cyan dark:text-cyan-500" />
+                            <Plus size={18} className="text-fintech-emerald dark:text-emerald-500" />
                             {t('add_stock_holding')}
                         </h3>
                         <button onClick={() => { resetForm(); onClose(); }} className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
@@ -125,12 +125,12 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                         onChange={e => setTicker(e.target.value.toUpperCase())}
                                         onKeyDown={e => e.key === 'Enter' && searchStock()}
                                         placeholder="e.g. RELIANCE, TCS, INFY"
-                                        className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 outline-none"
+                                        className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
                                     />
                                     <button
                                         onClick={searchStock}
                                         disabled={searching}
-                                        className="px-4 py-2.5 bg-fintech-cyan/10 dark:bg-cyan-500/10 hover:bg-fintech-cyan/20 dark:hover:bg-cyan-500/20 text-fintech-cyan dark:text-cyan-400 border border-fintech-cyan/20 dark:border-cyan-500/20 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+                                        className="px-4 py-2.5 bg-fintech-emerald/10 dark:bg-emerald-500/10 hover:bg-fintech-emerald/20 dark:hover:bg-emerald-500/20 text-fintech-emerald dark:text-emerald-400 border border-fintech-emerald/20 dark:border-emerald-500/20 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
                                     >
                                         {searching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                                     </button>
@@ -157,7 +157,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                         onChange={e => setQty(e.target.value)}
                                         placeholder="10"
                                         min="1"
-                                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 outline-none"
+                                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
                                     />
                                 </div>
                                 <div>
@@ -170,7 +170,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                         onChange={e => setAvgPrice(e.target.value)}
                                         placeholder="1500.00"
                                         step="0.01"
-                                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 outline-none"
+                                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
                                     />
                                 </div>
                             </div>
@@ -184,7 +184,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                     type="date"
                                     value={purchaseDate}
                                     onChange={e => setPurchaseDate(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 outline-none"
+                                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
                                 />
                             </div>
 
@@ -197,7 +197,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitting || !ticker || !qty || !avgPrice}
-                                className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {submitting ? (
                                     <><Loader2 size={16} className="animate-spin" /> {t('adding')}</>

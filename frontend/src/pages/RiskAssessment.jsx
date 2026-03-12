@@ -144,26 +144,26 @@ const RiskAssessment = () => {
                                             <div className="space-y-2">
                                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Current Age</label>
                                                 <div className="relative">
-                                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-600" />
+                                                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-600" />
                                                     <input
                                                         type="number"
                                                         placeholder="Your Age"
                                                         value={age}
                                                         onChange={e => setAge(e.target.value)}
-                                                        className="w-full bg-white dark:bg-black/20 border-2 border-gray-100 dark:border-white/5 rounded-2xl pl-12 pr-6 py-4 text-lg focus:outline-none focus:border-cyan-500 transition-all font-bold"
+                                                        className="w-full bg-white dark:bg-black/20 border-2 border-gray-100 dark:border-white/5 rounded-2xl pl-12 pr-6 py-4 text-lg focus:outline-none focus:border-emerald-500 transition-all font-bold"
                                                     />
                                                 </div>
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Annual Income (₹)</label>
                                                 <div className="relative">
-                                                    <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-600" />
+                                                    <Wallet className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-600" />
                                                     <input
                                                         type="number"
                                                         placeholder="Annual Income"
                                                         value={income}
                                                         onChange={e => setIncome(e.target.value)}
-                                                        className="w-full bg-white dark:bg-black/20 border-2 border-gray-100 dark:border-white/5 rounded-2xl pl-12 pr-6 py-4 text-lg focus:outline-none focus:border-cyan-500 transition-all font-bold"
+                                                        className="w-full bg-white dark:bg-black/20 border-2 border-gray-100 dark:border-white/5 rounded-2xl pl-12 pr-6 py-4 text-lg focus:outline-none focus:border-emerald-500 transition-all font-bold"
                                                     />
                                                 </div>
                                             </div>
@@ -175,7 +175,7 @@ const RiskAssessment = () => {
                                                             key={g}
                                                             onClick={() => setGoal(g)}
                                                             className={`py-4 rounded-2xl border-2 font-bold transition-all
-                                                                ${goal === g ? 'border-cyan-500 bg-cyan-500/10 text-cyan-600 dark:text-neon-cyan' : 'border-gray-100 dark:border-white/5 text-gray-500'}`}
+                                                                ${goal === g ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-neon-emerald' : 'border-gray-100 dark:border-white/5 text-gray-500'}`}
                                                         >
                                                             {g} Generation
                                                         </button>
@@ -190,14 +190,14 @@ const RiskAssessment = () => {
                                     <button
                                         onClick={handleBack}
                                         disabled={step === 0}
-                                        className="flex items-center gap-2 text-gray-500 hover:text-cyan-600 disabled:opacity-30 font-bold px-4 py-2"
+                                        className="flex items-center gap-2 text-gray-500 hover:text-emerald-600 disabled:opacity-30 font-bold px-4 py-2"
                                     >
                                         <ArrowLeft size={18} /> Prev Step
                                     </button>
                                     <button
                                         onClick={handleNext}
                                         disabled={(step < questions.length && !answers[step]) || (step === questions.length && (!age || !income))}
-                                        className="bg-cyan-600 hover:bg-cyan-500 text-white px-10 py-4 rounded-2xl font-extrabold shadow-xl shadow-cyan-600/20 flex items-center gap-2 group transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
+                                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-4 rounded-2xl font-extrabold shadow-xl shadow-emerald-600/20 flex items-center gap-2 group transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:translate-y-0"
                                     >
                                         {step === questions.length ? (isLoadingAI ? "Mapping AI Neural..." : "Unlock My Strategy") : "Continue Phase"}
                                         {isLoadingAI ? <Loader2 className="animate-spin" size={20} /> : <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />}
@@ -207,10 +207,10 @@ const RiskAssessment = () => {
 
                             {/* Right: Preview Engine (5 cols) */}
                             <div className="lg:col-span-5 h-[500px] flex flex-col justify-center sticky top-24">
-                                <div className="glass-panel p-8 rounded-[2rem] border-2 border-dashed border-cyan-500/20 relative overflow-hidden">
+                                <div className="glass-panel p-8 rounded-[2rem] border-2 border-dashed border-emerald-500/20 relative overflow-hidden">
                                     <div className="absolute top-4 right-8 flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></div>
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-600/60">Live Engine Analysis</span>
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600/60">Live Engine Analysis</span>
                                     </div>
 
                                     <div className="flex flex-col items-center">
@@ -244,11 +244,11 @@ const RiskAssessment = () => {
                                         <div className="w-full mt-8 space-y-3">
                                             <div className="flex justify-between items-center px-4">
                                                 <span className="text-xs font-bold text-gray-500">System Accuracy</span>
-                                                <span className="text-xs font-bold text-cyan-600">{Math.min(20 + step * 10, 98)}%</span>
+                                                <span className="text-xs font-bold text-emerald-600">{Math.min(20 + step * 10, 98)}%</span>
                                             </div>
                                             <div className="w-full h-1.5 bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
                                                 <motion.div
-                                                    className="h-full bg-cyan-600"
+                                                    className="h-full bg-emerald-600"
                                                     initial={{ width: 0 }}
                                                     animate={{ width: `${Math.min(20 + step * 10, 98)}%` }}
                                                 />

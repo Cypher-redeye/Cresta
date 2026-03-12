@@ -41,13 +41,13 @@ const SectorHeatmap = () => {
     return (
         <div className="glass-panel p-6 rounded-2xl relative overflow-hidden group">
             {/* Background glowing effects */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-fintech-cyan/5 rounded-full blur-2xl group-hover:bg-fintech-cyan/10 transition-colors duration-700"></div>
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-fintech-emerald/5 rounded-full blur-2xl group-hover:bg-fintech-emerald/10 transition-colors duration-700"></div>
 
             {/* Header Section */}
             <div className="flex items-center justify-between mb-5 relative z-10">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fintech-cyan/20 to-blue-500/20 flex items-center justify-center border border-fintech-cyan/20">
-                        <BarChart2 className="text-fintech-cyan w-4 h-4" />
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fintech-emerald/20 to-blue-500/20 flex items-center justify-center border border-fintech-emerald/20">
+                        <BarChart2 className="text-fintech-emerald w-4 h-4" />
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-white tracking-widest uppercase shadow-sm">
@@ -55,8 +55,8 @@ const SectorHeatmap = () => {
                         </h3>
                         <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
                             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
                                 {t('live_finbert_analysis', 'Live FinBERT Analysis')}
@@ -70,7 +70,7 @@ const SectorHeatmap = () => {
             <div className="relative z-10 min-h-[160px]">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center min-h-[160px] gap-3">
-                        <Loader2 className="w-8 h-8 text-fintech-cyan animate-spin opacity-80" />
+                        <Loader2 className="w-8 h-8 text-fintech-emerald animate-spin opacity-80" />
                         <p className="text-xs text-gray-400 font-medium tracking-wide">Scanning News Nodes...</p>
                     </div>
                 ) : error ? (

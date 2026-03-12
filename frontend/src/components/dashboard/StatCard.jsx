@@ -26,7 +26,7 @@ const StatCard = ({ title, value, change, isPositive, icon: Icon, delay, subtitl
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay }}
             whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            className="glass-panel p-6 rounded-2xl relative overflow-hidden group hover:shadow-[0_10px_40px_-10px_rgba(8,145,178,0.2)] dark:hover:shadow-[0_10px_40px_-10px_rgba(34,211,238,0.2)] hover:border-fintech-cyan/30 dark:hover:border-neon-cyan/30 transition-all duration-300"
+            className="glass-panel p-6 rounded-2xl relative overflow-hidden group hover:shadow-[0_10px_40px_-10px_rgba(8,145,178,0.2)] dark:hover:shadow-[0_10px_40px_-10px_rgba(34,211,238,0.2)] hover:border-fintech-emerald/30 dark:hover:border-neon-emerald/30 transition-all duration-300"
         >
             <div className="flex justify-between items-start mb-4">
                 <div>
@@ -38,7 +38,7 @@ const StatCard = ({ title, value, change, isPositive, icon: Icon, delay, subtitl
                         )}
                     </h3>
                 </div>
-                <div className={`p-2.5 rounded-xl ${isPositive ? 'bg-fintech-emerald/10 text-fintech-emerald dark:bg-neon-emerald/10 dark:text-neon-emerald' : 'bg-fintech-cyan/10 text-fintech-cyan dark:bg-neon-cyan/10 dark:text-neon-cyan'}`}>
+                <div className={`p-2.5 rounded-xl ${isPositive ? 'bg-fintech-emerald/10 text-fintech-emerald dark:bg-neon-emerald/10 dark:text-neon-emerald' : 'bg-fintech-emerald/10 text-fintech-emerald dark:bg-neon-emerald/10 dark:text-neon-emerald'}`}>
                     <Icon size={20} />
                 </div>
             </div>
@@ -52,7 +52,7 @@ const StatCard = ({ title, value, change, isPositive, icon: Icon, delay, subtitl
             </div>
 
             {/* Decorative Glow */}
-            <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-fintech-cyan/5 dark:bg-neon-cyan/5 rounded-full blur-2xl group-hover:bg-fintech-cyan/10 dark:group-hover:bg-neon-cyan/10 transition-colors"></div>
+            <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-fintech-emerald/5 dark:bg-neon-emerald/5 rounded-full blur-2xl group-hover:bg-fintech-emerald/10 dark:group-hover:bg-neon-emerald/10 transition-colors"></div>
         </motion.div>
     );
 };

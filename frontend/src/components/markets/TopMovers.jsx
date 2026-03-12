@@ -9,13 +9,13 @@ const TopMovers = ({ selectedTab, setSelectedTab, currentMovers, moversLoading, 
             <div className="p-4 border-b border-gray-200 dark:border-white/10 flex gap-6">
                 <button
                     onClick={() => setSelectedTab('gainers')}
-                    className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${selectedTab === 'gainers' || selectedTab === 'overview' ? 'text-fintech-cyan dark:text-neon-cyan border-fintech-cyan dark:border-neon-cyan' : 'text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300'}`}
+                    className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${selectedTab === 'gainers' || selectedTab === 'overview' ? 'text-fintech-emerald dark:text-neon-emerald border-fintech-emerald dark:border-neon-emerald' : 'text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300'}`}
                 >
                     {t('top_gainers')}
                 </button>
                 <button
                     onClick={() => setSelectedTab('losers')}
-                    className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${selectedTab === 'losers' ? 'text-fintech-cyan dark:text-neon-cyan border-fintech-cyan dark:border-neon-cyan' : 'text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300'}`}
+                    className={`pb-2 text-sm font-semibold transition-colors border-b-2 ${selectedTab === 'losers' ? 'text-fintech-emerald dark:text-neon-emerald border-fintech-emerald dark:border-neon-emerald' : 'text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300'}`}
                 >
                     {t('top_losers')}
                 </button>

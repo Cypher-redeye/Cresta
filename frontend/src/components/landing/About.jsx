@@ -14,7 +14,7 @@ const About = () => {
 
     const values = [
         {
-            icon: <Target className="w-8 h-8 text-cyan-600 dark:text-neon-cyan" />,
+            icon: <Target className="w-8 h-8 text-emerald-600 dark:text-neon-emerald" />,
             title: t('about_mission'),
             desc: t('about_mission_desc')
         },
@@ -33,7 +33,7 @@ const About = () => {
     return (
         <section id="about" className="py-24 relative overflow-hidden">
             {/* Background Orbs */}
-            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
             <div className="container mx-auto px-6 relative z-10">
@@ -50,7 +50,7 @@ const About = () => {
                         initial={{ scaleX: 0 }}
                         whileInView={{ scaleX: 1 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="h-1 w-24 bg-gradient-to-r from-cyan-500 to-blue-500 mx-auto rounded-full mb-8"
+                        className="h-1 w-24 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full mb-8"
                     ></motion.div>
                 </div>
 
@@ -64,7 +64,7 @@ const About = () => {
                             viewport={{ once: true }}
                             className="glass-panel p-10 rounded-3xl relative group"
                         >
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
                             <div className="mb-6 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 w-fit">
                                 {item.icon}
                             </div>
@@ -76,10 +76,10 @@ const About = () => {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 p-12 glass-panel rounded-3xl bg-cyan-500/5 border-cyan-500/10">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-8 p-12 glass-panel rounded-3xl bg-emerald-500/5 border-emerald-500/10">
                     {stats.map((stat, index) => (
                         <div key={index} className="text-center">
-                            <div className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-neon-cyan dark:to-neon-blue mb-2">
+                            <div className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600 dark:from-neon-emerald dark:to-neon-blue mb-2">
                                 {stat.value}
                             </div>
                             <div className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">

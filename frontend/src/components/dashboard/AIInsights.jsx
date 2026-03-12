@@ -46,7 +46,7 @@ const AIInsights = ({ delay }) => {
 
     const getConfidenceColor = (c) => {
         if (c >= 75) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-        if (c >= 55) return 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20';
+        if (c >= 55) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
         return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
     };
 
@@ -71,7 +71,7 @@ const AIInsights = ({ delay }) => {
         >
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-neon-cyan animate-pulse"></span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-neon-emerald animate-pulse"></span>
                     {t('ai_stock_advisor')}
                     <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">({insights.length} {t('picks')})</span>
                 </h3>
@@ -104,7 +104,7 @@ const AIInsights = ({ delay }) => {
                                     onClick={() => toggleExpand(stock.id)}
                                     className="w-full p-4 flex items-center gap-3 hover:bg-gray-100/50 dark:hover:bg-white/[0.02] transition-colors text-left"
                                 >
-                                    <div className="p-2 rounded-lg bg-cyan-400/10 text-cyan-400 shrink-0">
+                                    <div className="p-2 rounded-lg bg-emerald-400/10 text-emerald-400 shrink-0">
                                         <Lightbulb size={16} />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -155,7 +155,7 @@ const AIInsights = ({ delay }) => {
                                                                     <div className="w-1/2 bg-gradient-to-r from-yellow-500/30 to-emerald-500/30"></div>
                                                                 </div>
                                                                 <div
-                                                                    className="absolute top-0 w-3 h-2 rounded-full bg-white border-2 border-cyan-500 shadow-lg"
+                                                                    className="absolute top-0 w-3 h-2 rounded-full bg-white border-2 border-emerald-500 shadow-lg"
                                                                     style={{ left: `${Math.max(2, Math.min(96, (stock.xai.sentiment_score + 1) * 50))}%`, transform: 'translateX(-50%)' }}
                                                                 ></div>
                                                             </div>
@@ -195,7 +195,7 @@ const AIInsights = ({ delay }) => {
                                                         <Shield size={10} /> {t('why_recommend')}
                                                     </h5>
                                                     <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                                                        {t('based_on_risk_prefix')} <span className="font-bold text-fintech-cyan dark:text-cyan-500">{t(`profile_${stock.userClass.toLowerCase()}`, stock.userClass)}</span> {t('based_on_risk_suffix')} {stock.reasoning.charAt(0).toLowerCase() + stock.reasoning.slice(1)}
+                                                        {t('based_on_risk_prefix')} <span className="font-bold text-fintech-emerald dark:text-emerald-500">{t(`profile_${stock.userClass.toLowerCase()}`, stock.userClass)}</span> {t('based_on_risk_suffix')} {stock.reasoning.charAt(0).toLowerCase() + stock.reasoning.slice(1)}
                                                     </p>
                                                 </div>
 
@@ -222,7 +222,7 @@ const AIInsights = ({ delay }) => {
                                                         e.stopPropagation();
                                                         setChartTicker(chartTicker === stock.ticker ? null : stock.ticker);
                                                     }}
-                                                    className="w-full py-2.5 bg-fintech-cyan/10 dark:bg-cyan-500/10 hover:bg-fintech-cyan/20 dark:hover:bg-cyan-500/20 text-fintech-cyan dark:text-neon-cyan border border-fintech-cyan/20 dark:border-cyan-500/20 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 group"
+                                                    className="w-full py-2.5 bg-fintech-emerald/10 dark:bg-emerald-500/10 hover:bg-fintech-emerald/20 dark:hover:bg-emerald-500/20 text-fintech-emerald dark:text-neon-emerald border border-fintech-emerald/20 dark:border-emerald-500/20 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 group"
                                                 >
                                                     <BarChart3 size={14} />
                                                     {chartTicker === stock.ticker ? t('hide_growth_chart') : t('view_growth_chart')}

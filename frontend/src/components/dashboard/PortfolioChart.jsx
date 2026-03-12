@@ -74,7 +74,7 @@ const PortfolioChart = ({ delay }) => {
                 <select
                     value={period}
                     onChange={e => setPeriod(e.target.value)}
-                    className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs px-3 py-1.5 text-gray-700 dark:text-gray-300 focus:outline-none focus:border-fintech-cyan/50 dark:focus:border-neon-cyan/50"
+                    className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs px-3 py-1.5 text-gray-700 dark:text-gray-300 focus:outline-none focus:border-fintech-emerald/50 dark:focus:border-neon-emerald/50"
                 >
                     {PERIODS.map(p => (
                         <option key={p.value} value={p.value}>{p.label}</option>
@@ -85,7 +85,7 @@ const PortfolioChart = ({ delay }) => {
             <div className="w-full h-[300px] relative">
                 {loading ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="w-6 h-6 text-fintech-cyan dark:text-cyan-400 animate-spin" />
+                        <Loader2 className="w-6 h-6 text-fintech-emerald dark:text-emerald-400 animate-spin" />
                     </div>
                 ) : data.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center">

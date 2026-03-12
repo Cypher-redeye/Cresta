@@ -33,41 +33,43 @@ const PageLoader = () => (
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <UserProvider>
-          <ToastProvider>
-            <Router>
-              <SearchProvider>
-                <Suspense fallback={<PageLoader />}>
-                  <Routes>
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/auth" element={<AuthPage />} />
-                    <Route path="/dashboard" element={
-                      <ProtectedRoute>
-                        <Dashboard />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/risk-assessment" element={
-                      <ProtectedRoute>
-                        <RiskAssessment />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/markets" element={<MarketsPage />} />
-                    <Route path="/settings" element={
-                      <ProtectedRoute>
-                        <SettingsPage />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="*" element={<LandingPage />} />
-                  </Routes>
-                </Suspense>
-              </SearchProvider>
-            </Router>
-          </ToastProvider>
-        </UserProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <div className="min-h-screen">
+      <ErrorBoundary>
+        <ThemeProvider>
+          <UserProvider>
+            <ToastProvider>
+              <Router>
+                <SearchProvider>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<LandingPage />} />
+                      <Route path="/auth" element={<AuthPage />} />
+                      <Route path="/dashboard" element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/risk-assessment" element={
+                        <ProtectedRoute>
+                          <RiskAssessment />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/markets" element={<MarketsPage />} />
+                      <Route path="/settings" element={
+                        <ProtectedRoute>
+                          <SettingsPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="*" element={<LandingPage />} />
+                    </Routes>
+                  </Suspense>
+                </SearchProvider>
+              </Router>
+            </ToastProvider>
+          </UserProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </div>
   );
 }
 

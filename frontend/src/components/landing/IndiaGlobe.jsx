@@ -114,7 +114,7 @@ const DARK_GLOBE = {
 /* ─────────────────────────────────────────────────────────────────────
  * Main Component
  * ──────────────────────────────────────────────────────────────────── */
-const IndiaGlobe = React.forwardRef(({ cardRefs }, ref) => {
+const IndiaGlobe = () => {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const pointerInteracting = useRef(null);
@@ -248,7 +248,7 @@ const IndiaGlobe = React.forwardRef(({ cardRefs }, ref) => {
     return (
         <div ref={containerRef} className="globe-container relative w-full h-[420px] md:h-[500px] flex items-center justify-center" data-active="BSE SENSEX">
             {/* Globe */}
-            <div ref={ref} className="relative w-[300px] h-[300px] md:w-[380px] md:h-[380px]">
+            <div className="relative w-[300px] h-[300px] md:w-[380px] md:h-[380px]">
                 <canvas
                     ref={canvasRef}
                     onPointerDown={(e) => { pointerInteracting.current = e.clientX - pointerInteractionMovement.current; canvasRef.current.style.cursor = 'grabbing'; }}
@@ -268,15 +268,6 @@ const IndiaGlobe = React.forwardRef(({ cardRefs }, ref) => {
                 />
             </div>
 
-            {/* SVG connector lines */}
-            <ConnectorOverlay
-                positions={markerPositions}
-                containerRef={containerRef}
-                canvasRef={canvasRef}
-                lineColor={lineColor}
-                dotColor={dotColor}
-            />
-
             {/* Exchange cards - DOM rendered entirely */}
             <AnimatePresence mode="wait">
                 {EXCHANGES.map((exchange) => (
@@ -285,7 +276,7 @@ const IndiaGlobe = React.forwardRef(({ cardRefs }, ref) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         className="absolute right-0 top-[20%] md:top-[18%] z-20 pointer-events-none"
                     >
-                        <div ref={el => { if (cardRefs?.current) cardRefs.current[exchange.name] = el; }}>
+                        <div>
                             <ExchangeCard exchange={exchange} data={getData(exchange)} isDark={isDark} />
                         </div>
                     </motion.div>
@@ -313,68 +304,7 @@ const IndiaGlobe = React.forwardRef(({ cardRefs }, ref) => {
             </AnimatePresence>
         </div>
     );
-});
-
-
-/* ─────────────────────────────────────────────────────────────────────
- * ConnectorOverlay
- * ──────────────────────────────────────────────────────────────────── */
-const ConnectorOverlay = ({ positions, containerRef, canvasRef, lineColor, dotColor }) => {
-    // Force overlay to re-render when data-active changes using a small state or 
-    // simply let requestAnimationFrame handle it if you want zero react renders.
-    // Wait, ConnectorOverlay is a React component. It only re-renders if props change.
-    // If the active card is updated purely via DOM `setAttribute('data-active')`, 
-    // the connector SVG won't know to redraw the line to the new card unless we tell it.
-    
-    // Actually, drawing the connector line purely via DOM is much faster for 60fps.
-    // Let's create the SVG lines for ALL exchanges, but hide them with CSS exactly like the cards!
-    
-    if (!containerRef.current || !canvasRef.current || !Object.keys(positions).length) return null;
-
-    const cr = containerRef.current.getBoundingClientRect();
-    const gr = canvasRef.current.getBoundingClientRect();
-    const toContainer = (pos) => {
-        if (!pos || !pos.visible) return null;
-        return { x: gr.left - cr.left + pos.x, y: gr.top - cr.top + pos.y };
-    };
-
-    const lines = [];
-
-    const addLine = (exId) => {
-        const dot = toContainer(positions[exId]);
-        const card = containerRef.current.querySelector(`[data-card="${EXCHANGES.find(e => e.id === exId)?.name}"]`);
-        if (!dot || !card) return;
-        
-        const cardR = card.getBoundingClientRect();
-        const isLeft = cardR.left + cardR.width / 2 < cr.left + cr.width / 2;
-        const cx = isLeft ? cardR.right - cr.left : cardR.left - cr.left;
-        const cy = cardR.top - cr.top + cardR.height / 2;
-
-        const exName = EXCHANGES.find(e => e.id === exId)?.name;
-
-        lines.push(
-            <g key={`conn-${exId}`} data-connector={exName} className="connector-line hidden transition-opacity duration-300">
-                <line x1={dot.x} y1={dot.y} x2={cx} y2={cy}
-                    stroke={lineColor} strokeWidth="1.5" strokeDasharray="4 3"
-                />
-                <circle cx={dot.x} cy={dot.y} r="4" fill={dotColor} opacity="0.9">
-                    <animate attributeName="r" values="3;5.5;3" dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite" />
-                </circle>
-            </g>
-        );
-    };
-
-    // Draw all lines
-    EXCHANGES.forEach(ex => addLine(ex.id));
-
-    return (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" style={{ overflow: 'visible' }}>
-            {lines}
-        </svg>
-    );
 };
-
 
 /* ─────────────────────────────────────────────────────────────────────
  * ExchangeCard — theme-aware glass card

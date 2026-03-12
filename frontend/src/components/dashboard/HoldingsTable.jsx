@@ -116,7 +116,7 @@ const HoldingsTable = ({ holdings = [], onDelete, onUpdate, signals = {} }) => {
                                                         <SignalBadge signal={sig.signal} />
                                                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-fintech-card border border-white/10 rounded-lg text-left opacity-0 group-hover/sig:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
                                                             <p className="text-[10px] text-gray-600 dark:text-gray-300 mb-1">{sig.reason}</p>
-                                                            <p className="text-[10px] text-fintech-cyan dark:text-cyan-400 font-bold">{sig.action}</p>
+                                                            <p className="text-[10px] text-fintech-emerald dark:text-emerald-400 font-bold">{sig.action}</p>
                                                         </div>
                                                     </div>
                                                 ) : <span className="text-[10px] text-gray-500">—</span>;
@@ -138,7 +138,7 @@ const HoldingsTable = ({ holdings = [], onDelete, onUpdate, signals = {} }) => {
                                                 ) : (
                                                     <>
                                                         <button onClick={() => setAnalyzingStock(stock.ticker)}
-                                                            className="p-1.5 hover:bg-fintech-cyan/10 dark:hover:bg-cyan-500/10 rounded-lg text-fintech-cyan dark:text-neon-cyan transition-all" title="Prediction">
+                                                            className="p-1.5 hover:bg-fintech-emerald/10 dark:hover:bg-emerald-500/10 rounded-lg text-fintech-emerald dark:text-neon-emerald transition-all" title="Prediction">
                                                             <BarChart2 size={14} />
                                                         </button>
                                                         <button onClick={() => startEdit(stock)}
