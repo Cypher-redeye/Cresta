@@ -197,7 +197,7 @@ const IndiaGlobe = () => {
                 state.height = width * 2;
 
                 const best = findActiveExchange(phi);
-                // Removed setActiveExchange to keep cards permanently on India layout
+                setActiveExchange(prev => prev.id !== best.id ? best : prev);
 
                 const now = performance.now();
                 if (now - lastPosUpdate.current > 50) {
