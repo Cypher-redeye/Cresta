@@ -51,22 +51,4 @@
     /* neon-emerald glow */
   }
 
-  /* Globe Card Synchronization */
-  .globe-container [data-card] {
-    opacity: 0.25;
-    transform: scale(0.97);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-
-  .globe-container[data-active="BSE SENSEX"] [data-card="BSE SENSEX"],
-  .globe-container[data-active="NSE NIFTY 50"] [data-card="NSE NIFTY 50"],
-  .globe-container[data-active="FTSE 100"] [data-card="FTSE 100"],
-  .globe-container[data-active="NYSE (DOW)"] [data-card="NYSE (DOW)"],
-  .globe-container[data-active="NIKKEI 225"] [data-card="NIKKEI 225"],
-  .globe-container[data-active="ASX 200"] [data-card="ASX 200"] {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
-    z-index: 30;
-  }
 }
