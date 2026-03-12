@@ -38,16 +38,35 @@
   }
 
   .glass-btn {
-    @apply bg-gradient-to-r from-fintech-cyan/10 to-fintech-blue/10 dark:from-neon-cyan/20 dark:to-neon-blue/20 backdrop-blur-md border border-gray-200 dark:border-white/10 hover:border-fintech-cyan/50 dark:hover:border-neon-cyan/50 transition-all duration-300;
+    @apply bg-gradient-to-r from-fintech-emerald/10 to-fintech-blue/10 dark:from-neon-emerald/20 dark:to-neon-blue/20 backdrop-blur-md border border-gray-200 dark:border-white/10 hover:border-fintech-emerald/50 dark:hover:border-neon-emerald/50 transition-all duration-300;
   }
 
   .text-glow {
-    text-shadow: 0 0 15px rgba(8, 145, 178, 0.4);
-    /* fintech-cyan glow */
+    text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    /* fintech-emerald glow */
   }
 
   .dark .text-glow {
-    text-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
-    /* neon-cyan glow */
+    text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
+    /* neon-emerald glow */
+  }
+
+  /* Globe Card Synchronization */
+  .globe-container [data-card] {
+    opacity: 0.25;
+    transform: scale(0.97);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .globe-container[data-active="BSE SENSEX"] [data-card="BSE SENSEX"],
+  .globe-container[data-active="NSE NIFTY 50"] [data-card="NSE NIFTY 50"],
+  .globe-container[data-active="FTSE 100"] [data-card="FTSE 100"],
+  .globe-container[data-active="NYSE (DOW)"] [data-card="NYSE (DOW)"],
+  .globe-container[data-active="NIKKEI 225"] [data-card="NIKKEI 225"],
+  .globe-container[data-active="ASX 200"] [data-card="ASX 200"] {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    z-index: 30;
   }
 }

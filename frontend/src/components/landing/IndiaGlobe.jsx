@@ -22,7 +22,7 @@ const EXCHANGES = [
     },
     {
         id: 'lse', name: 'FTSE 100', location: 'Paternoster Sq, London',
-        lat: 51.5144, lng: -0.0987, region: 'Europe',
+        lat: 51.5142, lng: -0.0981, region: 'Europe',
         fallback: { value: '8,684.56', change: '+38.48', percent: '+0.45%', positive: true },
         color: '#7C3AED', flag: '🇬🇧',
     },
@@ -40,7 +40,7 @@ const EXCHANGES = [
     },
     {
         id: 'tse', name: 'NIKKEI 225', location: 'Nihonbashi, Tokyo',
-        lat: 35.6817, lng: 139.7714, region: 'Asia',
+        lat: 35.6762, lng: 139.6503, region: 'Asia',
         fallback: { value: '37,155.33', change: '+312.62', percent: '+0.85%', positive: true },
         color: '#DB2777', flag: '🇯🇵',
     },
@@ -75,31 +75,18 @@ const findActiveExchange = (phi) => {
 };
 
 /* ─────────────────────────────────────────────────────────────────────
- * 3D → 2D projection (self-calibrating sign)
+ * 3D → 2D projection using exact lat/lng coordinates
  * ──────────────────────────────────────────────────────────────────── */
 const GLOBE_THETA = 0.15;
 
-const projectMarker = (lat, lng, phi) => {
-    const latRad = (lat * Math.PI) / 180;
-    const lngRad = (lng * Math.PI) / 180;
-    const x = Math.cos(latRad) * Math.sin(lngRad);
-    const y = -Math.sin(latRad);
-    const z = Math.cos(latRad) * Math.cos(lngRad);
-
-    const facingLng = phiToFacingLng(phi);
-    const testLngRad = (facingLng * Math.PI) / 180;
-    const cosA = Math.cos(phi), sinA = Math.sin(phi);
-    const tzStd = -Math.sin(testLngRad) * sinA + Math.cos(testLngRad) * cosA;
-    const usePhi = tzStd > 0 ? phi : -phi;
-
-    const cp = Math.cos(usePhi), sp = Math.sin(usePhi);
-    const x1 = x * cp + z * sp;
-    const z1 = -x * sp + z * cp;
-    const ct = Math.cos(GLOBE_THETA), st = Math.sin(GLOBE_THETA);
-    const y2 = y * ct - z1 * st;
-    const z2 = y * st + z1 * ct;
-
-    return { x: x1, y: y2, z: z2, visible: z2 > 0.05 };
+const latLngToVector3 = (lat, lng, radius, globeRotationY) => {
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lng + globeRotationY) * (Math.PI / 180);
+    return {
+        x: -(radius * Math.sin(phi) * Math.cos(theta)),
+        y: radius * Math.cos(phi),
+        z: radius * Math.sin(phi) * Math.sin(theta),
+    };
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -127,7 +114,7 @@ const DARK_GLOBE = {
 /* ─────────────────────────────────────────────────────────────────────
  * Main Component
  * ──────────────────────────────────────────────────────────────────── */
-const IndiaGlobe = () => {
+const IndiaGlobe = React.forwardRef(({ cardRefs }, ref) => {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const pointerInteracting = useRef(null);
@@ -139,9 +126,9 @@ const IndiaGlobe = () => {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
 
-    const [activeExchange, setActiveExchange] = useState(EXCHANGES[0]);
     const [liveData, setLiveData] = useState({});
     const [markerPositions, setMarkerPositions] = useState({});
+    const currentActiveRef = useRef('BSE SENSEX');
 
     /* ── Fetch live BSE / NSE ──────────────────────────────── */
     useEffect(() => {
@@ -196,17 +183,49 @@ const IndiaGlobe = () => {
                 state.width = width * 2;
                 state.height = width * 2;
 
-                const best = findActiveExchange(phi);
-                setActiveExchange(prev => prev.id !== best.id ? best : prev);
+                const normalizedPhi = ((phi % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+                
+                const REGION_MAP = [
+                    { name: 'BSE SENSEX',   phiStart: 0.8,  phiEnd: 1.3  },
+                    { name: 'NSE NIFTY 50', phiStart: 1.3,  phiEnd: 1.9  },
+                    { name: 'FTSE 100',     phiStart: 2.8,  phiEnd: 3.6  },
+                    { name: 'NYSE (DOW)',   phiStart: 3.8,  phiEnd: 5.0  },
+                    { name: 'NIKKEI 225',   phiStart: 0.0,  phiEnd: 0.9  },
+                    { name: 'ASX 200',      phiStart: 5.0,  phiEnd: 6.28 },
+                ];
+                
+                const active = REGION_MAP.find(r =>
+                    normalizedPhi >= r.phiStart && normalizedPhi <= r.phiEnd
+                );
+                
+                if (active && active.name !== currentActiveRef.current) {
+                    currentActiveRef.current = active.name;
+                    if (containerRef.current) {
+                        containerRef.current.setAttribute('data-active', active.name);
+                        // Update connector line visibility directly
+                        const connectors = containerRef.current.querySelectorAll('.connector-line');
+                        connectors.forEach(c => c.style.display = 'none');
+                        const activeConn = containerRef.current.querySelector(`[data-connector="${active.name}"]`);
+                        if (activeConn) activeConn.style.display = 'inline';
+                    }
+                }
 
                 const now = performance.now();
                 if (now - lastPosUpdate.current > 50) {
                     lastPosUpdate.current = now;
-                    const r = width / 2, cx = width / 2, cy = width / 2;
+                    const r = width / 2;
+                    const cx = width / 2;
+                    const cy = width / 2;
+                    // Convert globe phi (radians) to degrees for latLngToVector3
+                    const globeRotationDeg = phi * (180 / Math.PI);
                     const positions = {};
                     for (const ex of EXCHANGES) {
-                        const p = projectMarker(ex.lat, ex.lng, phi);
-                        positions[ex.id] = { x: cx + p.x * r * 0.92, y: cy + p.y * r * 0.92, visible: p.visible };
+                        const p = latLngToVector3(ex.lat, ex.lng, 1, globeRotationDeg);
+                        positions[ex.id] = {
+                            x: cx + p.x * r * 0.92,
+                            y: cy + p.y * r * 0.92,
+                            visible: p.z > 0,
+                        };
                     }
                     setMarkerPositions(positions);
                 }
@@ -220,10 +239,6 @@ const IndiaGlobe = () => {
 
     /* ── Derived ───────────────────────────────────────────── */
     const getData = (ex) => liveData[ex.id] || ex.fallback;
-    const isIndia = activeExchange.region === 'India';
-    const data = getData(activeExchange);
-    const bseData = getData(EXCHANGES[0]);
-    const nseData = getData(EXCHANGES[1]);
 
     /* ── Connector line colour ─────────────────────────────── */
     const lineColor = isDark ? 'rgba(6,182,212,0.4)' : 'rgba(8,145,178,0.45)';
@@ -231,9 +246,9 @@ const IndiaGlobe = () => {
 
     /* ── Render ─────────────────────────────────────────────── */
     return (
-        <div ref={containerRef} className="relative w-full h-[420px] md:h-[500px] flex items-center justify-center">
+        <div ref={containerRef} className="globe-container relative w-full h-[420px] md:h-[500px] flex items-center justify-center" data-active="BSE SENSEX">
             {/* Globe */}
-            <div className="relative w-[300px] h-[300px] md:w-[380px] md:h-[380px]">
+            <div ref={ref} className="relative w-[300px] h-[300px] md:w-[380px] md:h-[380px]">
                 <canvas
                     ref={canvasRef}
                     onPointerDown={(e) => { pointerInteracting.current = e.clientX - pointerInteractionMovement.current; canvasRef.current.style.cursor = 'grabbing'; }}
@@ -255,8 +270,6 @@ const IndiaGlobe = () => {
 
             {/* SVG connector lines */}
             <ConnectorOverlay
-                activeExchange={activeExchange}
-                isIndia={isIndia}
                 positions={markerPositions}
                 containerRef={containerRef}
                 canvasRef={canvasRef}
@@ -264,41 +277,24 @@ const IndiaGlobe = () => {
                 dotColor={dotColor}
             />
 
-            {/* Exchange cards */}
+            {/* Exchange cards - DOM rendered entirely */}
             <AnimatePresence mode="wait">
-                {isIndia ? (
-                    <React.Fragment key="india-pair">
-                        <motion.div key="bse" data-card="bse"
-                            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.45 }}
-                            className="absolute left-0 top-[18%] md:top-[15%] z-20"
-                        >
-                            <ExchangeCard exchange={EXCHANGES[0]} data={bseData} isDark={isDark} />
-                        </motion.div>
-                        <motion.div key="nse" data-card="nse"
-                            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.45, delay: 0.12 }}
-                            className="absolute right-0 bottom-[18%] md:bottom-[15%] z-20"
-                        >
-                            <ExchangeCard exchange={EXCHANGES[1]} data={nseData} isDark={isDark} />
-                        </motion.div>
-                    </React.Fragment>
-                ) : (
-                    <motion.div key={activeExchange.id} data-card={activeExchange.id}
+                {EXCHANGES.map((exchange) => (
+                    <motion.div key={exchange.id} data-card={exchange.name}
                         initial={{ opacity: 0, y: 12, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -12, scale: 0.96 }}
-                        transition={{ duration: 0.4 }}
-                        className="absolute right-0 top-[20%] md:top-[18%] z-20"
+                        className="absolute right-0 top-[20%] md:top-[18%] z-20 pointer-events-none"
                     >
-                        <ExchangeCard exchange={activeExchange} data={data} isDark={isDark} />
+                        <div ref={el => { if (cardRefs?.current) cardRefs.current[exchange.name] = el; }}>
+                            <ExchangeCard exchange={exchange} data={getData(exchange)} isDark={isDark} />
+                        </div>
                     </motion.div>
-                )}
+                ))}
             </AnimatePresence>
 
             {/* Bottom region label */}
             <AnimatePresence mode="wait">
-                <motion.div key={isIndia ? 'india' : activeExchange.id}
+                <motion.div key="global-label"
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3 }}
                     className="absolute bottom-0 md:bottom-2 left-1/2 -translate-x-1/2 z-20"
@@ -310,20 +306,29 @@ const IndiaGlobe = () => {
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] ${isDark ? 'text-gray-400' : 'text-gray-600'
                             }`}>
-                            {isIndia ? "India's Financial Footprint" : `${activeExchange.region} · ${activeExchange.flag}`}
+                            Global Markets
                         </span>
                     </div>
                 </motion.div>
             </AnimatePresence>
         </div>
     );
-};
+});
 
 
 /* ─────────────────────────────────────────────────────────────────────
  * ConnectorOverlay
  * ──────────────────────────────────────────────────────────────────── */
-const ConnectorOverlay = ({ activeExchange, isIndia, positions, containerRef, canvasRef, lineColor, dotColor }) => {
+const ConnectorOverlay = ({ positions, containerRef, canvasRef, lineColor, dotColor }) => {
+    // Force overlay to re-render when data-active changes using a small state or 
+    // simply let requestAnimationFrame handle it if you want zero react renders.
+    // Wait, ConnectorOverlay is a React component. It only re-renders if props change.
+    // If the active card is updated purely via DOM `setAttribute('data-active')`, 
+    // the connector SVG won't know to redraw the line to the new card unless we tell it.
+    
+    // Actually, drawing the connector line purely via DOM is much faster for 60fps.
+    // Let's create the SVG lines for ALL exchanges, but hide them with CSS exactly like the cards!
+    
     if (!containerRef.current || !canvasRef.current || !Object.keys(positions).length) return null;
 
     const cr = containerRef.current.getBoundingClientRect();
@@ -337,28 +342,31 @@ const ConnectorOverlay = ({ activeExchange, isIndia, positions, containerRef, ca
 
     const addLine = (exId) => {
         const dot = toContainer(positions[exId]);
-        const card = containerRef.current.querySelector(`[data-card="${exId}"]`);
+        const card = containerRef.current.querySelector(`[data-card="${EXCHANGES.find(e => e.id === exId)?.name}"]`);
         if (!dot || !card) return;
+        
         const cardR = card.getBoundingClientRect();
         const isLeft = cardR.left + cardR.width / 2 < cr.left + cr.width / 2;
         const cx = isLeft ? cardR.right - cr.left : cardR.left - cr.left;
         const cy = cardR.top - cr.top + cardR.height / 2;
 
+        const exName = EXCHANGES.find(e => e.id === exId)?.name;
+
         lines.push(
-            <g key={`conn-${exId}`}>
-                <line x1={cx} y1={cy} x2={dot.x} y2={dot.y}
+            <g key={`conn-${exId}`} data-connector={exName} className="connector-line hidden transition-opacity duration-300">
+                <line x1={dot.x} y1={dot.y} x2={cx} y2={cy}
                     stroke={lineColor} strokeWidth="1.5" strokeDasharray="4 3"
                 />
                 <circle cx={dot.x} cy={dot.y} r="4" fill={dotColor} opacity="0.9">
                     <animate attributeName="r" values="3;5.5;3" dur="2s" repeatCount="indefinite" />
                     <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite" />
                 </circle>
-            </g>,
+            </g>
         );
     };
 
-    if (isIndia) { addLine('bse'); addLine('nse'); }
-    else { addLine(activeExchange.id); }
+    // Draw all lines
+    EXCHANGES.forEach(ex => addLine(ex.id));
 
     return (
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" style={{ overflow: 'visible' }}>
@@ -387,7 +395,10 @@ const ExchangeCard = ({ exchange, data, isDark }) => {
                     ? 'bg-gray-900/80 border-white/10'
                     : 'bg-white/80 border-gray-200/60 shadow-lg'
                 }`}
-            style={{ borderColor: isDark ? `${exchange.color}33` : `${exchange.color}22` }}
+            style={{ 
+               borderColor: isDark ? `${exchange.color}33` : `${exchange.color}22`,
+               transition: 'box-shadow 0.4s ease, border-color 0.4s ease'
+            }}
         >
             <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
