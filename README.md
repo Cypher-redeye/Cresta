@@ -2,6 +2,8 @@
 
 Cresta is a localized, full-stack AI-driven Robo-Advisory platform built specifically for the Indian equity market (NSE/BSE). Unlike standard retail brokerages that offer generic recommendations, Cresta acts as a personalized fiduciary—using institutional-grade Machine Learning to analyze stocks, predict price movements, and tailor recommendations to each user's specific financial goals and risk tolerance.
 
+---
+
 ## 📊 Evaluation Metrics & Performance
 
 ### 1. 🧠 Intelligent Risk Profiling
@@ -12,20 +14,23 @@ Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive**
 * **Conservative Recall:** 84% — critical for fiduciary safety
 
 **Explainable AI (XAI) - Feature Importance:**
-To ensure fiduciary transparency, the XGBoost model's decision-making is fully interpretable. SHAP/Gain feature importance reveals the model correctly prioritizes logical financial constraints:
-1. **Risk Tolerance (61.35%)** - Primary driver of asset allocation.
-2. **Income (17.81%)** - Determines risk capacity and loss absorption.
-3. **Investment Goal (14.75%)** - Time horizon constraints.
-4. **Age (3.88%) & Experience (2.21%)** - Vanguard "120-minus-age" equity constraints.
+| Feature | Importance |
+|---|---|
+| Risk Tolerance | 61.35% |
+| Income | 17.81% |
+| Investment Goal | 14.75% |
+| Age | 3.88% |
+| Experience | 2.21% |
 
 ### 2. 📈 Tier-2 Quant Stock Forecasting
 Cresta features a highly advanced time-series prediction engine that forecasts stock prices 7 days into the future.
-* **Architecture:** Attention-LSTM Hybrid + XGBoost + ARIMA Ensemble.
-* **Features Used (16):** Close, Volume, SMA (5, 20), RSI (14), MACD, Bollinger Bands, OBV, FinBERT Sentiment, USD/INR Exchange Rate, India VIX, Crude Oil Futures.
-* **Validation:** Strict time-series Walk-Forward Validation (3-fold expanding window) to prevent look-ahead bias.
-* **Dataset:** 20 years of historical Nifty50 daily data (via Kaggle & `yfinance`).
+* **Architecture:** Attention-LSTM Hybrid + XGBoost + ARIMA Ensemble (weights: 0.70 / 0.10 / 0.20)
+* **Features Used (16):** Close, Volume, SMA (5, 20), RSI (14), MACD, Bollinger Bands, OBV, FinBERT Sentiment, USD/INR Exchange Rate, India VIX, Crude Oil Futures
+* **Validation:** Strict time-series Walk-Forward Validation (3-fold expanding window, minimum 45-day folds) to prevent look-ahead bias
+* **Seed:** Fixed at 42 for full reproducibility
+* **Dataset:** 20 years of historical Nifty50 daily data (via Kaggle & `yfinance`)
 
-**Forecasting Performance & Backtesting (6-Month Historical):**
+**Forecasting Performance (Walk-Forward Validated):**
 | Ticker | Sector | Directional Accuracy | MAPE |
 |---|---|---|---|
 | RELIANCE.NS | Energy/Conglomerate | 85.2% | 10.84% |
@@ -37,8 +42,9 @@ Cresta features a highly advanced time-series prediction engine that forecasts s
 | SUNPHARMA.NS | Pharma | 60.7% | 5.98% |
 | INFY.NS | IT Services | 54.1%* | 10.66% |
 
-*Data-limited — insufficient 20-year historical coverage
-Average directional accuracy across 7 liquid stocks: 72.3%
+*Data-limited — insufficient 20-year historical coverage. System suppresses recommendations and serves data-limitation warning for stocks below 60% directional accuracy threshold.
+
+**Average directional accuracy across 7 liquid stocks: 72.3%**
 
 ---
 
@@ -48,22 +54,16 @@ Average directional accuracy across 7 liquid stocks: 72.3%
 graph TD
     Client[React + Vite Frontend] <-->|HTTPS / REST API| Nginx[Nginx Reverse Proxy]
     Nginx <-->|Gunicorn| Django[Django 5 Backend]
-    
-    sublayer1[Background Processing]
     Django <-->|Task Queue| Redis[Redis Broker]
     Redis <--> Celery[Celery + Celery Beat]
-    
-    sublayer2[AI Architecture]
     Celery <-->|Train/Predict| PyTorch[Attention-LSTM Engine]
     Celery <-->|Analyze News| FinBERT[HuggingFace NLP]
     Django <-->|Classify Risk| XGBoost[XGBoost Profiler]
-    
-    sublayer3[Data persistence]
     Django <--> Postgres[(PostgreSQL)]
     PyTorch <--> YF[yfinance API]
 ```
 
-### 🗄️ Database Schema Diagram
+### 🗄️ Database Schema
 ```mermaid
 erDiagram
     USER ||--o{ PORTFOLIO : owns
@@ -127,101 +127,109 @@ erDiagram
 ## ✨ Core Features
 
 ### 1. 🌍 Interactive 3D Global Exchange Globe
-The landing page features a stunning **interactive 3D globe** (powered by [cobe](https://github.com/shuding/cobe)) that showcases major global stock exchanges in real-time:
-* **7 Global Exchanges:** BSE SENSEX, NSE NIFTY 50 (India), FTSE 100 (London), NYSE/DOW (New York), IBOVESPA (São Paulo), NIKKEI 225 (Tokyo), ASX 200 (Sydney).
-* **Geographic Sync:** As the globe rotates, exchange cards automatically update to match the front-facing continent with angular-distance detection.
-* **Live Connector Lines:** SVG dashed connector lines with pulsing dots track from exchange cards to their precise city coordinates on the globe surface.
-* **Theme-Aware:** The globe adapts its palette for both Light Mode (soft blue-grey sphere) and Dark Mode (deep space aesthetic) using the app's `ThemeContext`.
-* **Live Data:** BSE SENSEX and NSE NIFTY 50 prices are fetched live from the backend API.
+The landing page features an interactive 3D globe (powered by [cobe](https://github.com/shuding/cobe)) showcasing major global stock exchanges:
+* **7 Global Exchanges:** BSE SENSEX, NSE NIFTY 50 (India), FTSE 100 (London), NYSE/DOW (New York), IBOVESPA (São Paulo), NIKKEI 225 (Tokyo), ASX 200 (Sydney)
+* **Geographic Sync:** Angular-distance phi detection ensures the correct exchange card appears exactly when that continent faces the camera. India displays two cards (BSE + NSE); all other regions display one.
+* **Emerald Pulse Connectors:** SVG dashed connector lines with emerald pulsing dots track from exchange cards to precise city coordinates on the globe surface
+* **Theme-Aware:** Globe adapts palette for both Light and Dark mode via `ThemeContext`
+* **Live Data:** BSE SENSEX and NSE NIFTY 50 prices fetched live from the backend API
 
-### 2. Explainable AI (XAI) & Fiduciary Scoring
-A stock's viability depends entirely on *who* is buying it. Cresta's personalized weighted scoring engine assesses every stock on a 100-point scale tailored to the user:
-* **Sentiment (40 points):** Financial news processed through FinBERT NLP.
-* **Risk Fit (40 points):** Matches the stock's volatility (Beta) directly against the user's ML-classified risk profile. An Aggressive user might see a "Buy" recommendation for a highly volatile stock, while a Conservative user will be warned to "Avoid" it.
-* **Valuation (20 points):** Price positioning relative to its 52-week high/low.
-* **Explainability:** The system translates these mathematical weights into natural language reasoning (e.g., *"This high-volatility stock fits your aggressive profile, and recent news is highly positive."*), ensuring fiduciary transparency.
+### 2. 🎨 Premium Emerald Design System
+Full Light/Dark theme support with a sophisticated **Emerald Green** (`#10B981`) accent palette:
+* **Dark Mode Background:** Deep charcoal `#0d0d0d`
+* **Light Mode Background:** Cool off-white `#f0f4f8`
+* **Animated Hero Background:** Canvas-based breathing gradient with three independent radial emerald glows pulsing at different frequencies (1.5x, 1.0x, 0.7x), layered with 28 floating market data numbers (SENSEX values, ₹ prices, ▲▼ indicators, tickers) fading in and out — fully adapted for both dark and light modes
+* **Complete cyan→emerald migration** across all components, Tailwind config, and CSS variables
+* **Theme persistence** via `localStorage` with system preference detection
 
-### 3. Comprehensive Portfolio Management
-* **Real-time Tracking:** Live market data integration via `yfinance`.
-* **Smart Alerts:** Automated Buy/Sell/Hold signals based on real-time moving average crossovers for assets currently in your portfolio.
+### 3. Explainable AI (XAI) & Fiduciary Scoring
+Every stock is assessed on a personalized 100-point scale:
+* **Sentiment (40 pts):** Financial news processed through FinBERT NLP
+* **Risk Fit (40 pts):** Stock Beta matched against ML-classified user risk profile
+* **Valuation (20 pts):** Price positioning relative to 52-week high/low
+* Natural language reasoning generated for full fiduciary transparency
 
-### 4. 🎨 Light & Dark Theme
-Full Light/Dark theme support across the entire platform, including the 3D globe, exchange cards, connector lines, and all dashboard components. Theme preference is persisted in `localStorage` and respects system preference on first visit.
+### 4. 📈 Dynamic Growth Forecast Chart
+The Market Watch growth forecast chart uses **dynamic green/red coloring** based on actual price direction:
+* Price higher than period start → Emerald green line + fill
+* Price lower than period start → Red line + fill
+* Confidence interval shading adapts to match the direction color
 
-### 5. Deep Localization for India (i18n)
-Financial literacy barriers are heavily tied to language. Cresta natively implements `react-i18next` to provide deep localization across the entire platform. Every UI component, ML reasoning string, and alert is seamlessly translatable between **English, Hindi, and Punjabi**, ensuring accessibility for a vastly wider domestic demographic.
+### 5. Comprehensive Portfolio Management
+* Real-time tracking via `yfinance`
+* Smart Buy/Sell/Hold alerts based on moving average crossovers
+* Email alert integration via Django `send_mail`
+* Paper trading and watchlist alert models
 
+### 6. 🌐 Deep Localization (i18n)
+Native `react-i18next` implementation supporting **English, Hindi, and Punjabi** across all UI components, ML reasoning strings, and alerts.
 
 ---
 
-## 🛡️ Security & Testing
+## 🛡️ Security
 
-As a financial advisory platform, security is paramount:
-* **Authentication:** JWT (JSON Web Tokens) with short-lived access tokens and HttpOnly refresh rotation.
-* **DDos Prevention:** The primary `/api/prediction` route serves from cached `StockPrediction` Postgres arrays to prevent CPU exhaustion locking background threads.
-* **Input Sanitization:** All stock ticker inputs are strictly validated against a known whitelist of NSE/BSE suffixes to prevent injection.
-* **Production HTTPS:** Deployment configurations enforce `SECURE_SSL_REDIRECT`, `X-Frame-Options: DENY`, and strict HSTS policies.
-
-**Testing Coverage:**
-* Unit tests implemented for the 100-point fiduciary scoring engine.
-* Postman/DRF Test Client coverage for all REST endpoints.
-* Walk-forward validation loops acting as integration tests for the ML pipeline.
+* **Authentication:** JWT with short-lived access tokens and HttpOnly refresh rotation
+* **DDoS Prevention:** `/api/prediction` serves from cached PostgreSQL arrays to prevent CPU exhaustion
+* **Input Sanitization:** Stock ticker inputs validated against NSE/BSE suffix whitelist
+* **Production HTTPS:** `SECURE_SSL_REDIRECT`, `X-Frame-Options: DENY`, strict HSTS
 
 ---
 
 ## 🛠️ Technology Stack
 
-**Frontend:** React 18, Vite, Tailwind CSS, Recharts, Framer Motion, i18next, Cobe (3D Globe).  
-**Backend:** Django 5, DRF, PostgreSQL, Redis, Celery.  
-**Machine Learning:** PyTorch (LSTM), Scikit-Learn/XGBoost, HuggingFace (FinBERT).  
-**Tracking & MLOps:** MLflow (Tracking 5-fold CV loss curves, model versions, and hyperparameters).  
-**DevOps:** Docker, Docker Compose, Nginx, Gunicorn.  
+**Frontend:** React 18, Vite, Tailwind CSS, Recharts, Framer Motion, i18next, Cobe
+**Backend:** Django 5, DRF, PostgreSQL, Redis, Celery + Celery Beat
+**ML:** PyTorch (Attention-LSTM), XGBoost, Scikit-Learn, HuggingFace FinBERT
+**MLOps:** MLflow (CV loss curves, model versions, hyperparameters)
+**DevOps:** Docker, Docker Compose, Nginx, Gunicorn
 
 ---
 
-## ⚙️ How It Works (The ML Pipeline & Caching)
+## ⚙️ ML Pipeline
 
-1. **User Onboarding:** A user completes a 4-step assessment. The backend XGBoost model classifies their risk profile.
-2. **Data Ingestion:** Celery Beat fetches the latest EOD stock data and Nifty50 news headlines out-of-band.
-3. **Sentiment Analysis:** FinBERT processes the headlines, generating a sentiment score (-1 to 1) for each stock.
-4. **Forecasting & Caching Strategy:** 
-   * When a user requests a prediction, the backend checks the persistent **PostgreSQL/SQLite database (`STOCK_PREDICTION` table)** for recent forecasts (valid for 24 hours).
-   * Separate from predictions, the financial news sentiment for the stock is cached in **Redis** with a 24-hour TTL, fetched daily out-of-band by Celery Beat.
-   * Both PyTorch AttentionLSTM modeling and XGBoost regressors are bound to asynchronous background workers (Celery) executing out-of-band nightly data pipelines.
-   * If both the DB and filesystem miss, the system will search for nearest neighbor equivalents tracking heavily correlated market patterns utilizing proxy fallback methodologies mapping proxy metrics to immediate JSON demands.
-5. **Scoring:** The Recommendation Engine loads the user's risk profile, cross-references it with the stock's live Beta (cached in Redis), Sentiment, and Valuation, and computes a 0-100 Confidence Score with generated text reasoning.
-
-
-While highly capable, the current architecture has pathways for academic and commercial expansion:
-1. **Backtesting Framework:** Integrating a simulated return engine (e.g., Zipline or Backtrader) to historically validate the "Risk-Aware 100-point scoring" against a Buy-and-Hold Nifty50 benchmark over a 3-year period.
-2. **Federated Learning:** Implementing decentralized training for the investor profiling model to preserve user data privacy.
-3. **Derivatives & Options:** Expanding the LSTM feature set to include implied volatility (IV) and options chain data for institutional-grade predictive accuracy.
-4. **Regulatory (SEBI) Compliance Pipeline:** Transitioning the "Reasoning" engine to generate legally auditable logs required by Indian RIA (Registered Investment Advisor) regulations.
+1. **User Onboarding:** 4-step assessment → XGBoost risk classification
+2. **Data Ingestion:** Celery Beat fetches EOD stock data and Nifty50 news headlines nightly
+3. **Sentiment Analysis:** FinBERT generates sentiment score (−1 to 1) per stock
+4. **Forecasting & Caching:** Predictions cached in PostgreSQL for 24 hours; sentiment cached in Redis with 24-hour TTL; fallback to nearest-neighbor proxy if cache miss
+5. **Scoring:** Risk profile + Beta + Sentiment + Valuation → 0–100 Confidence Score with generated reasoning text
 
 ---
 
 ## 📚 Academic References
 
 * Hochreiter, S., & Schmidhuber, J. (1997). Long Short-Term Memory. *Neural Computation*, 9(8), 1735–1780.
-* Vaswani, A., et al. (2017). Attention Is All You Need. *Advances in Neural Information Processing Systems* (for Self-Attention mechanics in the LSTM hybrid).
-* Araci, D. (2019). FinBERT: Financial Sentiment Analysis with Pre-trained Language Models. *arXiv preprint arXiv:1908.10063*.
+* Vaswani, A., et al. (2017). Attention Is All You Need. *NeurIPS*.
+* Araci, D. (2019). FinBERT: Financial Sentiment Analysis with Pre-trained Language Models. *arXiv:1908.10063*.
 * Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. *KDD '16*.
+* Markowitz, H. (1952). Portfolio Selection. *Journal of Finance*, 7(1), 77–91.
 
 ---
 
-## 🚀 Quick Start (Development)
+## 🚀 Quick Start
 
-### Prerequisites
-* Docker & Docker Compose (Recommended)
-* OR Python 3.10+ and Node.js 18+
-
-### Running with Docker (Easiest)
-\`\`\`bash
-git clone https://github.com/yourusername/Cresta.git
+### With Docker (Recommended)
+```bash
+git clone https://github.com/Cypher-redeye/Cresta.git
 cd Cresta
 docker-compose up --build
-\`\`\`
+```
 * Frontend: `http://localhost:5173`
 * Backend API: `http://localhost:8000/api/`
 
-*Cresta is presented as a production-ready, highly localized Robo-Advisory platform, developed to demonstrate the viable intersection of behavioral finance, deep learning, and modern web architecture.*
+### Without Docker
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+*Cresta is a production-ready, highly localized Robo-Advisory platform demonstrating the viable intersection of behavioral finance, deep learning, and modern web architecture.*
