@@ -9,7 +9,7 @@ Cresta is a localized, full-stack AI-driven Robo-Advisory platform built specifi
 ### 1. 🧠 Intelligent Risk Profiling
 Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive** based on their Age, Income, Investment Goals, and Risk Tolerance.
 * **Model:** XGBoost Classifier
-* **Dataset:** 25,000 profiles combining real NFCS 2021 Investor Survey data (FINRA Foundation, N=2,578 verified respondents) and SEBI 2015-calibrated synthetic profiles
+* **Dataset:** 25,000 profiles — 2,578 real NFCS 2021 Investor Survey respondents (FINRA Foundation) augmented with 22,422 synthetic profiles generated via SEBI income capacity guideline distributions and empirical behavioral noise.
 * **Accuracy:** 84% (5-Fold Stratified Cross-Validation)
 * **Conservative Recall:** 84% — critical for fiduciary safety
 
@@ -24,8 +24,10 @@ Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive**
 
 ### 2. 📈 Tier-2 Quant Stock Forecasting
 Cresta features a highly advanced time-series prediction engine that forecasts stock prices 7 days into the future.
-* **Architecture:** Attention-LSTM Hybrid + XGBoost + ARIMA Ensemble (weights: 0.70 / 0.10 / 0.20)
-* **Features Used (16):** Close, Volume, SMA (5, 20), RSI (14), MACD, Bollinger Bands, OBV, FinBERT Sentiment, USD/INR Exchange Rate, India VIX, Crude Oil Futures
+* **Architecture:** Attention-LSTM Hybrid + XGBoost + ARIMA Ensemble
+The Attention mechanism applies learned temporal weights across LSTM hidden states, allowing the model to selectively focus on the most predictive time steps rather than treating all historical observations equally.
+* **Ensemble weights:** (0.70 LSTM / 0.10 XGBoost / 0.20 ARIMA) selected via validation MAPE minimization across walk-forward folds — LSTM dominates long-horizon trend capture while ARIMA stabilizes short-term variance.
+* **Features Used (16):** Close, Volume, SMA (5, 20), RSI (14), MACD, Bollinger Bands, OBV, FinBERT Sentiment (daily NSE-listed company headlines via yfinance news API, aggregated as mean sentiment score per ticker across all articles published within 24 hours), USD/INR Exchange Rate, India VIX, Crude Oil Futures
 * **Validation:** Strict time-series Walk-Forward Validation (3-fold expanding window, minimum 45-day folds) to prevent look-ahead bias
 * **Seed:** Fixed at 42 for full reproducibility
 * **Dataset:** 20 years of historical Nifty50 daily data (via Kaggle & `yfinance`)
@@ -169,7 +171,7 @@ Native `react-i18next` implementation supporting **English, Hindi, and Punjabi**
 ## 🛡️ Security
 
 * **Authentication:** JWT with short-lived access tokens and HttpOnly refresh rotation
-* **DDoS Prevention:** `/api/prediction` serves from cached PostgreSQL arrays to prevent CPU exhaustion
+* **Computational DoS Mitigation:** /api/prediction serves from cached PostgreSQL arrays to prevent CPU exhaustion from repeated ML inference requests.
 * **Input Sanitization:** Stock ticker inputs validated against NSE/BSE suffix whitelist
 * **Production HTTPS:** `SECURE_SSL_REDIRECT`, `X-Frame-Options: DENY`, strict HSTS
 
