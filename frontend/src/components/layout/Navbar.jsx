@@ -10,7 +10,16 @@ const Navbar = () => {
     const location = useLocation();
 
     return (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-8 px-6 py-2.5 bg-[#0d0d0d]/70 backdrop-blur-xl border border-emerald-500/15 rounded-full shadow-2xl transition-all duration-300">
+        <div 
+            style={{
+                position: 'fixed',
+                top: '24px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 50,
+            }}
+            className="flex items-center gap-8 px-6 py-2.5 bg-[#0d0d0d]/70 backdrop-blur-xl border border-emerald-500/15 rounded-full shadow-2xl transition-all duration-300"
+        >
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
                 <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:scale-110 transition-transform">

@@ -8,17 +8,17 @@ const Features = () => {
 
     const features = [
         {
-            icon: <Shield className="w-8 h-8 text-emerald-600 dark:text-neon-emerald" />,
+            icon: <Shield className="w-8 h-8 text-emerald-500" />,
             title: t('feature_risk_profiling_title'),
             description: t('feature_risk_profiling_desc')
         },
         {
-            icon: <Activity className="w-8 h-8 text-blue-600 dark:text-neon-blue" />,
+            icon: <Activity className="w-8 h-8 text-emerald-500" />,
             title: t('feature_market_data_title'),
             description: t('feature_market_data_desc')
         },
         {
-            icon: <RefreshCw className="w-8 h-8 text-emerald-600 dark:text-neon-emerald" />,
+            icon: <RefreshCw className="w-8 h-8 text-emerald-500" />,
             title: t('feature_auto_rebalancing_title'),
             description: t('feature_auto_rebalancing_desc')
         }
@@ -43,12 +43,12 @@ const Features = () => {
                             transition={{ duration: 0.5, delay: index * 0.2 }}
                             viewport={{ once: true }}
                             whileHover={{ y: -10 }}
-                            className="glass-panel p-8 rounded-2xl hover:border-emerald-500/30 dark:hover:border-neon-emerald/30 transition-colors group cursor-pointer"
+                            className="glass-panel p-8 rounded-2xl hover:border-emerald-500/30 transition-colors group cursor-pointer"
                         >
-                            <div className="mb-6 p-4 rounded-full bg-blue-50 dark:bg-white/5 w-fit group-hover:bg-blue-100 dark:group-hover:bg-white/10 transition-colors">
+                            <div className="mb-6 p-4 rounded-full bg-emerald-500/10 dark:bg-white/5 w-fit group-hover:bg-emerald-500/20 dark:group-hover:bg-white/10 transition-colors">
                                 {feature.icon}
                             </div>
-                            <h3 className="text-xl font-bold mb-4 group-hover:text-emerald-600 dark:group-hover:text-neon-emerald transition-colors">{feature.title}</h3>
+                            <h3 className="text-xl font-bold mb-4 group-hover:text-emerald-500 transition-colors">{feature.title}</h3>
                             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                                 {feature.description}
                             </p>

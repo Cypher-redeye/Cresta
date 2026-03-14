@@ -217,7 +217,7 @@ const Dashboard = () => {
                                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('risk_matched_ai')}</span>
                             </div>
                             <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 rounded-2xl bg-fintech-blue/20 dark:bg-blue-500/20 flex items-center justify-center text-fintech-blue dark:text-blue-400">
+                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500 dark:text-emerald-400">
                                     <PieChartIcon size={32} />
                                 </div>
                                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('optimal_allocation')}</span>
@@ -234,7 +234,7 @@ const Dashboard = () => {
                         <div className="pt-8">
                             <Link
                                 to="/risk-assessment"
-                                className="px-10 py-5 bg-gradient-to-r from-neon-emerald to-neon-blue rounded-2xl text-white font-bold text-lg hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transform hover:-translate-y-1 transition-all inline-flex items-center gap-3 group"
+                                className="px-10 py-5 bg-emerald-500 rounded-2xl text-white font-bold text-lg hover:bg-emerald-600 hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transform hover:-translate-y-1 transition-all inline-flex items-center gap-3 group"
                             >
                                 {t('start_risk_assessment')}
                                 <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />

@@ -7,6 +7,8 @@ import { SearchProvider } from './context/SearchContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import { useTheme } from './context/ThemeContext';
+
 
 // Route-level code splitting — each page loads only when navigated to
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -36,37 +38,37 @@ function App() {
     <div className="min-h-screen">
       <ErrorBoundary>
         <ThemeProvider>
-          <UserProvider>
-            <ToastProvider>
-              <Router>
-                <SearchProvider>
-                  <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      <Route path="/" element={<LandingPage />} />
-                      <Route path="/auth" element={<AuthPage />} />
-                      <Route path="/dashboard" element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/risk-assessment" element={
-                        <ProtectedRoute>
-                          <RiskAssessment />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/markets" element={<MarketsPage />} />
-                      <Route path="/settings" element={
-                        <ProtectedRoute>
-                          <SettingsPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="*" element={<LandingPage />} />
-                    </Routes>
-                  </Suspense>
-                </SearchProvider>
-              </Router>
-            </ToastProvider>
-          </UserProvider>
+            <UserProvider>
+              <ToastProvider>
+                <Router>
+                  <SearchProvider>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/auth" element={<AuthPage />} />
+                        <Route path="/dashboard" element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/risk-assessment" element={
+                          <ProtectedRoute>
+                            <RiskAssessment />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/markets" element={<MarketsPage />} />
+                        <Route path="/settings" element={
+                          <ProtectedRoute>
+                            <SettingsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="*" element={<LandingPage />} />
+                      </Routes>
+                    </Suspense>
+                  </SearchProvider>
+                </Router>
+              </ToastProvider>
+            </UserProvider>
         </ThemeProvider>
       </ErrorBoundary>
     </div>

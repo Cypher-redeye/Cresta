@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -8,7 +8,7 @@ import IndiaGlobe from './IndiaGlobe';
 const Hero = () => {
     return (
         <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-            {/* Background handled by BackgroundEffects.jsx */}
+            {/* Background handled by BackgroundEffects.jsx at root level */}
             <div className="absolute inset-0 z-0 pointer-events-none"></div>
 
             <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
