@@ -62,28 +62,45 @@ const AuthPage = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        setTimeout(() => {
-            setIsLoading(false);
-
-            let displayName = 'Investor';
-            if (!isLogin && formData.name) {
-                displayName = formData.name;
-            } else if (isLogin && formData.email) {
-                const emailName = formData.email.split('@')[0];
-                displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-            }
-
-            login({
-                name: displayName,
-                email: formData.email
+        try {
+            const response = await fetch(`${API_BASE}/auth/login/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: formData.email, // Backend expects username (which is email)
+                    password: formData.password
+                })
             });
 
-            navigate('/dashboard');
-        }, 2000);
+            const data = await response.json();
+
+            if (response.ok) {
+                // Backend returns { access, refresh }
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+                
+                // Fetch user info using the new access token
+                const userRes = await fetch(`${API_BASE}/auth/me/`, {
+                    headers: { 'Authorization': `Bearer ${data.access}` }
+                });
+                const userData = await userRes.json();
+                
+                login(userData, data);
+                showToast(t('login_success'), 'success');
+                navigate('/dashboard');
+            } else {
+                showToast(data.detail || 'Invalid credentials', 'error');
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            showToast('Connection failed', 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -194,6 +211,9 @@ const AuthPage = () => {
                                 <Lock className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-fintech-emerald dark:group-focus-within:text-neon-emerald transition-colors" />
                                 <input
                                     type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
                                     required
                                     placeholder=" "
                                     className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl pl-10 pr-12 py-3 text-gray-900 dark:text-white outline-none focus:border-emerald-500/50 dark:focus:border-neon-emerald/50 focus:bg-white dark:focus:bg-white/10 transition-all peer"

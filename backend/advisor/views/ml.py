@@ -1,7 +1,7 @@
 import json
 import yfinance as yf
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -9,7 +9,7 @@ from ..serializers import RecommendSerializer
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def recommend_api(request):
     """
     Expects POST request with JSON containing:
@@ -41,7 +41,7 @@ def recommend_api(request):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_prediction(request):
     symbol = request.query_params.get('symbol')
     if not symbol:

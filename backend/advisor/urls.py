@@ -11,6 +11,7 @@ urlpatterns = [
     path("news/", views.get_news),
     path("top-movers/", views.get_top_movers),
     # Auth (JWT)
+    path("auth/login/", views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path("auth/google/", views.google_login),
     path("auth/refresh/", views.token_refresh),
     path("auth/me/", views.get_me),
