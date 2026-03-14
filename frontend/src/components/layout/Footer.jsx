@@ -7,7 +7,7 @@ const Footer = () => {
     const { showToast } = useToast();
 
     return (
-        <footer className="py-8 border-t border-gray-200 dark:border-white/10 mt-auto relative z-10 bg-white/80 dark:bg-fintech-primary/80 backdrop-blur-md transition-colors duration-300">
+        <footer className="py-8 border-t border-gray-200 dark:border-white/10 mt-auto relative z-10 bg-white/80 dark:bg-[#0d0d0d] backdrop-blur-md transition-colors duration-300">
             <div className="container mx-auto px-6 text-center text-gray-600 dark:text-gray-500">
                 <p>&copy; {new Date().getFullYear()} Cresta AI. {t('rights_reserved')}</p>
                 <div className="flex justify-center space-x-6 mt-4">

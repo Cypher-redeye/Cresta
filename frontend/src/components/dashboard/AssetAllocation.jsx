@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
 const STOCK_COLORS = [
-    '#22D3EE', '#3B82F6', '#34D399', '#A78BFA', '#F472B6',
+    '#10B981', '#3B82F6', '#34D399', '#A78BFA', '#F472B6',
     '#FBBF24', '#FB923C', '#4ADE80', '#818CF8', '#F87171'
 ];
 

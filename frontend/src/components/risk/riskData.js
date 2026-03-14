@@ -133,7 +133,7 @@ export const profiles = {
             { name: 'Small Cap', value: 30, color: '#EC4899' },
             { name: 'Mid Cap', value: 30, color: '#8B5CF6' },
             { name: 'Large Cap', value: 30, color: '#3B82F6' },
-            { name: 'Sector/Speculative', value: 10, color: '#06B6D4' }
+            { name: 'Sector/Speculative', value: 10, color: '#10B981' }
         ]
     }
 };

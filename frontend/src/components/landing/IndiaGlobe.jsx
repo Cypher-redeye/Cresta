@@ -226,8 +226,8 @@ const IndiaGlobe = () => {
     const nseData = getData(EXCHANGES[1]);
 
     /* ── Connector line colour ─────────────────────────────── */
-    const lineColor = isDark ? 'rgba(6,182,212,0.4)' : 'rgba(8,145,178,0.45)';
-    const dotColor = isDark ? '#06B6D4' : '#0891B2';
+    const lineColor = isDark ? 'rgba(16,185,129,0.4)' : 'rgba(16,185,129,0.45)';
+    const dotColor = isDark ? '#10B981' : '#10B981';
 
     /* ── Render ─────────────────────────────────────────────── */
     return (

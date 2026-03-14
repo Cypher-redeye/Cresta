@@ -19,7 +19,7 @@ const About = () => {
             desc: t('about_mission_desc')
         },
         {
-            icon: <Eye className="w-8 h-8 text-blue-600 dark:text-neon-blue" />,
+            icon: <Eye className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />,
             title: t('about_vision'),
             desc: t('about_vision_desc')
         },
@@ -34,7 +34,7 @@ const About = () => {
         <section id="about" className="py-24 relative overflow-hidden">
             {/* Background Orbs */}
             <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
             <div className="container mx-auto px-6 relative z-10">
                 <div className="text-center mb-16">
@@ -50,7 +50,7 @@ const About = () => {
                         initial={{ scaleX: 0 }}
                         whileInView={{ scaleX: 1 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="h-1 w-24 bg-gradient-to-r from-emerald-500 to-blue-500 mx-auto rounded-full mb-8"
+                        className="h-1 w-24 bg-gradient-to-r from-emerald-500 to-emerald-600 mx-auto rounded-full mb-8"
                     ></motion.div>
                 </div>
 
@@ -79,7 +79,7 @@ const About = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-8 p-12 glass-panel rounded-3xl bg-emerald-500/5 border-emerald-500/10">
                     {stats.map((stat, index) => (
                         <div key={index} className="text-center">
-                            <div className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600 dark:from-neon-emerald dark:to-neon-blue mb-2">
+                            <div className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-400 dark:from-emerald-400 dark:to-emerald-500 mb-2">
                                 {stat.value}
                             </div>
                             <div className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">

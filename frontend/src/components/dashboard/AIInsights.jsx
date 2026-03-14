@@ -162,7 +162,7 @@ const AIInsights = ({ delay }) => {
                                                         </div>
                                                         {/* Score Bars */}
                                                         {[
-                                                            { label: t('sentiment'), pts: stock.xai.sentiment_pts, max: 40, color: '#06b6d4' },
+                                                            { label: t('sentiment'), pts: stock.xai.sentiment_pts, max: 40, color: '#10B981' },
                                                             { label: t('risk_fit'), pts: stock.xai.risk_fit_pts, max: 40, color: '#8b5cf6' },
                                                             { label: t('valuation'), pts: stock.xai.valuation_pts, max: 20, color: '#f59e0b' },
                                                         ].map((bar) => (

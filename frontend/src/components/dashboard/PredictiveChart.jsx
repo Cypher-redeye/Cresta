@@ -134,8 +134,8 @@ const PredictiveChart = ({ symbol, onClose }) => {
                         <AreaChart data={chartData}>
                             <defs>
                                 <linearGradient id={`grad-hist-${symbol}`} x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#22D3EE" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#22D3EE" stopOpacity={0} />
+                                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id={`grad-future-${symbol}`} x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
@@ -158,7 +158,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
                             <Area
                                 type="monotone"
                                 dataKey="historical"
-                                stroke="#22D3EE"
+                                stroke="#10B981"
                                 strokeWidth={2}
                                 fillOpacity={1}
                                 fill={`url(#grad-hist-${symbol})`}
@@ -180,7 +180,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
                                 type="monotone"
                                 dataKey="lower_bound"
                                 stroke="none"
-                                fill="#0f172a" // Masking the area below the lower bound to fake a floating band
+                                fill="#0d0d0d" // Masking the area below the lower bound to fake a floating band
                                 fillOpacity={0.8}
                                 isAnimationActive={true}
                             />

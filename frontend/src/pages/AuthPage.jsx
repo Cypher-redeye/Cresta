@@ -89,7 +89,7 @@ const AuthPage = () => {
     return (
         <div className="min-h-screen flex bg-gray-50 dark:bg-fintech-bg text-gray-900 dark:text-white overflow-hidden transition-colors duration-300">
 
-            <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-white/50 dark:bg-slate-900 border-r border-gray-200 dark:border-white/10">
+            <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-white/50 dark:bg-[#0d0d0d] border-r border-gray-200 dark:border-white/10">
                 <div className="absolute inset-0 z-0 opacity-30">
                     <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center grayscale dark:grayscale-0 transition-all duration-500"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-blue-100/40 to-transparent dark:from-fintech-bg dark:via-fintech-primary/80 dark:to-transparent"></div>
