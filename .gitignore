@@ -42,3 +42,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Training Artifacts
+train_err.txt
+train_out.txt
+results.txt
+
+# Build tools
+.vite/
