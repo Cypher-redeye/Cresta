@@ -133,3 +133,57 @@ def get_me(request):
         'investment_goal': profile.investment_goal if profile else '',
         'needs_reassessment': needs_reassessment,
     })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def signup(request):
+    """
+    Standard email/password signup.
+    Creates a new Django User and UserProfile.
+    """
+    username = request.data.get('username') or request.data.get('email')
+    email = request.data.get('email')
+    password = request.data.get('password')
+    name = request.data.get('name', '')
+
+    if not email or not password:
+        return Response(
+            {'detail': 'Email and password are required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+        return Response(
+            {'detail': 'User with this email already exists'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=name.split()[0] if name else '',
+            last_name=' '.join(name.split()[1:]) if name and len(name.split()) > 1 else ''
+        )
+        # Create profile
+        UserProfile.objects.create(user=user)
+        
+        # Generate tokens
+        tokens = get_tokens_for_user(user)
+        
+        return Response({
+            'success': True,
+            'user': {
+                'email': user.email,
+                'name': name or user.username,
+            },
+            'access': tokens['access'],
+            'refresh': tokens['refresh']
+        }, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response(
+            {'detail': f'Error creating user: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

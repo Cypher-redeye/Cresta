@@ -15,7 +15,8 @@ import {
     ShieldCheck,
     PieChart as PieChartIcon,
     ArrowRight,
-    Plus
+    Plus,
+    X
 } from 'lucide-react';
 import MarketTicker from '../components/dashboard/MarketTicker';
 import { motion } from 'framer-motion';
@@ -39,6 +40,8 @@ const itemVariants = {
     show: { opacity: 1, y: 0 }
 };
 
+const BANNER_KEY = 'cresta_risk_banner_dismissed';
+
 const Dashboard = () => {
     const { t } = useTranslation();
     const { hasCompletedRiskAssessment, user } = useUser();
@@ -49,6 +52,14 @@ const Dashboard = () => {
     const [signals, setSignals] = useState({});
     const [alerts, setAlerts] = useState([]);
     const [dismissedAlerts, setDismissedAlerts] = useState([]);
+
+    const [showRiskBanner, setShowRiskBanner] = useState(() => {
+        const dismissed = localStorage.getItem(BANNER_KEY);
+        if (!dismissed) return true;
+        const dismissedDate = new Date(dismissed);
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        return dismissedDate < thirtyDaysAgo;
+    });
 
     const userEmail = user?.email || localStorage.getItem('user_email') || '';
 
@@ -160,6 +171,11 @@ const Dashboard = () => {
         setAlerts(prev => prev.filter(a => a.id !== id));
     };
 
+    const handleDismissRiskBanner = () => {
+        localStorage.setItem(BANNER_KEY, new Date().toISOString());
+        setShowRiskBanner(false);
+    };
+
     const totals = holdings.reduce((acc, h) => {
         const invested = (h.qty || 0) * (h.avg || 0);
         const current = (h.qty || 0) * (h.ltp || h.avg || 0);
@@ -264,11 +280,11 @@ const Dashboard = () => {
             <AlertBanner alerts={alerts} onDismiss={dismissAlert} />
 
             {/* Risk Re-assessment Banner */}
-            {user?.needs_reassessment && (
+            {user?.needs_reassessment && showRiskBanner && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 flex items-center justify-between gap-4"
+                    className="relative mb-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 flex items-center justify-between gap-4 group/banner"
                 >
                     <div className="flex items-center gap-3">
                         <div className="p-2 rounded-xl bg-amber-500/20 text-amber-500">
@@ -279,12 +295,20 @@ const Dashboard = () => {
                             <p className="text-xs text-gray-500 dark:text-gray-400">{t('risk_assessment_old')}</p>
                         </div>
                     </div>
-                    <Link
-                        to="/risk-assessment"
-                        className="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
-                    >
-                        {t('retake_quiz')} <ArrowRight size={14} />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            to="/risk-assessment"
+                            className="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
+                        >
+                            {t('retake_quiz')} <ArrowRight size={14} />
+                        </Link>
+                        <button
+                            onClick={handleDismissRiskBanner}
+                            className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
                 </motion.div>
             )}
             <motion.div

@@ -8,9 +8,9 @@ export default {
     theme: {
         extend: {
             colors: {
-                'fintech-bg': '#0d0d0d',
-                'fintech-card': '#0d0d0d',
-                'fintech-primary': '#0d0d0d',
+                'fintech-bg': '#121212',
+                'fintech-card': '#121212',
+                'fintech-primary': '#121212',
                 // Dark mode accents (Neon)
                 
                 'neon-emerald': '#34D399',

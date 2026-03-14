@@ -7,7 +7,7 @@ import { useUser } from '../context/UserContext';
 import { useToast } from '../context/ToastContext';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import { API_BASE } from '../api';
+import { API_BASE, apiCall } from '../api';
 
 // Decomposed sub-components
 import SearchResultCard from '../components/markets/SearchResultCard';
@@ -74,7 +74,7 @@ const MarketsPage = () => {
                     } catch (e) { }
                 }
 
-                const response = await fetch(`${API_BASE}/search/?symbol=${searchQuery}${riskParam}`);
+                const response = await apiCall(`/search/?ticker=${searchQuery}${riskParam}`);
                 if (!response.ok) throw new Error('Stock not found');
                 const data = await response.json();
                 setSearchResult(data);

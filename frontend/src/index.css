@@ -34,7 +34,13 @@
   }
 
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-lg border border-gray-200 shadow-xl dark:bg-white/5 dark:border-white/10;
+    @apply border border-gray-200 shadow-xl dark:border-white/10;
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.85);
+  }
+
+  .dark .glass-panel {
+    background-color: rgba(255, 255, 255, 0.12);
   }
 
   .glass-btn {

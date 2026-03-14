@@ -35,8 +35,14 @@ export const UserProvider = ({ children }) => {
                     }
                 }
 
-                if (!res.ok) {
-                    // Token invalid — logout
+                if (res.ok) {
+                    const data = await res.json();
+                    setUser(prev => ({ ...prev, ...data }));
+                    if (data.risk_profile) {
+                        setHasCompletedRiskAssessment(true);
+                        localStorage.setItem('risk_assessment_completed', 'true');
+                    }
+                } else {
                     logout();
                 }
             } catch {

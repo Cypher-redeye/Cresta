@@ -185,153 +185,133 @@ from rest_framework.permissions import IsAuthenticated
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def search_stock(request):
-    symbol = request.GET.get('symbol', '').strip().upper()
+    ticker_param = request.GET.get('ticker', '').upper().strip()
     risk_class = request.GET.get('risk', '').strip()
-    if not symbol:
-        return JsonResponse({"error": "Symbol parameter is required"}, status=400)
+    
+    if not ticker_param:
+        return JsonResponse({"error": "Ticker parameter is required"}, status=400)
 
-    # Check mapping first
-    if symbol in STOCK_NAME_MAPPING:
-        symbol = STOCK_NAME_MAPPING[symbol]
+    # Try .NS first, then .BO as fallback if no decimal point
+    suffixes = [''] if ('.' in ticker_param or ticker_param.startswith('^')) else ['.NS', '.BO']
+    tickers_to_try = [ticker_param] if ('.' in ticker_param or ticker_param.startswith('^')) else [ticker_param + s for s in suffixes]
 
-    # Fuzzy match on names
-    for name, ticker in STOCK_NAME_MAPPING.items():
-        if name in symbol or symbol in name:
-            symbol = ticker
-            break
+    # Check mapping first for friendly names as a primary source
+    if ticker_param in STOCK_NAME_MAPPING:
+        # Move mapped ticker to the front of the list
+        mapped = STOCK_NAME_MAPPING[ticker_param]
+        if mapped not in tickers_to_try:
+            tickers_to_try.insert(0, mapped)
+        else:
+            tickers_to_try.remove(mapped)
+            tickers_to_try.insert(0, mapped)
 
-    # Auto-append .NS if not present
-    if not symbol.endswith('.NS') and not symbol.endswith('.BO') and not symbol.startswith('^'):
-        symbol = f"{symbol}.NS"
+    last_error = "Stock not found"
+    
+    for symbol in tickers_to_try:
+        try:
+            ticker = yf.Ticker(symbol)
+            data = ticker.history(period="5d")
 
-    try:
-        ticker = yf.Ticker(symbol)
-        data = ticker.history(period="5d")
+            if data.empty:
+                continue
 
-        if data.empty:
-            return JsonResponse({"error": "Stock not found"}, status=404)
+            latest_price = round(data["Close"].iloc[-1], 2)
+            average_price = data["Close"].mean()
 
-        latest_price = round(data["Close"].iloc[-1], 2)
-        average_price = data["Close"].mean()
+            info = ticker.info
+            # Some tickers return info but no price, check for valid price
+            if not info.get('regularMarketPrice') and not info.get('currentPrice') and data.empty:
+                continue
 
-        info = ticker.info
-        name = info.get('longName', symbol)
-        previous_close = info.get('previousClose', latest_price)
-        change = round(((latest_price - previous_close) / previous_close) * 100, 2)
-        volume = info.get('volume', 0)
+            name = info.get('longName', symbol)
+            previous_close = info.get('previousClose', latest_price)
+            change = round(((latest_price - previous_close) / previous_close) * 100, 2)
+            volume = info.get('volume', 0)
 
-        # Default simple suggestion (fallback for non-logged-in users)
-        suggestion = "Buy" if latest_price < average_price else "Hold"
-        confidence = None
-        reasoning = None
+            # Default simple suggestion
+            suggestion = "Buy" if latest_price < average_price else "Hold"
+            confidence = None
+            reasoning = None
 
-        # ML-powered risk-aware suggestion when risk class is provided
-        if risk_class and risk_class in ('Conservative', 'Moderate', 'Aggressive'):
-            try:
-                from recommender.engine import get_stock_profile, SECTOR_MAP, REASONING
+            # ML-powered risk-aware suggestion
+            if risk_class and risk_class in ('Conservative', 'Moderate', 'Aggressive'):
                 try:
-                    from recommender.sentiment import get_market_sentiment
-                except ImportError:
-                    get_market_sentiment = None
+                    from recommender.engine import get_stock_profile, REASONING
+                    try:
+                        from advisor.tasks import get_cached_sentiment
+                    except ImportError:
+                        get_cached_sentiment = None
 
-                try:
-                    from advisor.tasks import get_cached_sentiment
-                except ImportError:
-                    get_cached_sentiment = get_market_sentiment
+                    profile = get_stock_profile(symbol)
+                    beta = profile["beta"]
+                    price = profile["price"] if profile["price"] > 0 else latest_price
 
-                profile = get_stock_profile(symbol)
-                beta = profile["beta"]
-                price = profile["price"] if profile["price"] > 0 else latest_price
-
-                # Sentiment scoring (40 pts max)
-                sentiment_score = 0.0
-                try:
+                    # Sentiment scoring
+                    sentiment_score = 0.0
                     if get_cached_sentiment:
-                        sentiment_data = get_cached_sentiment(symbol)
-                        sentiment_score = sentiment_data.get("score", 0.0)
-                except Exception:
-                    pass
-                sentiment_pts = (sentiment_score + 1) * 20  # maps -1..1 to 0..40
+                        try:
+                             sentiment_data = get_cached_sentiment(symbol)
+                             sentiment_score = sentiment_data.get("score", 0.0)
+                        except: pass
+                    
+                    sentiment_pts = (sentiment_score + 1) * 20
 
-                # Risk fit scoring (40 pts max)
-                if risk_class == "Conservative":
-                    beta_pts = max(0, (1.2 - beta) * 33)
-                elif risk_class == "Aggressive":
-                    beta_pts = max(0, (beta - 0.5) * 28)
-                else:  # Moderate
-                    beta_pts = max(0, (1.0 - abs(beta - 1.0)) * 40)
+                    # Risk fit scoring
+                    if risk_class == "Conservative":
+                        beta_pts = max(0, (1.2 - beta) * 33)
+                    elif risk_class == "Aggressive":
+                        beta_pts = max(0, (beta - 0.5) * 28)
+                    else:
+                        beta_pts = max(0, (1.0 - abs(beta - 1.0)) * 40)
 
-                # Valuation scoring (20 pts max)
-                price_position = 0.5
-                if profile["week52_high"] > 0 and profile["week52_high"] != profile["week52_low"]:
-                    price_position = (price - profile["week52_low"]) / (profile["week52_high"] - profile["week52_low"] + 0.01)
-                valuation_pts = (1 - price_position) * 20
+                    # Valuation scoring
+                    price_position = 0.5
+                    if profile["week52_high"] > 0 and profile["week52_high"] != profile["week52_low"]:
+                        price_position = (price - profile["week52_low"]) / (profile["week52_high"] - profile["week52_low"] + 0.01)
+                    valuation_pts = (1 - price_position) * 20
 
-                total_score = sentiment_pts + beta_pts + valuation_pts
-                confidence = min(99, max(30, int(total_score)))
+                    total_score = sentiment_pts + beta_pts + valuation_pts
+                    confidence = min(99, max(30, int(total_score)))
 
-                # Determine suggestion from score
-                if total_score >= 60:
-                    suggestion = "Buy"
-                elif total_score >= 40:
-                    suggestion = "Hold"
-                else:
-                    suggestion = "Avoid"
+                    if total_score >= 60: suggestion = "Buy"
+                    elif total_score >= 40: suggestion = "Hold"
+                    else: suggestion = "Avoid"
 
-                # Build reasoning
-                phrases = REASONING.get('en', {})
-                if risk_class == "Conservative":
-                    fit_phrase = phrases.get('conservative_low_beta', '') if beta < 0.9 else phrases.get('conservative_other', '')
-                elif risk_class == "Aggressive":
-                    fit_phrase = phrases.get('aggressive_high_beta', '') if beta > 1.1 else phrases.get('aggressive_other', '')
-                else:
-                    fit_phrase = phrases.get('moderate', '')
+                    phrases = REASONING.get('en', {})
+                    if risk_class == "Conservative":
+                        fit_phrase = phrases.get('conservative_low_beta', '') if beta < 0.9 else phrases.get('conservative_other', '')
+                    elif risk_class == "Aggressive":
+                        fit_phrase = phrases.get('aggressive_high_beta', '') if beta > 1.1 else phrases.get('aggressive_other', '')
+                    else:
+                        fit_phrase = phrases.get('moderate', '')
 
-                if sentiment_score > 0.1:
-                    news_phrase = phrases.get('news_positive', '')
-                elif sentiment_score < -0.1:
-                    news_phrase = phrases.get('news_cautious', '')
-                else:
-                    news_phrase = phrases.get('news_neutral', '')
+                    if sentiment_score > 0.1: news_phrase = phrases.get('news_positive', '')
+                    elif sentiment_score < -0.1: news_phrase = phrases.get('news_cautious', '')
+                    else: news_phrase = phrases.get('news_neutral', '')
 
-                reasoning = f"{fit_phrase} {news_phrase}".strip()
-                if price_position < 0.3:
-                    reasoning += f" {phrases.get('value_low', '')}"
-                elif price_position > 0.8:
-                    reasoning += f" {phrases.get('value_high', '')}"
+                    reasoning = f"{fit_phrase} {news_phrase}".strip()
+                    if price_position < 0.3: reasoning += f" {phrases.get('value_low', '')}"
+                    elif price_position > 0.8: reasoning += f" {phrases.get('value_high', '')}"
 
-            except Exception as ml_err:
-                print(f"ML scoring fallback for {symbol}: {ml_err}")
-                # Keep simple suggestion on ML failure
+                except Exception as ml_err:
+                    print(f"ML scoring fallback for {symbol}: {ml_err}")
 
-        # Build response
-        response_data = {
-            "symbol": symbol,
-            "name": name,
-            "price": latest_price,
-            "change_percent": change,
-            "volume": volume,
-            "suggestion": suggestion
-        }
-        if confidence is not None:
-            response_data["confidence"] = confidence
-        if reasoning:
-            response_data["reasoning"] = reasoning
+            return JsonResponse({
+                "symbol": symbol,
+                "name": name,
+                "price": latest_price,
+                "change_percent": change,
+                "volume": volume,
+                "suggestion": suggestion,
+                "confidence": confidence,
+                "reasoning": reasoning
+            })
 
-        # Update cache (basic data only, ML results are personalized)
-        market_cache[symbol] = {
-            'price': latest_price,
-            'timestamp': time.time(),
-            'name': name,
-            'change_percent': change,
-            'volume': volume,
-            'suggestion': suggestion if not risk_class else "Hold"  # cache neutral suggestion
-        }
+        except Exception as e:
+            last_error = str(e)
+            continue
 
-        return JsonResponse(response_data)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": last_error}, status=404)
 
 
 def get_news(request):

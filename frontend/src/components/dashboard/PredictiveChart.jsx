@@ -12,7 +12,7 @@ import {
 import { motion } from 'framer-motion';
 import { TrendingUp, Info, Loader2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { API_BASE } from '../../api';
+import { API_BASE, apiCall } from '../../api';
 
 const PredictiveChart = ({ symbol, onClose }) => {
     const [chartData, setChartData] = useState([]);
@@ -26,7 +26,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
             setError(null);
             try {
                 const cleanSymbol = symbol.replace('.NS', '');
-                const res = await fetch(`${API_BASE}/prediction/?symbol=${cleanSymbol}`);
+                const res = await apiCall(`/prediction/?symbol=${cleanSymbol}`);
                 const result = await res.json();
                 if (result.error) throw new Error(result.error);
 

@@ -26,13 +26,26 @@ def recommend_api(request):
         result_json_str = recommend_stocks(serializer.validated_data, lang=lang)
         result_dict = json.loads(result_json_str)
 
-        # Update last_assessment_date if user is authenticated
+        # Update user profile if authenticated
         if request.user.is_authenticated:
             from ..models import UserProfile
             from django.utils import timezone
+            
             profile, _ = UserProfile.objects.get_or_create(user=request.user)
             profile.last_assessment_date = timezone.now()
-            profile.save(update_fields=['last_assessment_date'])
+            
+            # Map Risk_Tolerance (1-5) to profile strings
+            risk_val = serializer.validated_data['Risk_Tolerance']
+            if risk_val <= 2: profile.risk_profile = 'Conservative'
+            elif risk_val == 3: profile.risk_profile = 'Balanced'
+            else: profile.risk_profile = 'Aggressive'
+            
+            profile.risk_score = risk_val
+            profile.investment_goal = serializer.validated_data['Investment_Goal']
+            profile.age = serializer.validated_data['Age']
+            profile.income = serializer.validated_data['Income']
+            
+            profile.save()
 
         return Response(result_dict)
     except Exception as e:

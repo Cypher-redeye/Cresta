@@ -37,7 +37,7 @@ const Sidebar = () => {
         <motion.aside
             initial={false}
             animate={{ width: collapsed ? 80 : 280 }}
-            className="hidden md:flex flex-col h-screen sticky top-0 bg-white/70 dark:bg-fintech-card/30 backdrop-blur-xl border-r border-gray-200 dark:border-white/10 z-20 transition-colors duration-300"
+            className="hidden md:flex flex-col h-screen sticky top-0 bg-white/85 dark:bg-fintech-card/60 backdrop-blur-xl border-r border-gray-200 dark:border-white/10 z-20 transition-colors duration-300"
         >
             <div className="p-6 flex items-center justify-between">
                 {!collapsed && (

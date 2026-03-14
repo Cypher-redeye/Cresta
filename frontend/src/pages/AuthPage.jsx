@@ -66,37 +66,52 @@ const AuthPage = () => {
         e.preventDefault();
         setIsLoading(true);
 
+        const endpoint = isLogin ? 'auth/login/' : 'auth/signup/';
+        const payload = isLogin 
+            ? { username: formData.email, password: formData.password }
+            : { name: formData.name, email: formData.email, password: formData.password };
+
         try {
-            const response = await fetch(`${API_BASE}/auth/login/`, {
+            const response = await fetch(`${API_BASE}/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: formData.email, // Backend expects username (which is email)
-                    password: formData.password
-                })
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Backend returns { access, refresh }
-                localStorage.setItem('access_token', data.access);
-                localStorage.setItem('refresh_token', data.refresh);
+                // Both login and signup should return tokens
+                // For signup, backend might return format { access, refresh, user }
+                // For login, backend returns { access, refresh }
                 
-                // Fetch user info using the new access token
-                const userRes = await fetch(`${API_BASE}/auth/me/`, {
-                    headers: { 'Authorization': `Bearer ${data.access}` }
-                });
-                const userData = await userRes.json();
-                
-                login(userData, data);
-                showToast(t('login_success'), 'success');
-                navigate('/dashboard');
+                const accessToken = data.access;
+                const refreshToken = data.refresh;
+
+                if (accessToken) {
+                    localStorage.setItem('access_token', accessToken);
+                    localStorage.setItem('refresh_token', refreshToken);
+                    
+                    // Fetch or use user info
+                    let userData = data.user;
+                    if (!userData) {
+                        const userRes = await fetch(`${API_BASE}/auth/me/`, {
+                            headers: { 'Authorization': `Bearer ${accessToken}` }
+                        });
+                        userData = await userRes.json();
+                    }
+                    
+                    login(userData, data);
+                    showToast(t(isLogin ? 'login_success' : 'signup_success'), 'success');
+                    navigate('/dashboard');
+                } else {
+                    showToast('Unexpected response from server', 'error');
+                }
             } else {
-                showToast(data.detail || 'Invalid credentials', 'error');
+                showToast(data.detail || data.error || 'Operation failed', 'error');
             }
         } catch (err) {
-            console.error('Login error:', err);
+            console.error('Auth error:', err);
             showToast('Connection failed', 'error');
         } finally {
             setIsLoading(false);

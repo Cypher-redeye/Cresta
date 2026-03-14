@@ -52,7 +52,7 @@
     "already_have_account": "Already have an account?",
     "sign_up": "Sign up",
     "log_in": "Log in",
-    "search_placeholder": "Search assets (e.g. RELIANCE)...",
+    "search_placeholder": "Search stocks (e.g. RELIANCE, TCS, INFY)",
     "symbol": "Symbol",
     "search_result": "Search Result",
     "searching_for": "Searching for",
@@ -213,5 +213,7 @@
     "whats_happening_today": "Here's what's happening with your portfolio today.",
     "premium_investor": "Premium Investor",
     "based_on_risk_prefix": "Based on your",
-    "based_on_risk_suffix": "risk profile and our analysis of current market trends,"
+    "based_on_risk_suffix": "risk profile and our analysis of current market trends,",
+    "login_success": "Login successful! Welcome back.",
+    "signup_success": "Account created successfully! Welcome to Cresta."
 }

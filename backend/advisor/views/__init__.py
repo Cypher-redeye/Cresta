@@ -12,7 +12,7 @@ from .markets import (
 )
 
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .auth import google_login, token_refresh, get_me
+from .auth import google_login, token_refresh, get_me, signup
 
 from .ml import recommend_api, get_prediction, sector_sentiment
 

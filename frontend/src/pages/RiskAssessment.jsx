@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
-import { API_BASE } from '../api';
+import { API_BASE, apiCall } from '../api';
 
 // Decomposed sub-components and data
 import { questions, profiles } from '../components/risk/riskData';
@@ -87,9 +87,8 @@ const RiskAssessment = () => {
                 Risk_Tolerance: riskValue,
                 Investment_Goal: goal
             };
-            const res = await fetch(`${API_BASE}/recommend/`, {
+            const res = await apiCall('/recommend/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             const data = await res.json();

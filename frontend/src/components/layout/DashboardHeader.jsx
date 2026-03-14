@@ -15,16 +15,59 @@ const Header = () => {
     const displayName = user?.name || 'Investor';
     const location = useLocation();
 
+    const normalizeQuery = (query) => {
+        const q = query.trim().toUpperCase();
+        // Common name mappings
+        const aliases = {
+            'RELIANCE': 'RELIANCE.NS',
+            'TCS': 'TCS.NS',
+            'INFY': 'INFY.NS',
+            'INFOSYS': 'INFY.NS',
+            'HDFC': 'HDFCBANK.NS',
+            'HDFCBANK': 'HDFCBANK.NS',
+            'ICICI': 'ICICIBANK.NS',
+            'ICICIBANK': 'ICICIBANK.NS',
+            'SUNPHARMA': 'SUNPHARMA.NS',
+            'SUN PHARMA': 'SUNPHARMA.NS',
+            'SUNPHARM': 'SUNPHARMA.NS',
+            'MARUTI': 'MARUTI.NS',
+            'SUZUKI': 'MARUTI.NS',
+            'ONGC': 'ONGC.NS',
+            'BAJAJ': 'BAJAJ-AUTO.NS',
+            'BAJAJUTO': 'BAJAJ-AUTO.NS',
+            'BPCL': 'BPCL.NS',
+            'WIPRO': 'WIPRO.NS',
+            'TATAMOTORS': 'TATAMOTORS.NS',
+            'TATA MOTORS': 'TATAMOTORS.NS',
+            'TATA': 'TCS.NS',
+            'ASIAN PAINTS': 'ASIANPAINT.NS',
+            'ASIANPAINT': 'ASIANPAINT.NS',
+            'KOTAK': 'KOTAKBANK.NS',
+            'KOTAKBANK': 'KOTAKBANK.NS',
+            'AXIS': 'AXISBANK.NS',
+            'AXISBANK': 'AXISBANK.NS',
+            'SBI': 'SBIN.NS',
+            'SBIN': 'SBIN.NS',
+            'ADANI': 'ADANIENT.NS',
+            'BHARTI': 'BHARTIARTL.NS',
+            'AIRTEL': 'BHARTIARTL.NS',
+        };
+        if (aliases[q]) return aliases[q];
+        if (q.includes('.') || q.startsWith('^')) return q;
+        return q + '.NS';
+    };
+
     const handleSearch = (e) => {
         if (e.key === 'Enter') {
-            setSearchQuery(e.target.value);
+            const ticker = normalizeQuery(e.target.value);
+            setSearchQuery(ticker);
         }
     };
 
 
 
     return (
-        <header className="flex items-center justify-between px-4 md:px-8 py-4 md:py-5 border-b border-gray-200 dark:border-white/10 bg-white/50 dark:bg-fintech-bg/50 backdrop-blur-md sticky top-0 z-10 transition-colors duration-300 w-full overflow-hidden">
+        <header className="flex items-center justify-between px-4 md:px-8 py-4 md:py-5 border-b border-gray-200 dark:border-white/10 bg-white/85 dark:bg-fintech-bg/80 backdrop-blur-md sticky top-0 z-10 transition-colors duration-300 w-full overflow-hidden">
             <div className="min-w-0 pr-4">
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">
                     {t('welcome_back')}, <span className="text-fintech-emerald dark:text-neon-emerald">{displayName}</span>
