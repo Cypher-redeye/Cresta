@@ -1,24 +1,21 @@
 <div align="center">
 
-<img src="docs/screenshots/cresta-logo.jpg" alt="Cresta Logo" width="80" height="80" />
-
-# CRESTA
+# 🚀 CRESTA
 
 ### Your Wealth, Powered by Intelligence
 
 *Production-grade AI Robo-Advisory for Indian Equity Markets*
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Django](https://img.shields.io/badge/Django-5.x-092E20?style=for-the-badge&logo=django)](https://djangoproject.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791?style=for-the-badge&logo=postgresql)](https://supabase.com/)
-[![Redis](https://img.shields.io/badge/Redis-Upstash-DC382D?style=for-the-badge&logo=redis)](https://upstash.com/)
-[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)](https://docker.com/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-ML_Pipeline-EE4C2C?style=for-the-badge&logo=pytorch)](https://pytorch.org/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Styling-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?style=for-the-badge&logo=postgresql)](https://postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?style=for-the-badge&logo=redis)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker)](https://docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Production-brightgreen?style=for-the-badge)]()
+[![Status](https://img.shields.io/badge/Status-Pre--Deployment-orange?style=for-the-badge)]()
 
-**[Author →](#author)**
+**[Live Demo →](https://crestafinance.me)** · **[Author →](#author)**
 
 </div>
 
@@ -31,12 +28,67 @@
     <td align="center" width="50%">
       <img src="docs/screenshots/01-landing-dark.png" alt="Cresta Dark Mode" />
       <br />
-      <sub><b>Dark mode landing</b> — live SENSEX/NIFTY ticker, 3D COBE globe, real-time exchange cards.</sub>
+      <sub><b>Dark mode landing</b> — live SENSEX/NIFTY ticker, 3D COBE globe, real-time exchange cards, breathing emerald gradient background.</sub>
     </td>
     <td align="center" width="50%">
       <img src="docs/screenshots/02-landing-light.png" alt="Cresta Light Mode" />
       <br />
-      <sub><b>Light mode</b> — same data, zero compromise on readability or polish.</sub>
+      <sub><b>Light mode</b> — same data, zero compromise on readability or polish. Globe adapts palette automatically.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/03-features.png" alt="Intelligent Features" />
+      <br />
+      <sub><b>Landing features section</b> — AI Risk Profiling, Real-time Market Data, Automated Rebalancing.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/04-login.png" alt="Login Page" />
+      <br />
+      <sub><b>Login page</b> — Warren Buffett quote, Google OAuth, JWT authentication.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/05-email-verify.png" alt="Email Verification" />
+      <br />
+      <sub><b>Email verification</b> — token-based verification for all new signups, 24-hour expiry.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/06-dashboard.png" alt="Dashboard" />
+      <br />
+      <sub><b>Portfolio dashboard</b> — total invested, current value, P&L, asset allocation donut, live ticker tape, AI alerts.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/07-holdings-ai-advisor.png" alt="Holdings and AI Advisor" />
+      <br />
+      <sub><b>Holdings + AI Advisor</b> — sparkline trends, BUY/SELL/HOLD signals, AI Score breakdown (Sentiment/Risk Fit/Valuation), personalized news.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/08-market-watch.png" alt="Market Watch" />
+      <br />
+      <sub><b>Market Watch</b> — stock search, 30-day historical + 7-day AI forecast chart, dynamic red/green coloring, NIFTY/SENSEX/BANK NIFTY indices.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/09-market-news.png" alt="Personalized News" />
+      <br />
+      <sub><b>Personalized news feed</b> — top gainers/losers, Reuters/Bloomberg headlines filtered by portfolio holdings.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/10-settings.png" alt="Settings" />
+      <br />
+      <sub><b>Settings</b> — profile management, dark/light mode toggle, language selection (English, Hindi, Gujarati, Punjabi).</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="100%">
+      <img src="docs/screenshots/11-hindi-mode.png" alt="Hindi Mode" />
+      <br />
+      <sub><b>Full Hindi mode</b> — entire dashboard, nav, tooltips, AI reasoning, and alerts rendered in Hindi. Gujarati and Punjabi also supported.</sub>
     </td>
   </tr>
 </table>
@@ -47,79 +99,69 @@
 
 Zerodha and Groww give you a brokerage. Smallcase gives you curated baskets. **Cresta gives you a reasoning engine.**
 
-| | Zerodha / Groww | Smallcase | **Cresta** |
-|---|---|---|---|
-| AI Stock Scoring | ✗ | ✗ | ✅ Ensemble ML (LSTM + XGBoost + FinBERT) |
-| Explainable Signals | ✗ | ✗ | ✅ Sentiment / Risk Fit / Valuation breakdown |
-| Indian Language Support | ✗ | ✗ | ✅ Hindi, Gujarati, Punjabi |
-| Price Forecast | ✗ | ✗ | ✅ 7-day prediction with 30-day historical context |
-| Email Watchlist Alerts | ✓ | ✗ | ✅ Trigger-based, configurable |
+| | Zerodha / Groww | Smallcase | Wealthfront | **Cresta** |
+|---|---|---|---|---|
+| AI Stock Scoring | ✗ | ✗ | Partial | ✅ Ensemble ML (LSTM + XGBoost + ARIMA + FinBERT) |
+| Explainable Signals | ✗ | ✗ | ✗ | ✅ Sentiment / Risk Fit / Valuation breakdown |
+| Indian Language Support | ✗ | ✗ | ✗ | ✅ Hindi, Gujarati & Punjabi |
+| 7-day Price Forecast | ✗ | ✗ | ✗ | ✅ Walk-forward validated ensemble |
+| Email Watchlist Alerts | ✓ | ✗ | ✓ | ✅ Trigger-based, configurable |
+| Risk Profiling (ML) | ✗ | ✗ | ✓ | ✅ XGBoost + NFCS 2021 real survey data |
+| Email Verification | ✗ | ✗ | ✓ | ✅ Token-based, 24-hour expiry |
 
 > Built for the 200M+ Indians who invest without institutional-grade tooling.
 
-> Cresta doesn't just show you your portfolio — it tells you what to do with it and *why*.
+---
+
+## 📊 ML Evaluation Metrics
+
+### 1. 🧠 Intelligent Risk Profiling
+
+Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive** based on Age, Income, Investment Goals, and Risk Tolerance.
+
+* **Model:** XGBoost Classifier
+* **Dataset:** 25,000 profiles — 2,578 real NFCS 2021 Investor Survey respondents (FINRA Foundation) augmented with 22,422 synthetic profiles generated via SEBI income capacity guideline distributions and empirical behavioral noise.
+* **Accuracy:** 84% (5-Fold Stratified Cross-Validation)
+* **Conservative Recall:** 84% — critical for fiduciary safety
+
+**Explainable AI (XAI) — Feature Importance:**
+
+| Feature | Importance |
+|---|---|
+| Risk Tolerance | 61.35% |
+| Income | 17.81% |
+| Investment Goal | 14.75% |
+| Age | 3.88% |
+| Experience | 2.21% |
 
 ---
 
-## Core Features
+### 2. 📈 Tier-2 Quant Stock Forecasting
 
-### 📊 Live Dashboard
+* **Architecture:** Attention-LSTM Hybrid + XGBoost + ARIMA Ensemble
+* **Attention Mechanism:** Applies learned temporal weights across LSTM hidden states, allowing the model to selectively focus on the most predictive time steps rather than treating all historical observations equally.
+* **Ensemble Weights:** (0.70 LSTM / 0.10 XGBoost / 0.20 ARIMA) selected via validation MAPE minimization across walk-forward folds — LSTM dominates long-horizon trend capture while ARIMA stabilizes short-term variance.
+* **Features (16):** Close, Volume, SMA (5, 20), RSI (14), MACD, Bollinger Bands, OBV, FinBERT Sentiment (daily NSE-listed company headlines via yfinance news API, aggregated as mean sentiment score per ticker across all articles published within 24 hours), USD/INR Exchange Rate, India VIX, Crude Oil Futures
+* **Validation:** Strict Walk-Forward Validation (3-fold expanding window, minimum 45-day folds) — no look-ahead bias
+* **Seed:** Fixed at 42 for full reproducibility
+* **Dataset:** 20 years of historical Nifty50 daily data (via Kaggle & `yfinance`)
 
-<img src="docs/screenshots/06-dashboard.png" alt="Dashboard" />
+**Forecasting Performance (Walk-Forward Validated):**
 
-> Total invested, current value, realized P&L, asset allocation donut, and a portfolio growth curve — all in one view.
+| Ticker | Sector | Directional Accuracy | MAPE |
+|---|---|---|---|
+| RELIANCE.NS | Energy/Conglomerate | 85.2% | 10.84% |
+| ICICIBANK.NS | Banking | 70.4% | 6.75% |
+| HDFCBANK.NS | Banking | 72.6% | 7.01% |
+| MARUTI.NS | Auto | 70.4% | 17.38% |
+| ONGC.NS | Energy | 78.5% | 12.73% |
+| TCS.NS | IT Services | 68.9% | 9.83% |
+| SUNPHARMA.NS | Pharma | 60.7% | 5.98% |
+| INFY.NS | IT Services | 54.1%* | 10.66% |
 
----
+*Data-limited — insufficient 20-year historical coverage. System suppresses recommendations and serves data-limitation warning for stocks below 60% directional accuracy threshold.
 
-### 🤖 AI Stock Advisor + Holdings
-
-<img src="docs/screenshots/07-holdings-ai-advisor.png" alt="Holdings and AI Advisor" />
-
-> Every holding carries a BUY / SELL / HOLD signal, sparkline trend, and an AI Score decomposed into Sentiment, Risk Fit, and Valuation.
-
----
-
-### 📈 Market Watch
-
-<img src="docs/screenshots/08-market-watch.png" alt="Market Watch" />
-
-> Stock search with live LTP, top gainers/losers, and a 7-day price forecast chart powered by the ensemble pipeline.
-
----
-
-### 🌐 Full Hindi Mode (i18n)
-
-<img src="docs/screenshots/11-hindi-mode.png" alt="Hindi Mode" />
-
-> The entire dashboard — labels, tooltips, nav, settings — rendered in Hindi. Gujarati and Punjabi support also available.
-
----
-
-### Additional Capabilities
-
-- **Live Ticker** — BSE SENSEX · NIFTY 50 · BANK NIFTY · NIFTY IT · NASDAQ · S&P 500 · USD/INR · GOLD
-- **3D COBE Globe** — India's financial ecosystem visualized as an interactive globe on the landing page
-- **Risk Assessment Module** — investor risk profiling before portfolio construction
-- **Email Alerts** — watchlist price triggers via configurable SMTP notifications
-- **Google OAuth + Email Verification** — full Supabase Auth flow with OTP fallback
-- **Dark / Light Mode** — system-aware, persistently stored per user
-
----
-
-## ML Evaluation Metrics
-
-Evaluated on an 8-ticker holdout set: **RELIANCE · TCS · INFY · HDFC · ITC · WIPRO · SBIN · BAJFINANCE**
-`set_seed(42)` applied across all models and data splits for full reproducibility.
-
-| Model | MAE (₹) | RMSE (₹) | Directional Accuracy | Notes |
-|---|---|---|---|---|
-| Attention-LSTM | 18.4 | 26.1 | 61.3% | Best on volatile, high-cap tickers |
-| XGBoost | 21.7 | 30.8 | 58.9% | Strong on feature-rich tabular signal |
-| ARIMA | 34.2 | 47.5 | 52.1% | Statistical baseline; linear trend only |
-| FinBERT | — | — | Sentiment F1: **0.81** · Accuracy: **83.4%** | News headline classification |
-| **Ensemble** | **15.9** | **22.3** | **64.7%** | Weighted aggregation of all four models |
-
-> Directional accuracy = next-day up/down prediction. MAE/RMSE computed on normalized closing prices across the holdout period. Ensemble consistently outperforms each constituent model.
+**Average directional accuracy across 7 liquid stocks: 72.3%**
 
 ---
 
@@ -131,8 +173,8 @@ Raw Market Data (OHLCV + News Headlines)
          ▼
 ┌─────────────────────────────────────────────┐
 │              Feature Engineering             │
-│  RSI · MACD · Bollinger · SMA · EMA ·       │
-│  Momentum · ATR · OBV · FinBERT Score       │
+│  RSI · MACD · Bollinger · SMA · OBV ·       │
+│  India VIX · USD/INR · Crude · FinBERT      │
 └───────────────────┬─────────────────────────┘
                     │  16 features
          ┌──────────┴──────────┐
@@ -140,157 +182,193 @@ Raw Market Data (OHLCV + News Headlines)
   ┌─────────────┐       ┌─────────────┐
   │ Attention-  │       │  XGBoost    │
   │   LSTM      │       │  Regressor  │
-  │ (temporal   │       │ (tabular    │
-  │  sequences) │       │  signal)    │
+  │ (temporal)  │       │ (tabular)   │
   └──────┬──────┘       └──────┬──────┘
          │                     │
          ▼                     ▼
   ┌─────────────┐       ┌─────────────┐
   │    ARIMA    │       │   FinBERT   │
-  │ (statistical│       │  (news NLP  │
-  │  baseline)  │       │  sentiment) │
+  │ (baseline)  │       │  (NLP sent) │
   └──────┬──────┘       └──────┬──────┘
-         │                     │
          └─────────┬───────────┘
                    ▼
           ┌────────────────┐
           │    Ensemble    │
-          │   Aggregator   │
-          │ (weighted avg) │
+          │  0.70/0.10/0.20│
           └───────┬────────┘
                   ▼
-     AI Score + BUY / SELL / HOLD Signal
+     AI Score + BUY / SELL / HOLD
           7-day Price Forecast
 ```
 
-**Feature Set (16 baseline features):**
+---
 
-```python
-FEATURES = [
-    # Price
-    'open', 'high', 'low', 'close', 'volume',
-    # Momentum
-    'rsi_14', 'macd', 'macd_signal', 'momentum_10',
-    # Volatility
-    'bollinger_upper', 'bollinger_lower', 'atr_14',
-    # Trend
-    'sma_20', 'ema_50',
-    # Volume
-    'obv',
-    # Sentiment
-    'finbert_score'
-]
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    Client[React + Vite Frontend] <-->|HTTPS / REST API| Nginx[Nginx Reverse Proxy]
+    Nginx <-->|Gunicorn| Django[Django 5 Backend]
+    Django <-->|Task Queue| Redis[Redis Broker]
+    Redis <--> Celery[Celery + Celery Beat]
+    Celery <-->|Train/Predict| PyTorch[Attention-LSTM Engine]
+    Celery <-->|Analyze News| FinBERT[HuggingFace NLP]
+    Django <-->|Classify Risk| XGBoost[XGBoost Profiler]
+    Django <--> Postgres[(PostgreSQL)]
+    PyTorch <--> YF[yfinance API]
+```
+
+### 🗄️ Database Schema
+
+```mermaid
+erDiagram
+    USER ||--o{ PORTFOLIO : owns
+    USER {
+        int id PK
+        string email
+        string password_hash
+    }
+    INVESTOR_PROFILE ||--|| USER : belongs_to
+    INVESTOR_PROFILE {
+        int id PK
+        int age
+        decimal income
+        int risk_tolerance
+        string user_class "Aggressive/Moderate/Conservative"
+        boolean email_verified
+    }
+    PORTFOLIO ||--o{ HOLDING : contains
+    PORTFOLIO {
+        int id PK
+        decimal total_value
+        decimal cash_balance
+    }
+    HOLDING ||--o{ ALERT : triggers
+    HOLDING {
+        int id PK
+        string ticker
+        decimal quantity
+        decimal average_buy_price
+    }
+    STOCK_PREDICTION {
+        string ticker PK
+        json history_array
+        json future_forecast_array
+        timestamp last_updated
+    }
+    ALERT {
+        int id PK
+        string ticker
+        string signal "Buy/Sell/Hold"
+        boolean is_active
+    }
+    PAPER_TRADE {
+        int id PK
+        string ticker
+        string action "BUY/SELL"
+        decimal quantity
+        decimal price_at_trade
+        timestamp created_at
+    }
+    WATCHLIST_ALERT {
+        int id PK
+        string ticker
+        decimal target_price
+        string condition "ABOVE/BELOW"
+        boolean triggered
+    }
 ```
 
 ---
 
-## System Architecture
+## ✨ Core Features
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT (Browser)                          │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ HTTPS
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    VERCEL (Next.js 15)                           │
-│  Landing · Auth · Dashboard · Holdings · Market Watch · i18n   │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │ REST API (JSON)
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    RENDER (Django REST)                          │
-│  /api/portfolio/   /api/advisor/   /api/market/   /api/alerts/ │
-│                                                                  │
-│  ┌───────────────────────┐   ┌───────────────────────────────┐  │
-│  │     ML Pipeline       │   │       Auth Middleware          │  │
-│  │  LSTM · XGB · ARIMA   │   │   Supabase JWT verification   │  │
-│  │  FinBERT · Ensemble   │   └───────────────────────────────┘  │
-│  └───────────────────────┘                                       │
-└──────┬──────────────────────────────────────┬────────────────────┘
-       │                                      │
-       ▼                                      ▼
-┌──────────────────┐               ┌─────────────────────┐
-│    Supabase      │               │    Upstash Redis     │
-│    PostgreSQL    │               │  ML cache · ticker   │
-│  users ·         │               │  data · sessions     │
-│  holdings ·      │               └─────────────────────┘
-│  watchlist ·     │
-│  alerts          │
-└──────┬───────────┘
-       │
-       ▼
-┌──────────────────┐
-│   Supabase Auth  │
-│  Google OAuth +  │
-│  Email OTP/JWT   │
-└──────────────────┘
-```
+### 🌍 Interactive 3D Global Exchange Globe
+* **7 Global Exchanges:** BSE SENSEX, NSE NIFTY 50, FTSE 100, NYSE/DOW, IBOVESPA, NIKKEI 225, ASX 200
+* **Geographic Sync:** Angular-distance phi detection ensures correct exchange card appears when that continent faces the camera
+* **Live Data:** BSE SENSEX and NSE NIFTY 50 prices fetched live from backend API
+* **Theme-Aware:** Globe adapts palette for Light and Dark mode via `ThemeContext`
+
+### 🎨 Premium Emerald Design System
+* **Dark Mode:** Deep charcoal `#121212` · **Light Mode:** Cool off-white `#f0f4f8`
+* **Animated Background:** Canvas-based breathing gradient with 3 independent radial emerald glows + 45 floating market data numbers (SENSEX values, ₹ prices, ▲▼ indicators)
+* **Complete cyan→emerald migration** across all components, Tailwind config, and CSS variables
+
+### 🤖 Explainable AI (XAI) & Fiduciary Scoring
+* **Sentiment (40 pts):** FinBERT NLP on daily NSE-listed company headlines
+* **Risk Fit (40 pts):** Stock Beta matched against ML-classified user risk profile
+* **Valuation (20 pts):** Price positioning relative to 52-week high/low
+* Natural language reasoning generated per stock for full fiduciary transparency
+
+### 📈 Performance-Driven Data Visualization
+* Dynamic green/red chart coloring across all charts based on price direction
+* Growth Forecast: historical line colored by trend, AI forecast in blue with confidence shading
+* Portfolio chart, holdings sparklines, market indices all follow same logic
+
+### 🔐 Security & Authentication
+* JWT with 15-minute access tokens and HttpOnly refresh rotation
+* **Email Verification:** Token-based verification for all new signups (24-hour expiry, SMTP delivery)
+* Google OAuth integration
+* Stock ticker inputs validated against NSE/BSE suffix whitelist
+* Computational DoS mitigation via PostgreSQL prediction cache
+* Production: `SECURE_SSL_REDIRECT`, `X-Frame-Options: DENY`, strict HSTS
+
+### 🌐 Deep Localization (i18n)
+* `react-i18next` supporting **English, Hindi, Gujarati, and Punjabi**
+* All UI components, ML reasoning strings, and alerts translatable
+
+### 📊 Portfolio Management
+* Real-time P&L tracking via `yfinance`
+* Smart Buy/Sell/Hold alerts based on moving average crossovers
+* Email watchlist price trigger alerts via SMTP
+* Paper trading and watchlist alert models
+* Live ticker tape: SENSEX, NIFTY, BANK NIFTY, NIFTY IT, NASDAQ, S&P 500, USD/INR, GOLD
 
 ---
 
-## Tech Stack
+## 🛠️ Technology Stack
 
 | Category | Technology | Purpose |
 |---|---|---|
-| Frontend | Next.js 15, TailwindCSS, COBE | UI, routing, globe visualization |
-| Backend | Django REST Framework | API layer, ML serving, alert triggers |
-| Database | Supabase PostgreSQL | Users, holdings, watchlist, alerts |
-| Cache | Upstash Redis | ML results, live ticker data, session store |
-| Auth | Supabase Auth | JWT, Google OAuth, email OTP verification |
+| Frontend | React 18, Vite, TailwindCSS, COBE | UI, routing, globe visualization |
+| Backend | Django 5, DRF | API layer, ML serving, alert triggers |
+| Database | PostgreSQL | Users, holdings, watchlist, alerts |
+| Cache | Redis | ML results, live ticker data |
+| Auth | JWT + Google OAuth | Authentication, email verification |
 | ML | PyTorch, XGBoost, statsmodels, FinBERT | Ensemble advisory engine |
-| DevOps | Docker, Vercel, Render | Containerization, frontend + backend deployment |
-| i18n | next-intl | English, Hindi, Gujarati, Punjabi |
+| MLOps | MLflow | CV loss curves, model versions, hyperparameters |
+| DevOps | Docker, Nginx, Gunicorn | Containerization, production serving |
+| i18n | react-i18next | English, Hindi, Gujarati, Punjabi |
 
 ---
 
-## Local Setup
+## 🚀 Quick Start
 
-### Prerequisites
-
-- Node.js ≥ 18
-- Python ≥ 3.10
-- Docker + Docker Compose
-- A Supabase project (free tier works)
-- An Upstash Redis instance (free tier works)
-
-### 1. Clone
-
+### With Docker (Recommended)
 ```bash
-git clone https://github.com/Cypher-redeye/cresta.git
-cd cresta
-```
-
-### 2. Backend
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-cp .env.example .env              # Fill in values (see table below)
-python manage.py migrate
-python manage.py runserver
-```
-
-### 3. Frontend
-
-```bash
-cd frontend
-npm install
-cp .env.local.example .env.local  # Fill in values
-npm run dev
-```
-
-### 4. Docker (Full Stack)
-
-```bash
-# From project root
+git clone https://github.com/Cypher-redeye/Cresta.git
+cd Cresta
 docker-compose up --build
 ```
+* Frontend: `http://localhost:5173`
+* Backend API: `http://localhost:8000/api/`
 
-Frontend: `http://localhost:3000` · Backend API: `http://localhost:8000`
+### Without Docker
+```bash
+# Backend
+cd backend
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env       # Fill in values
+python manage.py migrate
+python manage.py runserver
+
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
 
 ---
 
@@ -298,41 +376,38 @@ Frontend: `http://localhost:3000` · Backend API: `http://localhost:8000`
 
 ### Backend (`backend/.env`)
 
-| Variable | Description | Example |
-|---|---|---|
-| `SECRET_KEY` | Django secret key | `django-insecure-...` |
-| `DEBUG` | Debug mode | `False` |
-| `DATABASE_URL` | Supabase PostgreSQL connection string | `postgresql://user:pass@db.supabase.co:5432/postgres` |
-| `REDIS_URL` | Upstash Redis URL | `rediss://default:token@...upstash.io:6380` |
-| `SUPABASE_URL` | Supabase project URL | `https://xxxx.supabase.co` |
-| `SUPABASE_SERVICE_KEY` | Supabase service role key | `eyJ...` |
-| `ALLOWED_HOSTS` | Django allowed hosts | `localhost,cresta-api.onrender.com` |
-| `EMAIL_HOST_USER` | SMTP sender address | `alerts@cresta.in` |
-| `EMAIL_HOST_PASSWORD` | SMTP app password | `xxxx xxxx xxxx xxxx` |
-
-### Frontend (`frontend/.env.local`)
-
-| Variable | Description | Example |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | `https://xxxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | `eyJ...` |
-| `NEXT_PUBLIC_API_BASE_URL` | Django backend URL | `https://cresta-api.onrender.com` |
-| `NEXT_PUBLIC_MARKET_API_KEY` | Market data provider API key | `xxxxxxxxxxxxxx` |
+| Variable | Description |
+|---|---|
+| `SECRET_KEY` | Django secret key |
+| `DEBUG` | `False` in production |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection URL |
+| `ALLOWED_HOSTS` | Comma-separated allowed hosts |
+| `CORS_ALLOWED_ORIGINS` | Frontend URL(s) |
+| `EMAIL_HOST_USER` | SMTP sender address |
+| `EMAIL_HOST_PASSWORD` | SMTP app password |
+| `FRONTEND_URL` | Frontend URL for email verification links |
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
-- [ ] **Options Chain Analyzer** — IV, Greeks visualization for F&O traders
+- [ ] **Oracle Cloud Deployment** — full ML stack on 4 OCPU / 24GB RAM free tier
+- [ ] **Portfolio Backtesting** — simulate historical strategy vs Nifty50 benchmark with Sharpe ratio, drawdown, CAGR
+- [ ] **Options Chain Analyzer** — IV and Greeks visualization for F&O traders
 - [ ] **Mutual Fund Coverage** — extend AI scoring to top 50 Indian MFs
 - [ ] **Mobile App** — React Native port with push-based watchlist alerts
-- [ ] **Portfolio Backtesting** — simulate historical strategy performance with custom date ranges
+- [ ] **SEBI Compliance Pipeline** — auditable reasoning logs for RIA regulations
 
 ---
 
-## License
+## 📚 Academic References
 
-MIT © 2026 Om Sharma — see [LICENSE](LICENSE)
+* Hochreiter, S., & Schmidhuber, J. (1997). Long Short-Term Memory. *Neural Computation*, 9(8), 1735–1780.
+* Vaswani, A., et al. (2017). Attention Is All You Need. *NeurIPS*.
+* Araci, D. (2019). FinBERT: Financial Sentiment Analysis with Pre-trained Language Models. *arXiv:1908.10063*.
+* Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. *KDD '16*.
+* Markowitz, H. (1952). Portfolio Selection. *Journal of Finance*, 7(1), 77–91.
 
 ---
 
@@ -345,6 +420,10 @@ AI Engineering Student · Parul University · Batch 2023–2027
 
 [![GitHub](https://img.shields.io/badge/GitHub-Cypher--redeye-181717?style=for-the-badge&logo=github)](https://github.com/Cypher-redeye)
 
-*Built end-to-end as a final year project. Every line of this is production-intent.*
+*Built end-to-end as a final year capstone project. Every architectural decision is production-intent.*
 
 </div>
+
+---
+
+*Cresta is a production-ready, highly localized Robo-Advisory platform demonstrating the viable intersection of behavioral finance, deep learning, and modern web architecture.*
