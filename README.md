@@ -28,69 +28,58 @@
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="docs/screenshots/01-landing-dark.png" alt="Cresta Dark Mode" />
-      <br />
-      <sub><b>Dark mode landing</b> — live SENSEX/NIFTY ticker, 3D COBE globe, real-time exchange cards, breathing emerald gradient background.</sub>
+      <img src="docs/screenshots/01-landing-dark.png" alt="Dark Mode Landing" width="100%" />
+      <br /><sub><b>Dark Mode Landing</b> — live SENSEX/NIFTY ticker, 3D COBE globe, breathing emerald gradient, floating market data.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/screenshots/02-landing-light.png" alt="Cresta Light Mode" />
-      <br />
-      <sub><b>Light mode</b> — same data, zero compromise on readability or polish. Globe adapts palette automatically.</sub>
+      <img src="docs/screenshots/02-landing-light.png" alt="Light Mode Landing" width="100%" />
+      <br /><sub><b>Light Mode Landing</b> — same data, zero compromise on readability. Globe adapts palette automatically.</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="docs/screenshots/03-features.png" alt="Intelligent Features" />
-      <br />
-      <sub><b>Landing features section</b> — AI Risk Profiling, Real-time Market Data, Automated Rebalancing.</sub>
+      <img src="docs/screenshots/03-features.png" alt="Intelligent Features" width="100%" />
+      <br /><sub><b>Intelligent Features</b> — AI Risk Profiling, Real-time Market Data, Automated Rebalancing cards.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/screenshots/04-login.png" alt="Login Page" />
-      <br />
-      <sub><b>Login page</b> — Warren Buffett quote, Google OAuth, JWT authentication.</sub>
+      <img src="docs/screenshots/04-login.png" alt="Login Page" width="100%" />
+      <br /><sub><b>Login Page</b> — Warren Buffett quote, Google OAuth, JWT authentication, sign up flow.</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="docs/screenshots/05-email-verify.png" alt="Email Verification" />
-      <br />
-      <sub><b>Email verification</b> — token-based verification for all new signups, 24-hour expiry.</sub>
+      <img src="docs/screenshots/05-email-verify.png" alt="Email Verification" width="100%" />
+      <br /><sub><b>Email Verification</b> — token-based verification for all new signups, 24-hour expiry.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/screenshots/06-dashboard.png" alt="Dashboard" />
-      <br />
-      <sub><b>Portfolio dashboard</b> — total invested, current value, P&L, asset allocation donut, live ticker tape, AI alerts.</sub>
+      <img src="docs/screenshots/06-dashboard.png" alt="Portfolio Dashboard" width="100%" />
+      <br /><sub><b>Portfolio Dashboard</b> — total invested, current value, P&L, asset allocation donut, live ticker tape, AI alerts.</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="docs/screenshots/07-holdings-ai-advisor.png" alt="Holdings and AI Advisor" />
-      <br />
-      <sub><b>Holdings + AI Advisor</b> — sparkline trends, BUY/SELL/HOLD signals, AI Score breakdown (Sentiment/Risk Fit/Valuation), personalized news.</sub>
+      <img src="docs/screenshots/07-holdings-ai-advisor.png" alt="Holdings and AI Advisor" width="100%" />
+      <br /><sub><b>Holdings + AI Advisor</b> — sparkline trends, BUY/SELL/HOLD signals, AI Score breakdown (Sentiment/Risk Fit/Valuation), personalized news.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/screenshots/08-market-watch.png" alt="Market Watch" />
-      <br />
-      <sub><b>Market Watch</b> — stock search, 30-day historical + 7-day AI forecast chart, dynamic red/green coloring, NIFTY/SENSEX/BANK NIFTY indices.</sub>
+      <img src="docs/screenshots/08-market-watch.png" alt="Market Watch" width="100%" />
+      <br /><sub><b>Market Watch</b> — stock search, 30-day historical + 7-day AI forecast, dynamic red/green coloring, NIFTY/SENSEX/BANK NIFTY indices.</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="docs/screenshots/09-market-news.png" alt="Personalized News" />
-      <br />
-      <sub><b>Personalized news feed</b> — top gainers/losers, Reuters/Bloomberg headlines filtered by portfolio holdings.</sub>
+      <img src="docs/screenshots/09-market-news.png" alt="Personalized News" width="100%" />
+      <br /><sub><b>Personalized News Feed</b> — top gainers/losers, Reuters/Bloomberg headlines filtered by portfolio holdings.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/screenshots/10-settings.png" alt="Settings" />
-      <br />
-      <sub><b>Settings</b> — profile management, dark/light mode toggle, language selection (English, Hindi, Gujarati, Punjabi).</sub>
+      <img src="docs/screenshots/10-settings.png" alt="Settings" width="100%" />
+      <br /><sub><b>Settings</b> — profile management, dark/light mode toggle, language selection (English, Hindi, Gujarati, Punjabi).</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="100%">
-      <img src="docs/screenshots/11-hindi-mode.png" alt="Hindi Mode" />
-      <br />
-      <sub><b>Full Hindi mode</b> — entire dashboard, nav, tooltips, AI reasoning, and alerts rendered in Hindi. Gujarati and Punjabi also supported.</sub>
+      <img src="docs/screenshots/11-hindi-mode.png" alt="Hindi Mode" width="100%" />
+      <br /><sub><b>Full Hindi Mode</b> — entire dashboard rendered in Hindi including nav, tooltips, AI reasoning, holdings table, and alerts. Gujarati and Punjabi also supported.</sub>
     </td>
   </tr>
 </table>
