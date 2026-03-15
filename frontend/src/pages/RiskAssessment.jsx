@@ -81,7 +81,22 @@ const RiskAssessment = () => {
         setIsLoadingAI(true);
 
         try {
-            const payload = {
+            // 1. Save to Profile (Database Persistence)
+            const profilePayload = {
+                risk_score: totalScore,
+                risk_profile: profile.name,
+                investment_goal: goal,
+                age: parseInt(age),
+                income: parseInt(income)
+            };
+            
+            await apiCall('/profile/save/', {
+                method: 'POST',
+                body: JSON.stringify(profilePayload)
+            });
+
+            // 2. Get AI Recommendations
+            const recommendPayload = {
                 Age: parseInt(age) || 25,
                 Income: parseInt(income) || 700000,
                 Risk_Tolerance: riskValue,
@@ -89,14 +104,14 @@ const RiskAssessment = () => {
             };
             const res = await apiCall('/recommend/', {
                 method: 'POST',
-                body: JSON.stringify(payload)
+                body: JSON.stringify(recommendPayload)
             });
             const data = await res.json();
             if (data.Recommended_Stocks) {
                 localStorage.setItem('ai_insights_data', JSON.stringify(data));
             }
         } catch (e) {
-            console.error("AI Insights Error", e);
+            console.error("Risk Assessment Persistence/AI Error", e);
         } finally {
             setIsLoadingAI(false);
         }

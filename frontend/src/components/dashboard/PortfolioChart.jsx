@@ -96,8 +96,8 @@ const PortfolioChart = ({ delay }) => {
                         <AreaChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="portfolioGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={isPositive ? '#10B981' : '#EF4444'} stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor={isPositive ? '#10B981' : '#EF4444'} stopOpacity={0} />
+                                    <stop offset="5%" stopColor={isPositive ? '#10B981' : '#ef4444'} stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor={isPositive ? '#10B981' : '#ef4444'} stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
@@ -124,7 +124,7 @@ const PortfolioChart = ({ delay }) => {
                                     borderRadius: '12px',
                                     boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
                                 }}
-                                itemStyle={{ color: isPositive ? '#10B981' : '#EF4444' }}
+                                itemStyle={{ color: isPositive ? '#10B981' : '#ef4444' }}
                                 labelStyle={{ color: '#9CA3AF', marginBottom: '4px', fontSize: 11 }}
                                 formatter={(value) => [`₹${value.toLocaleString('en-IN')}`, 'Portfolio Value']}
                                 labelFormatter={(label) => label}
@@ -132,7 +132,7 @@ const PortfolioChart = ({ delay }) => {
                             <Area
                                 type="monotone"
                                 dataKey="value"
-                                stroke={isPositive ? '#10B981' : '#EF4444'}
+                                stroke={isPositive ? '#10B981' : '#ef4444'}
                                 strokeWidth={2.5}
                                 fillOpacity={1}
                                 fill="url(#portfolioGrad)"

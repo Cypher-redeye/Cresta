@@ -34,26 +34,36 @@ const MarketIndices = ({ indicesData, chartData, t }) => {
                             {index.change}
                         </div>
                     </div>
-                    <div className="h-16">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData}>
-                                <defs>
-                                    <linearGradient id={`grad${i}`} x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor={index.isPositive ? "#10B981" : "#EF4444"} stopOpacity={0.2} />
-                                        <stop offset="100%" stopColor={index.isPositive ? "#10B981" : "#EF4444"} stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <Area
-                                    type="monotone"
-                                    dataKey="value"
-                                    stroke={index.isPositive ? "#10B981" : "#EF4444"}
-                                    strokeWidth={2}
-                                    fill={`url(#grad${i})`}
-                                    isAnimationActive={false}
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
+                    {(() => {
+                        const trendIsPositive = chartData.length >= 2 
+                            ? chartData[chartData.length - 1].value >= chartData[0].value 
+                            : index.isPositive;
+                        const mainColor = trendIsPositive ? "#10B981" : "#ef4444";
+                        
+                        return (
+                            <div className="h-16">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={chartData}>
+                                        <defs>
+                                            <linearGradient id={`grad${i}`} x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor={mainColor} stopOpacity={0.15} />
+                                                <stop offset="100%" stopColor={mainColor} stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke={mainColor}
+                                            strokeWidth={2}
+                                            fillOpacity={1}
+                                            fill={`url(#grad${i})`}
+                                            isAnimationActive={false}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        );
+                    })()}
                 </motion.div>
             ))}
         </div>

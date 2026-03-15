@@ -5,6 +5,48 @@ import { TrendingUp, TrendingDown, ArrowUpDown, BarChart2, Trash2, Edit2, Check,
 import PredictiveChart from './PredictiveChart';
 import { SignalBadge } from './AlertBanner';
 
+const MiniSparkline = ({ data = [] }) => {
+    if (!data || data.length < 2) return <div className="w-full h-8 flex items-center justify-center text-[10px] text-gray-500 opacity-30">No trend</div>;
+    
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+    const isPositive = data[data.length - 1] >= data[0];
+    const color = isPositive ? '#10B981' : '#ef4444';
+
+    const points = data.map((val, i) => {
+        const x = (i / (data.length - 1)) * 100;
+        const y = 100 - ((val - min) / range) * 80 - 10; // scale to 80% height with 10% padding
+        return `${x},${y}`;
+    }).join(' ');
+
+    return (
+        <div className="w-20 h-10 flex items-center">
+            <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+                <defs>
+                    <linearGradient id={`sparkGrad-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.2" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0" />
+                    </linearGradient>
+                </defs>
+                <path
+                    d={`M ${points.split(' ')[0]} L ${points} L 100,100 L 0,100 Z`}
+                    fill={`url(#sparkGrad-${color.replace('#', '')})`}
+                    stroke="none"
+                />
+                <polyline
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={points}
+                />
+            </svg>
+        </div>
+    );
+};
+
 const HoldingsTable = ({ holdings = [], onDelete, onUpdate, signals = {} }) => {
     const { t } = useTranslation();
     const [analyzingStock, setAnalyzingStock] = useState(null);
@@ -52,6 +94,7 @@ const HoldingsTable = ({ holdings = [], onDelete, onUpdate, signals = {} }) => {
                                 <th className="px-3 py-3 text-right text-xs">{t('avg_price')}</th>
                                 <th className="px-3 py-3 text-right">{t('ltp')}</th>
                                 <th className="px-3 py-3 text-right">{t('pnl')}</th>
+                                <th className="px-3 py-3 text-right">{t('trend', 'Trend')}</th>
                                 <th className="px-3 py-3 text-center">{t('signal')}</th>
                                 <th className="px-3 py-3 text-right">{t('actions')}</th>
                             </tr>
@@ -97,7 +140,7 @@ const HoldingsTable = ({ holdings = [], onDelete, onUpdate, signals = {} }) => {
                                         <td className="px-3 py-3 whitespace-nowrap text-right text-xs font-medium text-gray-900 dark:text-white">
                                             ₹{ltp.toFixed(2)}
                                         </td>
-                                        <td className="px-3 py-3 whitespace-nowrap text-right text-xs">
+                                        <td className="px-3 py-3 whitespace-nowrap text-right">
                                             <div className={`flex flex-col items-end ${isProfit ? 'text-emerald-600 dark:text-neon-emerald' : 'text-red-500'}`}>
                                                 <span className="font-bold flex items-center gap-1">
                                                     {isProfit ? '+' : ''}₹{Math.abs(pnl).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
@@ -107,6 +150,22 @@ const HoldingsTable = ({ holdings = [], onDelete, onUpdate, signals = {} }) => {
                                                     ({isProfit ? '+' : ''}{pnlPercent.toFixed(2)}%)
                                                 </span>
                                             </div>
+                                        </td>
+                                        <td className="px-3 py-3 whitespace-nowrap text-right">
+                                            {/* Mock data for sparkline until backend provides history per stock */}
+                                            <MiniSparkline data={(() => {
+                                                const seed = stock.ticker.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+                                                const base = ltp;
+                                                const trend = [base * 0.95];
+                                                for(let i=1; i<10; i++) {
+                                                    const prev = trend[i-1];
+                                                    const change = (Math.sin(seed + i) * 0.05);
+                                                    trend.push(prev * (1 + change));
+                                                }
+                                                // Ensure it matches ltp at end roughly
+                                                trend[trend.length-1] = ltp;
+                                                return trend;
+                                            })()} />
                                         </td>
                                         <td className="px-3 py-3 whitespace-nowrap text-center">
                                             {(() => {

@@ -17,6 +17,8 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const RiskAssessment = lazy(() => import('./pages/RiskAssessment'));
 const MarketsPage = lazy(() => import('./pages/MarketsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const VerifyEmailSent = lazy(() => import('./pages/VerifyEmailSent'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 
 // Minimal loading fallback
 const PageLoader = () => (
@@ -62,6 +64,8 @@ function App() {
                             <SettingsPage />
                           </ProtectedRoute>
                         } />
+                        <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
+                        <Route path="/verify-email" element={<VerifyEmail />} />
                         <Route path="*" element={<LandingPage />} />
                       </Routes>
                     </Suspense>

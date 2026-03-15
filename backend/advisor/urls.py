@@ -11,8 +11,9 @@ urlpatterns = [
     path("news/", views.get_news),
     path("top-movers/", views.get_top_movers),
     # Auth (JWT)
-    path("auth/login/", views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path("auth/login/", views.VerifiedTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path("auth/signup/", views.signup, name='signup'),
+    path("auth/verify-email/", views.verify_email),
     path("auth/google/", views.google_login),
     path("auth/refresh/", views.token_refresh),
     path("auth/me/", views.get_me),

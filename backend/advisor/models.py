@@ -12,6 +12,12 @@ class UserProfile(models.Model):
     income = models.IntegerField(null=True, blank=True)
     picture = models.URLField(blank=True, default='')
     last_assessment_date = models.DateTimeField(null=True, blank=True)
+    
+    # Email Verification
+    email_verified = models.BooleanField(default=False)
+    verification_token = models.CharField(max_length=64, blank=True)
+    verification_token_expires = models.DateTimeField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

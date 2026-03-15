@@ -64,14 +64,20 @@ const REGION_REPS = [
 const normDeg = (d) => { d = d % 360; if (d > 180) d -= 360; if (d < -180) d += 360; return d; };
 const phiToFacingLng = (phi) => -phi * 180 / Math.PI;
 
+const REGION_MAP = [
+    { ex: REGION_REPS[2], start: 0.65, end: 2.47 }, // North America
+    { ex: REGION_REPS[3], start: 2.47, end: 3.30 }, // South America
+    { ex: REGION_REPS[5], start: 3.30, end: 3.75 }, // Australia (Oceania)
+    { ex: REGION_REPS[4], start: 3.75, end: 4.42 }, // Japan (Asia)
+    { ex: REGION_REPS[0], start: 4.42, end: 5.65 }, // India
+    { ex: REGION_REPS[1], start: 5.65, end: 6.283 }, // Europe (Part 1)
+    { ex: REGION_REPS[1], start: 0, end: 0.65 },    // Europe (Part 2)
+];
+
 const findActiveExchange = (phi) => {
-    const facingLng = phiToFacingLng(phi);
-    let minDist = Infinity, best = REGION_REPS[0];
-    for (const ex of REGION_REPS) {
-        const dist = Math.abs(normDeg(facingLng - ex.lng));
-        if (dist < minDist) { minDist = dist; best = ex; }
-    }
-    return best;
+    const p = ((phi % 6.283) + 6.283) % 6.283;
+    const match = REGION_MAP.find(r => p >= r.start && p < r.end);
+    return match ? match.ex : REGION_REPS[0];
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -196,7 +202,7 @@ const IndiaGlobe = () => {
                 state.width = width * 2;
                 state.height = width * 2;
 
-                const best = findActiveExchange(phi);
+                const best = findActiveExchange(phiRef.current);
                 setActiveExchange(prev => prev.id !== best.id ? best : prev);
 
                 const now = performance.now();
@@ -225,9 +231,6 @@ const IndiaGlobe = () => {
     const bseData = getData(EXCHANGES[0]);
     const nseData = getData(EXCHANGES[1]);
 
-    /* ── Connector line colour ─────────────────────────────── */
-    const lineColor = isDark ? 'rgba(16,185,129,0.4)' : 'rgba(16,185,129,0.45)';
-    const dotColor = isDark ? '#10B981' : '#10B981';
 
     /* ── Render ─────────────────────────────────────────────── */
     return (
@@ -253,16 +256,6 @@ const IndiaGlobe = () => {
                 />
             </div>
 
-            {/* SVG connector lines */}
-            <ConnectorOverlay
-                activeExchange={activeExchange}
-                isIndia={isIndia}
-                positions={markerPositions}
-                containerRef={containerRef}
-                canvasRef={canvasRef}
-                lineColor={lineColor}
-                dotColor={dotColor}
-            />
 
             {/* Exchange cards */}
             <AnimatePresence mode="wait">
@@ -320,52 +313,6 @@ const IndiaGlobe = () => {
 };
 
 
-/* ─────────────────────────────────────────────────────────────────────
- * ConnectorOverlay
- * ──────────────────────────────────────────────────────────────────── */
-const ConnectorOverlay = ({ activeExchange, isIndia, positions, containerRef, canvasRef, lineColor, dotColor }) => {
-    if (!containerRef.current || !canvasRef.current || !Object.keys(positions).length) return null;
-
-    const cr = containerRef.current.getBoundingClientRect();
-    const gr = canvasRef.current.getBoundingClientRect();
-    const toContainer = (pos) => {
-        if (!pos || !pos.visible) return null;
-        return { x: gr.left - cr.left + pos.x, y: gr.top - cr.top + pos.y };
-    };
-
-    const lines = [];
-
-    const addLine = (exId) => {
-        const dot = toContainer(positions[exId]);
-        const card = containerRef.current.querySelector(`[data-card="${exId}"]`);
-        if (!dot || !card) return;
-        const cardR = card.getBoundingClientRect();
-        const isLeft = cardR.left + cardR.width / 2 < cr.left + cr.width / 2;
-        const cx = isLeft ? cardR.right - cr.left : cardR.left - cr.left;
-        const cy = cardR.top - cr.top + cardR.height / 2;
-
-        lines.push(
-            <g key={`conn-${exId}`}>
-                <line x1={cx} y1={cy} x2={dot.x} y2={dot.y}
-                    stroke={lineColor} strokeWidth="1.5" strokeDasharray="4 3"
-                />
-                <circle cx={dot.x} cy={dot.y} r="4" fill={dotColor} opacity="0.9">
-                    <animate attributeName="r" values="3;5.5;3" dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite" />
-                </circle>
-            </g>,
-        );
-    };
-
-    if (isIndia) { addLine('bse'); addLine('nse'); }
-    else { addLine(activeExchange.id); }
-
-    return (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" style={{ overflow: 'visible' }}>
-            {lines}
-        </svg>
-    );
-};
 
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -421,8 +368,9 @@ const ExchangeCard = ({ exchange, data, isDark }) => {
                         style={{
                             height: `${h}%`,
                             backgroundColor: pos
-                                ? (isDark ? 'rgba(16,185,129,0.5)' : 'rgba(5,150,105,0.4)')
-                                : (isDark ? 'rgba(239,68,68,0.5)' : 'rgba(220,38,38,0.4)'),
+                                ? '#10B981'
+                                : '#ef4444',
+                            opacity: isDark ? 0.6 : 0.5
                         }}
                     />
                 ))}

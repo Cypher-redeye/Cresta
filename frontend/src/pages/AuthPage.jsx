@@ -81,9 +81,11 @@ const AuthPage = () => {
             const data = await response.json();
 
             if (response.ok) {
-                // Both login and signup should return tokens
-                // For signup, backend might return format { access, refresh, user }
-                // For login, backend returns { access, refresh }
+                if (!isLogin) {
+                    showToast(t('signup_success'), 'success');
+                    navigate('/verify-email-sent', { state: { email: formData.email } });
+                    return;
+                }
                 
                 const accessToken = data.access;
                 const refreshToken = data.refresh;
@@ -102,13 +104,15 @@ const AuthPage = () => {
                     }
                     
                     login(userData, data);
-                    showToast(t(isLogin ? 'login_success' : 'signup_success'), 'success');
+                    showToast(t('login_success'), 'success');
                     navigate('/dashboard');
                 } else {
                     showToast('Unexpected response from server', 'error');
                 }
             } else {
-                showToast(data.detail || data.error || 'Operation failed', 'error');
+                // If backend returns a specific error for unverified users
+                const errorMessage = data.error || data.detail || 'Operation failed';
+                showToast(errorMessage, 'error');
             }
         } catch (err) {
             console.error('Auth error:', err);
@@ -160,10 +164,6 @@ const AuthPage = () => {
 
             <div className="w-full lg:w-1/2 flex items-center justify-center p-6 relative">
 
-                <div className="absolute inset-0 z-0 lg:hidden">
-                    <div className="absolute inset-0 bg-gray-50 dark:bg-fintech-bg transition-colors duration-300"></div>
-                    <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/10 dark:bg-neon-emerald/10 rounded-full blur-[100px]"></div>
-                </div>
 
                 <motion.div
                     layout

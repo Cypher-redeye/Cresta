@@ -7,7 +7,12 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..models import UserProfile
-from ..serializers import GoogleAuthSerializer
+from ..serializers import GoogleAuthSerializer, VerifiedTokenObtainPairSerializer
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class VerifiedTokenObtainPairView(TokenObtainPairView):
+    serializer_class = VerifiedTokenObtainPairSerializer
 
 
 def get_tokens_for_user(user):
@@ -167,23 +172,75 @@ def signup(request):
             first_name=name.split()[0] if name else '',
             last_name=' '.join(name.split()[1:]) if name and len(name.split()) > 1 else ''
         )
-        # Create profile
-        UserProfile.objects.create(user=user)
         
-        # Generate tokens
-        tokens = get_tokens_for_user(user)
+        # Create profile with verification token
+        import secrets
+        from datetime import timedelta
+        from django.utils import timezone
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        token = secrets.token_urlsafe(32)
+        profile = UserProfile.objects.create(
+            user=user,
+            email_verified=False,
+            verification_token=token,
+            verification_token_expires=timezone.now() + timedelta(hours=24)
+        )
+        
+        # Send verification email
+        verification_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+        
+        send_mail(
+            subject='Verify your Cresta account',
+            html_message=f'''
+            <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;background:#0d0d0d;color:#ffffff;border-radius:12px;border:1px solid rgba(16,185,129,0.2)">
+              <h2 style="color:#10B981">Welcome to Cresta</h2>
+              <p>Click the button below to verify your email address.</p>
+              <a href="{verification_url}" style="display:inline-block;padding:12px 24px;background:#10B981;color:#000;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">Verify Email</a>
+              <p style="color:#666;font-size:12px">Link expires in 24 hours. If you didn't create a Cresta account, ignore this email.</p>
+            </div>
+            ''',
+            message=f'Verify your Cresta account: {verification_url}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
         
         return Response({
             'success': True,
+            'message': 'Verification email sent. Please check your inbox.',
             'user': {
                 'email': user.email,
                 'name': name or user.username,
-            },
-            'access': tokens['access'],
-            'refresh': tokens['refresh']
+            }
         }, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response(
             {'detail': f'Error creating user: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    """Verify user email via token."""
+    from django.utils import timezone
+    token = request.GET.get('token')
+    
+    if not token:
+        return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    try:
+        profile = UserProfile.objects.get(verification_token=token)
+        
+        if profile.verification_token_expires < timezone.now():
+            return Response({'error': 'Token expired. Please sign up again.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        profile.email_verified = True
+        profile.verification_token = ''
+        profile.save()
+        
+        return Response({'message': 'Email verified successfully. You can now log in.'})
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'Invalid or expired token.'}, status=status.HTTP_400_BAD_REQUEST)

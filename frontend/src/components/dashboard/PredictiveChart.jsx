@@ -91,8 +91,17 @@ const PredictiveChart = ({ symbol, onClose }) => {
         return null;
     };
 
-    // Find the divider date
+    // Find the divider date and determine if performance is positive
     const dividerDate = chartData.find(d => d.isFuture)?.date;
+    const historicalData = chartData.filter(d => !d.isFuture && d.historical !== undefined);
+    const isPositive = historicalData.length >= 2 
+        ? (historicalData[historicalData.length - 1].historical >= historicalData[0].historical)
+        : true;
+
+    const chartColors = {
+        stroke: isPositive ? '#10B981' : '#ef4444',
+        fill: isPositive ? '#10B981' : '#ef4444'
+    };
 
     return (
         <motion.div
@@ -134,11 +143,11 @@ const PredictiveChart = ({ symbol, onClose }) => {
                         <AreaChart data={chartData}>
                             <defs>
                                 <linearGradient id={`grad-hist-${symbol}`} x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                    <stop offset="5%" stopColor={chartColors.fill} stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor={chartColors.fill} stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id={`grad-future-${symbol}`} x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.15} />
                                     <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
@@ -154,11 +163,10 @@ const PredictiveChart = ({ symbol, onClose }) => {
                             />
                             <Tooltip content={<CustomTooltip />} />
 
-                            {/* Historical line (solid cyan) */}
                             <Area
                                 type="monotone"
                                 dataKey="historical"
-                                stroke="#10B981"
+                                stroke={chartColors.stroke}
                                 strokeWidth={2}
                                 fillOpacity={1}
                                 fill={`url(#grad-hist-${symbol})`}
@@ -185,7 +193,6 @@ const PredictiveChart = ({ symbol, onClose }) => {
                                 isAnimationActive={true}
                             />
 
-                            {/* Future line (dashed blue) */}
                             <Area
                                 type="monotone"
                                 dataKey="future"
@@ -207,7 +214,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
 
                     <div className="mt-2 flex items-center justify-between text-[9px] font-bold uppercase tracking-tighter">
                         <div className="flex items-center gap-1.5">
-                            <div className="w-3 h-0.5 bg-emerald-400 rounded"></div>
+                            <div className="w-3 h-0.5 rounded" style={{ backgroundColor: chartColors.stroke }}></div>
                             <span className="text-gray-400">{t('past_30_days')}</span>
                         </div>
                         <div className="flex items-center gap-1.5">

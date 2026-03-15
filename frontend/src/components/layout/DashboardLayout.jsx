@@ -84,11 +84,6 @@ const DashboardLayout = ({ children }) => {
 
 
             <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
-                {/* Background Orbs */}
-                <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-                    <div className="absolute top-[-5%] right-[10%] w-[30%] h-[30%] bg-neon-blue/20 rounded-full blur-[100px]"></div>
-                    <div className="absolute bottom-[10%] left-[5%] w-[25%] h-[25%] bg-neon-emerald/20 rounded-full blur-[80px]"></div>
-                </div>
 
                 <Header />
 

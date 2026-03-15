@@ -151,19 +151,28 @@ Every stock is assessed on a personalized 100-point scale:
 * **Valuation (20 pts):** Price positioning relative to 52-week high/low
 * Natural language reasoning generated for full fiduciary transparency
 
-### 4. 📈 Dynamic Growth Forecast Chart
-The Market Watch growth forecast chart uses **dynamic green/red coloring** based on actual price direction:
-* Price higher than period start → Emerald green line + fill
-* Price lower than period start → Red line + fill
-* Confidence interval shading adapts to match the direction color
+### 4. 📈 Global Dynamic Chart Coloring
+Every chart across the application now features **dynamic green/red performance coloring** based on the overall price direction (Last Value vs First Value):
+* **Portfolio Growth Chart:** Dynamically colors the main portfolio line based on current gains/losses.
+* **Growth Forecast:** Historical line follows the trend direction; AI Forecast remains blue for visual distinction.
+* **Market Watch Indices:** NIFTY, SENSEX, and BANK NIFTY area charts adapt their theme based on intraday performance.
+* **Holdings Table Sparklines:** New "Trend" column featuring individual stock sparklines.
+* **Globe Card Sparklines:** Exchange cards on the landing page now follow the global Emerald/Red theme.
+* **Logic:** 🟢 Emerald green (`#10B981`) for profit/rise, 🔴 Red (`#ef4444`) for loss/dip. Both use a sleek `0.15` opacity fill.
 
-### 5. Comprehensive Portfolio Management
+### 5. 🛡️ Risk Assessment Persistence
+The risk assessment flow is now fully synchronized with the backend:
+* Results are persisted in the PostgreSQL database via `/profile/save/`.
+* Logic prevents users from being redirected to the assessment on every login once completed.
+* Professional-grade XGBoost classification based on NFCS behavioral surveys.
+
+### 6. Comprehensive Portfolio Management
 * Real-time tracking via `yfinance`
 * Smart Buy/Sell/Hold alerts based on moving average crossovers
 * Email alert integration via Django `send_mail`
 * Paper trading and watchlist alert models
 
-### 6. 🌐 Deep Localization (i18n)
+### 7. 🌐 Deep Localization (i18n)
 Native `react-i18next` implementation supporting **English, Hindi, and Punjabi** across all UI components, ML reasoning strings, and alerts.
 
 ---

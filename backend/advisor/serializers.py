@@ -70,3 +70,19 @@ class PaperTradeSerializer(serializers.ModelSerializer):
         if obj.action == 'BUY':
             return round((float(current) - float(obj.price_at_trade)) * float(obj.quantity), 2)
         return round((float(obj.price_at_trade) - float(current)) * float(obj.quantity), 2)
+
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class VerifiedTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        
+        # Check if email is verified
+        profile = getattr(self.user, 'profile', None)
+        if profile and not profile.email_verified:
+            raise serializers.ValidationError({
+                'error': 'Please verify your email before logging in. Check your inbox.'
+            })
+            
+        return data

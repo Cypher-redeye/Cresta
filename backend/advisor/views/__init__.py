@@ -11,8 +11,7 @@ from .markets import (
     get_top_movers,
 )
 
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .auth import google_login, token_refresh, get_me, signup
+from .auth import google_login, token_refresh, get_me, signup, verify_email, VerifiedTokenObtainPairView
 
 from .ml import recommend_api, get_prediction, sector_sentiment
 

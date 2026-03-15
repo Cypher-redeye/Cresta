@@ -56,6 +56,15 @@ export const UserProvider = ({ children }) => {
     const login = (userData, tokens) => {
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
+        
+        if (userData?.risk_profile) {
+            setHasCompletedRiskAssessment(true);
+            localStorage.setItem('risk_assessment_completed', 'true');
+        } else {
+            setHasCompletedRiskAssessment(false);
+            localStorage.removeItem('risk_assessment_completed');
+        }
+
         if (tokens) {
             localStorage.setItem('access_token', tokens.access);
             localStorage.setItem('refresh_token', tokens.refresh);
