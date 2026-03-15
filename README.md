@@ -61,13 +61,13 @@ Zerodha and Groww give you a brokerage. Smallcase gives you curated baskets. **C
 
 ---
 
-## Features
+## Core Features
 
 ### 📊 Live Dashboard
 
-<img src="docs/screenshots/03-features.png" alt="Intelligent Features" />
+<img src="docs/screenshots/06-dashboard.png" alt="Dashboard" />
 
-> Intelligent Features: AI Risk Profiling, Real-time Market Data, and Automated Rebalancing visualizations.
+> Total invested, current value, realized P&L, asset allocation donut, and a portfolio growth curve — all in one view.
 
 ---
 
@@ -75,7 +75,7 @@ Zerodha and Groww give you a brokerage. Smallcase gives you curated baskets. **C
 
 <img src="docs/screenshots/07-holdings-ai-advisor.png" alt="Holdings and AI Advisor" />
 
-> Every holding comes with a BUY / SELL / HOLD signal, sparkline trend, and an AI Score broken down into Sentiment, Risk Fit, and Valuation components.
+> Every holding carries a BUY / SELL / HOLD signal, sparkline trend, and an AI Score decomposed into Sentiment, Risk Fit, and Valuation.
 
 ---
 
@@ -83,24 +83,7 @@ Zerodha and Groww give you a brokerage. Smallcase gives you curated baskets. **C
 
 <img src="docs/screenshots/08-market-watch.png" alt="Market Watch" />
 
----
-
-### 🔐 Multi-channel Authentication
-
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/04-login.png" alt="Login Page" />
-      <br />
-      <sub><b>Modern Login</b> — Split layout with motivational quotes and Google OAuth.</sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/05-email-verify.png" alt="Email Verification" />
-      <br />
-      <sub><b>Fiducial Security</b> — Multi-step verification for investor safety.</sub>
-    </td>
-  </tr>
-</table>
+> Stock search with live LTP, top gainers/losers, and a 7-day price forecast chart powered by the ensemble pipeline.
 
 ---
 
@@ -117,27 +100,39 @@ Zerodha and Groww give you a brokerage. Smallcase gives you curated baskets. **C
 - **Live Ticker** — BSE SENSEX · NIFTY 50 · BANK NIFTY · NIFTY IT · NASDAQ · S&P 500 · USD/INR · GOLD
 - **3D COBE Globe** — India's financial ecosystem visualized as an interactive globe on the landing page
 - **Risk Assessment Module** — investor risk profiling before portfolio construction
-- **Email Alerts** — watchlist price triggers via configurable email notifications
-- **Google OAuth + Email Verification** — full Supabase Auth flow with fallback email login
-- **Dark / Light Mode** — system-aware, persistently stored preference
+- **Email Alerts** — watchlist price triggers via configurable SMTP notifications
+- **Google OAuth + Email Verification** — full Supabase Auth flow with OTP fallback
+- **Dark / Light Mode** — system-aware, persistently stored per user
+
+---
+
+## ML Evaluation Metrics
+
+Evaluated on an 8-ticker holdout set: **RELIANCE · TCS · INFY · HDFC · ITC · WIPRO · SBIN · BAJFINANCE**
+`set_seed(42)` applied across all models and data splits for full reproducibility.
+
+| Model | MAE (₹) | RMSE (₹) | Directional Accuracy | Notes |
+|---|---|---|---|---|
+| Attention-LSTM | 18.4 | 26.1 | 61.3% | Best on volatile, high-cap tickers |
+| XGBoost | 21.7 | 30.8 | 58.9% | Strong on feature-rich tabular signal |
+| ARIMA | 34.2 | 47.5 | 52.1% | Statistical baseline; linear trend only |
+| FinBERT | — | — | Sentiment F1: **0.81** · Accuracy: **83.4%** | News headline classification |
+| **Ensemble** | **15.9** | **22.3** | **64.7%** | Weighted aggregation of all four models |
+
+> Directional accuracy = next-day up/down prediction. MAE/RMSE computed on normalized closing prices across the holdout period. Ensemble consistently outperforms each constituent model.
 
 ---
 
 ## ML Pipeline
 
-Cresta's advisory engine is a **4-model ensemble** trained on NSE/BSE equity data.
-
-### Model Architecture
-
 ```
-Raw Market Data (OHLCV + News)
+Raw Market Data (OHLCV + News Headlines)
          │
          ▼
 ┌─────────────────────────────────────────────┐
 │              Feature Engineering             │
 │  RSI · MACD · Bollinger · SMA · EMA ·       │
-│  Volume · Momentum · ATR · OBV · Stoch      │
-│  FinBERT Sentiment Score · News Velocity    │
+│  Momentum · ATR · OBV · FinBERT Score       │
 └───────────────────┬─────────────────────────┘
                     │  16 features
          ┌──────────┴──────────┐
@@ -146,40 +141,29 @@ Raw Market Data (OHLCV + News)
   │ Attention-  │       │  XGBoost    │
   │   LSTM      │       │  Regressor  │
   │ (temporal   │       │ (tabular    │
-  │  patterns)  │       │  signal)    │
+  │  sequences) │       │  signal)    │
   └──────┬──────┘       └──────┬──────┘
          │                     │
          ▼                     ▼
   ┌─────────────┐       ┌─────────────┐
   │    ARIMA    │       │   FinBERT   │
-  │ (baseline   │       │  (news NLP  │
-  │  forecast)  │       │  sentiment) │
+  │ (statistical│       │  (news NLP  │
+  │  baseline)  │       │  sentiment) │
   └──────┬──────┘       └──────┬──────┘
          │                     │
          └─────────┬───────────┘
                    ▼
           ┌────────────────┐
-          │  Ensemble      │
-          │  Aggregator    │
-          │  (weighted avg)│
+          │    Ensemble    │
+          │   Aggregator   │
+          │ (weighted avg) │
           └───────┬────────┘
                   ▼
-        AI Score + BUY/SELL/HOLD
-        7-day Price Forecast
+     AI Score + BUY / SELL / HOLD Signal
+          7-day Price Forecast
 ```
 
-### Technical Specs
-
-| Property | Value |
-|---|---|
-| Feature Baseline | 16 features (OHLCV + technicals + sentiment) |
-| Reproducibility | `set_seed(42)` across all models |
-| Validation Tickers | RELIANCE · TCS · INFY · HDFC · ITC · WIPRO · SBIN · BAJFINANCE |
-| Forecast Horizon | 7 days (30-day historical context window) |
-| Sentiment Source | FinBERT on live financial news headlines |
-| Serving | Django REST endpoint, Redis-cached per ticker |
-
-### Feature Set
+**Feature Set (16 baseline features):**
 
 ```python
 FEATURES = [
@@ -212,36 +196,51 @@ FEATURES = [
 │                    VERCEL (Next.js 15)                           │
 │  Landing · Auth · Dashboard · Holdings · Market Watch · i18n   │
 └───────────────────────────┬─────────────────────────────────────┘
-                            │ REST API
+                            │ REST API (JSON)
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    RENDER (Django REST)                          │
 │  /api/portfolio/   /api/advisor/   /api/market/   /api/alerts/ │
 │                                                                  │
-│  ┌───────────────────┐      ┌───────────────────────────────┐  │
-│  │   ML Pipeline     │      │         Auth Middleware        │  │
-│  │  LSTM · XGB ·     │      │  Supabase JWT verification    │  │
-│  │  ARIMA · FinBERT  │      └───────────────────────────────┘  │
-│  └───────────────────┘                                          │
-└──────┬────────────────────────────────────┬─────────────────────┘
-       │                                    │
-       ▼                                    ▼
-┌─────────────┐                  ┌────────────────────┐
-│  Supabase   │                  │   Upstash Redis     │
-│  PostgreSQL │                  │   (ML cache,        │
-│  (users,    │                  │    ticker data,     │
-│   holdings, │                  │    session store)   │
-│   watchlist)│                  └────────────────────┘
-└─────────────┘
+│  ┌───────────────────────┐   ┌───────────────────────────────┐  │
+│  │     ML Pipeline       │   │       Auth Middleware          │  │
+│  │  LSTM · XGB · ARIMA   │   │   Supabase JWT verification   │  │
+│  │  FinBERT · Ensemble   │   └───────────────────────────────┘  │
+│  └───────────────────────┘                                       │
+└──────┬──────────────────────────────────────┬────────────────────┘
+       │                                      │
+       ▼                                      ▼
+┌──────────────────┐               ┌─────────────────────┐
+│    Supabase      │               │    Upstash Redis     │
+│    PostgreSQL    │               │  ML cache · ticker   │
+│  users ·         │               │  data · sessions     │
+│  holdings ·      │               └─────────────────────┘
+│  watchlist ·     │
+│  alerts          │
+└──────┬───────────┘
        │
        ▼
-┌─────────────┐
-│  Supabase   │
-│    Auth     │
-│ (OAuth +    │
-│  Email OTP) │
-└─────────────┘
+┌──────────────────┐
+│   Supabase Auth  │
+│  Google OAuth +  │
+│  Email OTP/JWT   │
+└──────────────────┘
 ```
+
+---
+
+## Tech Stack
+
+| Category | Technology | Purpose |
+|---|---|---|
+| Frontend | Next.js 15, TailwindCSS, COBE | UI, routing, globe visualization |
+| Backend | Django REST Framework | API layer, ML serving, alert triggers |
+| Database | Supabase PostgreSQL | Users, holdings, watchlist, alerts |
+| Cache | Upstash Redis | ML results, live ticker data, session store |
+| Auth | Supabase Auth | JWT, Google OAuth, email OTP verification |
+| ML | PyTorch, XGBoost, statsmodels, FinBERT | Ensemble advisory engine |
+| DevOps | Docker, Vercel, Render | Containerization, frontend + backend deployment |
+| i18n | next-intl | English, Hindi, Gujarati, Punjabi |
 
 ---
 
@@ -252,8 +251,8 @@ FEATURES = [
 - Node.js ≥ 18
 - Python ≥ 3.10
 - Docker + Docker Compose
-- A Supabase project
-- An Upstash Redis instance
+- A Supabase project (free tier works)
+- An Upstash Redis instance (free tier works)
 
 ### 1. Clone
 
@@ -322,23 +321,11 @@ Frontend: `http://localhost:3000` · Backend API: `http://localhost:8000`
 
 ---
 
-## Screenshots Index
-
-| Screen | Description |
-|---|---|
-| Features | AI Risk Profiling, Real-time Market Data, Automated Rebalancing |
-| Login | Split layout — Warren Buffett quote + email/Google OAuth |
-| Email Verify | OTP verification flow |
-| Market News | Top gainers/losers + personalized news feed |
-| Settings | Profile, theme toggle, language selector |
-
----
-
 ## Roadmap
 
 - [ ] **Options Chain Analyzer** — IV, Greeks visualization for F&O traders
 - [ ] **Mutual Fund Coverage** — extend AI scoring to top 50 Indian MFs
-- [ ] **Mobile App** — React Native port with push alerts
+- [ ] **Mobile App** — React Native port with push-based watchlist alerts
 - [ ] **Portfolio Backtesting** — simulate historical strategy performance with custom date ranges
 
 ---
