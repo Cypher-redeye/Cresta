@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🚀 CRESTA
+<img src="frontend/public/favicon.svg" width="60" height="60" alt="Cresta Logo" />
+
+# CRESTA
 
 ### Your Wealth, Powered by Intelligence
 
