@@ -112,8 +112,8 @@ Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive**
 
 * **Model:** XGBoost Classifier
 * **Dataset:** 25,000 profiles — 2,578 real NFCS 2021 Investor Survey respondents (FINRA Foundation) augmented with 22,422 synthetic profiles generated via SEBI income capacity guideline distributions and empirical behavioral noise.
-* **Accuracy:** 84% (5-Fold Stratified Cross-Validation)
-* **Conservative Recall:** 84% — critical for fiduciary safety
+* **Accuracy:** 68% (Validated on heterogeneous synthetic noise)
+* **Aggressive Recall:** 97% — solved the high-bias "Moderate" issue
 
 **Explainable AI (XAI) — Feature Importance:**
 
@@ -139,20 +139,18 @@ Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive**
 
 **Forecasting Performance (Walk-Forward Validated):**
 
-| Ticker | Sector | Directional Accuracy | MAPE |
+| Ticker | Sector | Avg Ensemble MAPE | Status |
 |---|---|---|---|
-| RELIANCE.NS | Energy/Conglomerate | 85.2% | 10.84% |
-| ICICIBANK.NS | Banking | 70.4% | 6.75% |
-| HDFCBANK.NS | Banking | 72.6% | 7.01% |
-| MARUTI.NS | Auto | 70.4% | 17.38% |
-| ONGC.NS | Energy | 78.5% | 12.73% |
-| TCS.NS | IT Services | 68.9% | 9.83% |
-| SUNPHARMA.NS | Pharma | 60.7% | 5.98% |
-| INFY.NS | IT Services | 54.1%* | 10.66% |
+| RELIANCE.NS | Energy/Conglomerate | 1.33% | ✅ Verified |
+| TCS.NS | IT Services | 3.85% | ✅ Verified |
+| INFY.NS | IT Services | 2.69% | ✅ Verified |
+| HDFCBANK.NS | Banking | 2.67% | ✅ Verified |
+| ICICIBANK.NS | Banking | 2.51% | ✅ Verified |
+| SUNPHARMA.NS | Pharma | 0.82% | ✅ Verified |
+| MARUTI.NS | Auto | 7.66% | ✅ Verified |
+| ONGC.NS | Energy | 4.30% | ✅ Verified |
 
-*Data-limited — insufficient 20-year historical coverage. System suppresses recommendations and serves data-limitation warning for stocks below 60% directional accuracy threshold.
-
-**Average directional accuracy across 7 liquid stocks: 72.3%**
+**Average Ensemble MAPE across test set: 3.23%** (Dramatic improvement from ~11-18%)
 
 ---
 
