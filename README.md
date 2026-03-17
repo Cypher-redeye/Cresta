@@ -404,8 +404,8 @@ npm run dev
 
 <div align="center">
 
-| [<img src="https://github.com/ankitrmishra01.png" width="100px;"/><br /><sub><b>Ankit Mishra</b></sub>](https://github.com/ankitrmishra01) | [<img src="https://github.com/Shivam-Panchal0210.png" width="100px;"/><br /><sub><b>Shivam Panchal</b></sub>](https://github.com/Shivam-Panchal0210) | [<img src="https://github.com/shubhamjhadhoni-jpg.png" width="100px;"/><br /><sub><b>Shubham Jhadhoni</b></sub>](https://github.com/shubhamjhadhoni-jpg) |
-| :---: | :---: | :---: |
+| [<img src="https://github.com/ankitrmishra01.png" width="100px;"/><br /><sub><b>Ankit Mishra</b></sub>](https://github.com/ankitrmishra01) | [<img src="https://github.com/Shivam-Panchal0210.png" width="100px;"/><br /><sub><b>Shivam Panchal</b></sub>](https://github.com/Shivam-Panchal0210) | [<img src="https://github.com/shubhamjhadhoni-jpg.png" width="100px;"/><br /><sub><b>Shubham Jhadhoni</b></sub>](https://github.com/shubhamjhadhoni-jpg) | [<img src="https://github.com/Cypher-redeye.png" width="100px;"/><br /><sub><b>Om Sharma</b></sub>](https://github.com/Cypher-redeye) |
+| :---: | :---: | :---: | :---: |
 
 </div>
 
