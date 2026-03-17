@@ -6,52 +6,52 @@ Starting Cresta Master Validation Script...
 ============================================================
 
 --- Processing LSTM Walk-Forward for RELIANCE.NS ---
-  Fold 1: MSE_scaled=0.255372 | MAPE=13.85% | Directional=80.0%
-  Fold 2: MSE_scaled=0.256880 | MAPE=13.23% | Directional=24.4%
-  Fold 3: MSE_scaled=0.047240 | MAPE=6.28% | Directional=100.0%
-  --> RELIANCE.NS Summary: Avg MSE=0.186497 | Avg MAPE=11.12% | Avg Directional=68.1%
+  Fold 1: MSE_scaled=0.042346 | MAPE=31.29%
+  Fold 2: MSE_scaled=0.036864 | MAPE=21.92%
+  Fold 3: MSE_scaled=0.093714 | MAPE=73.21%
+  --> RELIANCE.NS Summary: Avg MAPE=42.14%
 
 --- Processing LSTM Walk-Forward for TCS.NS ---
-  Fold 1: MSE_scaled=0.104510 | MAPE=8.99% | Directional=33.3%
-  Fold 2: MSE_scaled=0.176809 | MAPE=11.57% | Directional=73.3%
-  Fold 3: MSE_scaled=0.084572 | MAPE=8.92% | Directional=0.0%
-  --> TCS.NS Summary: Avg MSE=0.121964 | Avg MAPE=9.83% | Avg Directional=35.6%
+  Fold 1: MSE_scaled=0.043732 | MAPE=36.45%
+  Fold 2: MSE_scaled=0.050054 | MAPE=31.93%
+  Fold 3: MSE_scaled=0.101579 | MAPE=86.93%
+  --> TCS.NS Summary: Avg MAPE=51.77%
 
 --- Processing LSTM Walk-Forward for INFY.NS ---
-  Fold 1: MSE_scaled=0.310039 | MAPE=13.86% | Directional=20.0%
-  Fold 2: MSE_scaled=0.358941 | MAPE=13.59% | Directional=82.2%
-  Fold 3: MSE_scaled=0.050456 | MAPE=6.26% | Directional=0.0%
-  --> INFY.NS Summary: Avg MSE=0.239812 | Avg MAPE=11.24% | Avg Directional=34.1%
+  Fold 1: MSE_scaled=0.041980 | MAPE=28.77%
+  Fold 2: MSE_scaled=0.027628 | MAPE=22.26%
+  Fold 3: MSE_scaled=0.069400 | MAPE=63.83%
+  --> INFY.NS Summary: Avg MAPE=38.29%
 
 --- Processing LSTM Walk-Forward for HDFCBANK.NS ---
-  Fold 1: MSE_scaled=0.293530 | MAPE=9.30% | Directional=48.9%
-  Fold 2: MSE_scaled=0.125737 | MAPE=5.61% | Directional=68.9%
-  Fold 3: MSE_scaled=0.099889 | MAPE=4.99% | Directional=0.0%
-  --> HDFCBANK.NS Summary: Avg MSE=0.173052 | Avg MAPE=6.63% | Avg Directional=39.3%
+  Fold 1: MSE_scaled=0.040834 | MAPE=42.15%
+  Fold 2: MSE_scaled=0.045831 | MAPE=28.15%
+  Fold 3: MSE_scaled=0.102161 | MAPE=106.28%
+  --> HDFCBANK.NS Summary: Avg MAPE=58.86%
 
 --- Processing LSTM Walk-Forward for ICICIBANK.NS ---
-  Fold 1: MSE_scaled=0.090747 | MAPE=4.48% | Directional=60.0%
-  Fold 2: MSE_scaled=0.174314 | MAPE=7.55% | Directional=48.9%
-  Fold 3: MSE_scaled=0.183825 | MAPE=8.20% | Directional=100.0%
-  --> ICICIBANK.NS Summary: Avg MSE=0.149629 | Avg MAPE=6.75% | Avg Directional=69.6%
+  Fold 1: MSE_scaled=0.053937 | MAPE=43.86%
+  Fold 2: MSE_scaled=0.047116 | MAPE=28.20%
+  Fold 3: MSE_scaled=0.120310 | MAPE=83.53%
+  --> ICICIBANK.NS Summary: Avg MAPE=51.86%
 
 --- Processing LSTM Walk-Forward for SUNPHARMA.NS ---
-  Fold 1: MSE_scaled=0.163324 | MAPE=5.50% | Directional=40.0%
-  Fold 2: MSE_scaled=0.134255 | MAPE=5.05% | Directional=42.2%
-  Fold 3: MSE_scaled=0.250878 | MAPE=7.38% | Directional=0.0%
-  --> SUNPHARMA.NS Summary: Avg MSE=0.182819 | Avg MAPE=5.98% | Avg Directional=27.4%
+  Fold 1: MSE_scaled=0.053590 | MAPE=36.39%
+  Fold 2: MSE_scaled=0.037878 | MAPE=29.38%
+  Fold 3: MSE_scaled=0.088887 | MAPE=50.26%
+  --> SUNPHARMA.NS Summary: Avg MAPE=38.68%
 
 --- Processing LSTM Walk-Forward for MARUTI.NS ---
-  Fold 1: MSE_scaled=0.288708 | MAPE=18.97% | Directional=28.9%
-  Fold 2: MSE_scaled=0.455086 | MAPE=25.05% | Directional=60.0%
-  Fold 3: MSE_scaled=0.055126 | MAPE=8.12% | Directional=0.0%
-  --> MARUTI.NS Summary: Avg MSE=0.266306 | Avg MAPE=17.38% | Avg Directional=29.6%
+  Fold 1: MSE_scaled=0.024820 | MAPE=24.57%
+  Fold 2: MSE_scaled=0.057626 | MAPE=120.91%
+  Fold 3: MSE_scaled=0.179986 | MAPE=474.49%
+  --> MARUTI.NS Summary: Avg MAPE=206.66%
 
 --- Processing LSTM Walk-Forward for ONGC.NS ---
-  Fold 1: MSE_scaled=0.017520 | MAPE=3.45% | Directional=42.2%
-  Fold 2: MSE_scaled=0.314662 | MAPE=14.12% | Directional=77.8%
-  Fold 3: MSE_scaled=0.619605 | MAPE=20.62% | Directional=0.0%
-  --> ONGC.NS Summary: Avg MSE=0.317262 | Avg MAPE=12.73% | Avg Directional=40.0%
+  Fold 1: MSE_scaled=0.016389 | MAPE=21.61%
+  Fold 2: MSE_scaled=0.015580 | MAPE=14.70%
+  Fold 3: MSE_scaled=0.080757 | MAPE=36.57%
+  --> ONGC.NS Summary: Avg MAPE=24.29%
 
 ============================================================
 === SECTION 2: XGBOOST RISK PROFILER EVALUATION ===
@@ -62,21 +62,21 @@ Running XGBoost prediction on 2000 synthetic held-out profiles...
 --- Classification Report ---
               precision    recall  f1-score   support
 
-  Aggressive       1.00      0.04      0.09       923
-Conservative       0.15      0.94      0.27       129
-    Moderate       0.31      0.38      0.34       948
+  Aggressive       0.58      0.97      0.72       550
+Conservative       0.88      0.47      0.61       389
+    Moderate       0.74      0.61      0.67      1061
 
-    accuracy                           0.26      2000
-   macro avg       0.49      0.46      0.23      2000
-weighted avg       0.62      0.26      0.22      2000
+    accuracy                           0.68      2000
+   macro avg       0.73      0.68      0.67      2000
+weighted avg       0.72      0.68      0.67      2000
 
 
 --- Confusion Matrix ---
              | Pred Aggr | Pred Cons | Pred Mode
 ------------------------------------------------
-True Aggr    | 41       | 77       | 805     
-True Cons    | 0        | 121      | 8       
-True Mode    | 0        | 585      | 363     
+True Aggr    | 533      | 0        | 17      
+True Cons    | 0        | 182      | 207     
+True Mode    | 388      | 26       | 647     
 
 ============================================================
 === SECTION 3: ENSEMBLE VS INDIVIDUAL COMPARISON ===
@@ -84,143 +84,90 @@ True Mode    | 0        | 585      | 363
 
 --- Comparing Models for RELIANCE.NS ---
   Prices to array match check:
-  LSTM      | MAPE:  4.45% | DIR_ACC:   0.0% | MSE: 4162
-  XGBoost   | MAPE:  2.15% | DIR_ACC: 100.0% | MSE: 1246
-  ARIMA     | MAPE:  3.17% | DIR_ACC: 100.0% | MSE: 2398
-  Ensemble  | MAPE:  3.75% | DIR_ACC:   0.0% | MSE: 2977
-  --> Winner for RELIANCE.NS: XGBoost (2.15% error)
+  LSTM      | MAPE:  1.06% | DIR_ACC:   0.0% | MSE: 265
+  XGBoost   | MAPE:  1.10% | DIR_ACC:   0.0% | MSE: 348
+  ARIMA     | MAPE:  0.93% | DIR_ACC: 100.0% | MSE: 212
+  Ensemble  | MAPE:  1.33% | DIR_ACC:   0.0% | MSE: 444
+  --> Winner for RELIANCE.NS: ARIMA (0.93% error)
 
 --- Comparing Models for TCS.NS ---
   Prices to array match check:
-  LSTM      | MAPE: 18.24% | DIR_ACC:   0.0% | MSE: 226851
-  XGBoost   | MAPE:  4.42% | DIR_ACC:   0.0% | MSE: 22151
-  ARIMA     | MAPE:  2.00% | DIR_ACC: 100.0% | MSE: 3253
-  Ensemble  | MAPE: 12.69% | DIR_ACC:   0.0% | MSE: 110534
-  --> Winner for TCS.NS: ARIMA (2.00% error)
+  LSTM      | MAPE:  3.44% | DIR_ACC: 100.0% | MSE: 8506
+  XGBoost   | MAPE:  7.69% | DIR_ACC:   0.0% | MSE: 43082
+  ARIMA     | MAPE:  3.79% | DIR_ACC: 100.0% | MSE: 10254
+  Ensemble  | MAPE:  3.85% | DIR_ACC: 100.0% | MSE: 10608
+  --> Winner for TCS.NS: LSTM (3.44% error)
 
 --- Comparing Models for INFY.NS ---
   Prices to array match check:
-  LSTM      | MAPE: 17.96% | DIR_ACC: 100.0% | MSE: 54696
-  XGBoost   | MAPE:  1.97% | DIR_ACC:   0.0% | MSE: 911
-  ARIMA     | MAPE:  0.43% | DIR_ACC: 100.0% | MSE: 38
-  Ensemble  | MAPE: 12.36% | DIR_ACC: 100.0% | MSE: 25911
-  --> Winner for INFY.NS: ARIMA (0.43% error)
+  LSTM      | MAPE:  0.49% | DIR_ACC: 100.0% | MSE: 70
+  XGBoost   | MAPE:  4.42% | DIR_ACC:   0.0% | MSE: 4894
+  ARIMA     | MAPE:  3.29% | DIR_ACC: 100.0% | MSE: 2257
+  Ensemble  | MAPE:  2.69% | DIR_ACC: 100.0% | MSE: 1539
+  --> Winner for INFY.NS: LSTM (0.49% error)
 
 --- Comparing Models for HDFCBANK.NS ---
   Prices to array match check:
-  LSTM      | MAPE:  9.83% | DIR_ACC:   0.0% | MSE: 7935
-  XGBoost   | MAPE:  9.14% | DIR_ACC:   0.0% | MSE: 8170
-  ARIMA     | MAPE:  3.22% | DIR_ACC:   0.0% | MSE: 1045
-  Ensemble  | MAPE:  8.44% | DIR_ACC:   0.0% | MSE: 5984
-  --> Winner for HDFCBANK.NS: ARIMA (3.22% error)
+  LSTM      | MAPE:  2.39% | DIR_ACC: 100.0% | MSE: 493
+  XGBoost   | MAPE:  6.37% | DIR_ACC:   0.0% | MSE: 3049
+  ARIMA     | MAPE:  1.51% | DIR_ACC: 100.0% | MSE: 241
+  Ensemble  | MAPE:  2.67% | DIR_ACC:   0.0% | MSE: 589
+  --> Winner for HDFCBANK.NS: ARIMA (1.51% error)
 
 --- Comparing Models for ICICIBANK.NS ---
   Prices to array match check:
-  LSTM      | MAPE:  2.26% | DIR_ACC:   0.0% | MSE: 1785
-  XGBoost   | MAPE:  1.32% | DIR_ACC: 100.0% | MSE: 463
-  ARIMA     | MAPE:  1.80% | DIR_ACC: 100.0% | MSE: 1002
-  Ensemble  | MAPE:  1.94% | DIR_ACC:   0.0% | MSE: 1278
-  --> Winner for ICICIBANK.NS: XGBoost (1.32% error)
+  LSTM      | MAPE:  2.66% | DIR_ACC:   0.0% | MSE: 1469
+  XGBoost   | MAPE:  1.99% | DIR_ACC: 100.0% | MSE: 945
+  ARIMA     | MAPE:  2.54% | DIR_ACC: 100.0% | MSE: 1352
+  Ensemble  | MAPE:  2.51% | DIR_ACC: 100.0% | MSE: 1337
+  --> Winner for ICICIBANK.NS: XGBoost (1.99% error)
 
 --- Comparing Models for SUNPHARMA.NS ---
   Prices to array match check:
-  LSTM      | MAPE:  5.16% | DIR_ACC:   0.0% | MSE: 8733
-  XGBoost   | MAPE:  1.93% | DIR_ACC: 100.0% | MSE: 1420
-  ARIMA     | MAPE:  2.02% | DIR_ACC:   0.0% | MSE: 1730
-  Ensemble  | MAPE:  4.09% | DIR_ACC:   0.0% | MSE: 5699
-  --> Winner for SUNPHARMA.NS: XGBoost (1.93% error)
+  LSTM      | MAPE:  1.02% | DIR_ACC:   0.0% | MSE: 439
+  XGBoost   | MAPE:  1.52% | DIR_ACC: 100.0% | MSE: 1017
+  ARIMA     | MAPE:  0.77% | DIR_ACC: 100.0% | MSE: 273
+  Ensemble  | MAPE:  0.82% | DIR_ACC: 100.0% | MSE: 266
+  --> Winner for SUNPHARMA.NS: ARIMA (0.77% error)
 
 --- Comparing Models for MARUTI.NS ---
   Prices to array match check:
-  LSTM      | MAPE:  3.85% | DIR_ACC:   0.0% | MSE: 429186
-  XGBoost   | MAPE:  5.97% | DIR_ACC:   0.0% | MSE: 1131422
-  ARIMA     | MAPE:  3.02% | DIR_ACC: 100.0% | MSE: 254177
-  Ensemble  | MAPE:  3.90% | DIR_ACC:   0.0% | MSE: 434711
-  --> Winner for MARUTI.NS: ARIMA (3.02% error)
+  LSTM      | MAPE:  7.51% | DIR_ACC: 100.0% | MSE: 1120656
+  XGBoost   | MAPE:  7.69% | DIR_ACC: 100.0% | MSE: 1168295
+  ARIMA     | MAPE:  5.21% | DIR_ACC: 100.0% | MSE: 566172
+  Ensemble  | MAPE:  7.66% | DIR_ACC: 100.0% | MSE: 1166532
+  --> Winner for MARUTI.NS: ARIMA (5.21% error)
 
 --- Comparing Models for ONGC.NS ---
   Prices to array match check:
-  LSTM      | MAPE: 15.39% | DIR_ACC:   0.0% | MSE: 1848
-  XGBoost   | MAPE:  2.21% | DIR_ACC:   0.0% | MSE: 47
-  ARIMA     | MAPE:  0.83% | DIR_ACC: 100.0% | MSE: 7
-  Ensemble  | MAPE: 10.96% | DIR_ACC:   0.0% | MSE: 940
-  --> Winner for ONGC.NS: ARIMA (0.83% error)
-
-============================================================
-=== SECTION 4: 6-MONTH BACKTESTING (SIMULATED) ===
-============================================================
-Note: Backtest does not account for transaction costs or slippage.
-
---- Backtesting RELIANCE.NS (6 Months) ---
-  Signal Return (%):   9.55%
-  Buy & Hold Return:   1.91%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   :  10.85%
-
---- Backtesting TCS.NS (6 Months) ---
-  Signal Return (%):   4.42%
-  Buy & Hold Return: -13.42%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   :   5.73%
-
---- Backtesting INFY.NS (6 Months) ---
-  Signal Return (%):  -7.95%
-  Buy & Hold Return:  -7.29%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   :  -6.64%
-
---- Backtesting HDFCBANK.NS (6 Months) ---
-  Signal Return (%):  12.02%
-  Buy & Hold Return: -11.28%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   :  13.33%
-
---- Backtesting ICICIBANK.NS (6 Months) ---
-  Signal Return (%): -17.16%
-  Buy & Hold Return:  -6.37%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   : -15.86%
-
---- Backtesting SUNPHARMA.NS (6 Months) ---
-  Signal Return (%):  10.15%
-  Buy & Hold Return:  14.55%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   :  11.45%
-
---- Backtesting MARUTI.NS (6 Months) ---
-  Signal Return (%):   8.43%
-  Buy & Hold Return:  -7.20%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   :   9.73%
-
---- Backtesting ONGC.NS (6 Months) ---
-  Signal Return (%):  13.00%
-  Buy & Hold Return:  25.79%
-  Nifty50 Benchmark:  -1.30%
-  Alpha vs Nifty   :  14.30%
+  LSTM      | MAPE:  5.17% | DIR_ACC:   0.0% | MSE: 211
+  XGBoost   | MAPE:  2.82% | DIR_ACC: 100.0% | MSE: 65
+  ARIMA     | MAPE:  4.50% | DIR_ACC:   0.0% | MSE: 158
+  Ensemble  | MAPE:  4.30% | DIR_ACC:   0.0% | MSE: 145
+  --> Winner for ONGC.NS: XGBoost (2.82% error)
 
 ============================================================
 === FINAL VALIDATION SUMMARY TABLE ===
 ============================================================
-      Ticker    Model      MAPE  Directional_Accuracy           MSE
- RELIANCE.NS     LSTM 11.118101             68.148148      0.186497
-      TCS.NS     LSTM  9.826996             35.555556      0.121964
-     INFY.NS     LSTM 11.239051             34.074074      0.239812
- HDFCBANK.NS     LSTM  6.632795             39.259259      0.173052
-ICICIBANK.NS     LSTM  6.747726             69.629630      0.149629
-SUNPHARMA.NS     LSTM  5.975156             27.407407      0.182819
-   MARUTI.NS     LSTM 17.381430             29.629630      0.266306
-     ONGC.NS     LSTM 12.729121             40.000000      0.317262
- RELIANCE.NS Ensemble  3.750352              0.000000   2976.674767
-      TCS.NS Ensemble 12.685528              0.000000 110533.776657
-     INFY.NS Ensemble 12.357544            100.000000  25910.721767
- HDFCBANK.NS Ensemble  8.436216              0.000000   5984.468452
-ICICIBANK.NS Ensemble  1.940001              0.000000   1277.858331
-SUNPHARMA.NS Ensemble  4.089416              0.000000   5698.822676
-   MARUTI.NS Ensemble  3.897658              0.000000 434710.940714
-     ONGC.NS Ensemble 10.962692              0.000000    940.076744
+      Ticker    Model       MAPE  Directional_Accuracy          MSE
+ RELIANCE.NS     LSTM  42.142323                  50.0 5.764126e-02
+      TCS.NS     LSTM  51.770054                  50.0 6.512163e-02
+     INFY.NS     LSTM  38.289852                  50.0 4.633607e-02
+ HDFCBANK.NS     LSTM  58.861073                  50.0 6.294207e-02
+ICICIBANK.NS     LSTM  51.863163                  50.0 7.378765e-02
+SUNPHARMA.NS     LSTM  38.675251                  50.0 6.011833e-02
+   MARUTI.NS     LSTM 206.656570                  50.0 8.747766e-02
+     ONGC.NS     LSTM  24.294279                  50.0 3.757540e-02
+ RELIANCE.NS Ensemble   1.326867                   0.0 4.436333e+02
+      TCS.NS Ensemble   3.853527                 100.0 1.060835e+04
+     INFY.NS Ensemble   2.688900                 100.0 1.538825e+03
+ HDFCBANK.NS Ensemble   2.665579                   0.0 5.894101e+02
+ICICIBANK.NS Ensemble   2.506572                 100.0 1.336734e+03
+SUNPHARMA.NS Ensemble   0.821991                 100.0 2.655254e+02
+   MARUTI.NS Ensemble   7.655526                 100.0 1.166532e+06
+     ONGC.NS Ensemble   4.297776                   0.0 1.448108e+02
 
 ------------------------------------------------------------
-Average Ensemble MAPE across test set: 7.26%
+Average Ensemble MAPE across test set: 3.23%
 
-Validation complete in 151.4 seconds.
+Validation complete in 217.2 seconds.

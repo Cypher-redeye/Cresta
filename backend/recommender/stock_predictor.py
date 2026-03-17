@@ -16,15 +16,15 @@ from sklearn.preprocessing import MinMaxScaler
 from datetime import timedelta
 
 from .models.attention_lstm import AttentionLSTM, StockLSTM  # noqa: F401
-from .features import prepare_features  # noqa: F401 (re-exported for backward compat)
+from .features import prepare_features  # noqa: F401
 from .validation import walk_forward_split, create_sequences  # noqa: F401
-from .persistence import (  # noqa: F401 (re-exported for backward compat)
+from .persistence import (  # noqa: F401
     get_cached_prediction,
     save_prediction,
     save_model,
     load_saved_model,
-    CACHE_DURATION,
 )
+from .data_loader import SafeDataFetcher
 
 import logging
 logger = logging.getLogger(__name__)
@@ -57,10 +57,8 @@ def get_sentiment_for_ticker(ticker):
 
 def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -> dict:
     """
-    Fetch real data, train AttentionLSTM with walk-forward validation,
+    Fetch real data, train AttentionLSTM with log returns for stationarity,
     and predict next 7 days.
-    Uses saved models when available, otherwise trains from scratch.
-    Returns dict with 'history' and 'predictions'.
     """
     set_seed(42)
     # Check persistent DB cache
@@ -69,39 +67,49 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
         print(f"[LSTM] Returning DB cached result for {ticker}")
         return cached_result
 
-    print(f"[LSTM] Processing {ticker}...")
+    print(f"[LSTM] Processing {ticker} with Log Returns...")
 
-    # 1. Fetch 1 year of real data
-    stock = yf.Ticker(ticker)
-    df = stock.history(period="1y")
-
-    if df.empty or len(df) < lookback + forecast_days + 10:
-        raise ValueError(f"Insufficient data for {ticker}. Need at least {lookback + forecast_days + 10} days.")
+    # 1. Fetch data using SafeDataFetcher
+    try:
+        df = SafeDataFetcher.fetch_ticker_data(ticker, period="1y", min_days=lookback + forecast_days + 15)
+    except ValueError as e:
+        print(f"[LSTM] Data fetch failed for {ticker}: {e}")
+        # Try proxy
+        proxy = SafeDataFetcher.find_proxy_ticker(ticker)
+        print(f"[LSTM] Using proxy {proxy} instead.")
+        df = SafeDataFetcher.fetch_ticker_data(proxy, period="1y", min_days=lookback + forecast_days + 15)
 
     # 2. Get sentiment score
     sentiment_score = get_sentiment_for_ticker(ticker)
 
-    # 3. Prepare extended features (13+ features)
+    # 3. Prepare features
     features_df = prepare_features(df, sentiment_score=sentiment_score)
+    
+    # --- STATIONARITY OVERHAUL: Log Returns Transformation ---
+    # We predict Log Returns, not raw prices.
+    # We'll use Log Returns of Close as the primary target/feature.
+    last_actual_price = float(df['Close'].iloc[-1])
+    features_df['Target'] = np.log(features_df['Close'] / features_df['Close'].shift(1))
+    features_df = features_df.dropna() # Drop first row (NaN log return)
+    
+    # Reorder to put Target as Column 0
+    cols = ['Target'] + [c for c in features_df.columns if c != 'Target' and c != 'Close']
+    features_df = features_df[cols]
+    
     feature_columns = features_df.columns.tolist()
     num_features = len(feature_columns)
 
     # 4. Scale data
-    scaler = MinMaxScaler()
+    scaler = MinMaxScaler(feature_range=(-1, 1)) # Better for centered returns
     scaled_data = scaler.fit_transform(features_df.values)
 
-    # 5. Try loading a pre-trained model from disk
+    # 5. Training / Loading
     model, loaded_scaler = load_saved_model(ticker, num_features)
     test_loss_val = 0.0
     wf_mse = 0.0
 
-    if model is not None and loaded_scaler is not None:
-        # Use loaded model
-        pass
-    else:
-        # Train from scratch with walk-forward validation
-        print(f"[LSTM] Training new AttentionLSTM for {ticker} ({num_features} features)...")
-
+    if model is None or loaded_scaler is None:
+        print(f"[LSTM] Training new AttentionLSTM for {ticker} (Target: Log Returns)...")
         X, y = create_sequences(scaled_data, lookback, forecast_days)
 
         if len(X) < 10:
@@ -125,7 +133,7 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
             y_te_t = torch.FloatTensor(y_te)
 
             fold_model.train()
-            for epoch in range(30):
+            for epoch in range(40):
                 optimizer.zero_grad()
                 output = fold_model(X_tr_t)
                 loss = criterion(output, y_tr_t)
@@ -138,92 +146,76 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
                 fold_loss = criterion(test_pred, y_te_t).item()
                 fold_losses.append(fold_loss)
 
-            print(f"  Walk-Forward Fold {fold_idx+1}: MSE={fold_loss:.6f}")
-
         wf_mse = np.mean(fold_losses)
-        print(f"  Walk-Forward Avg MSE: {wf_mse:.6f}")
-
-        # --- Final Training on ALL data ---
-        model = AttentionLSTM(
-            input_size=num_features, hidden_size=64,
-            num_layers=2, output_size=forecast_days
-        )
+        
+        # Final Training
+        model = AttentionLSTM(input_size=num_features, hidden_size=64, num_layers=2, output_size=forecast_days)
         criterion = nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-
         X_all_t = torch.FloatTensor(X)
         y_all_t = torch.FloatTensor(y)
 
         model.train()
-        epochs = 50
-        for epoch in range(epochs):
+        for epoch in range(60):
             optimizer.zero_grad()
             output = model(X_all_t)
             loss = criterion(output, y_all_t)
             loss.backward()
             optimizer.step()
-
-            if (epoch + 1) % 10 == 0:
-                print(f"  Epoch {epoch+1}/{epochs}, Loss: {loss.item():.6f}")
-
+        
         model.eval()
         test_loss_val = loss.item()
-
-        # Save model to disk
         save_model(ticker, model, scaler, num_features)
 
-    # 6. Predict future using the last `lookback` days with Monte Carlo Dropout
+    # 6. Prediction with MC Dropout
     last_sequence = scaled_data[-lookback:]
     last_sequence_t = torch.FloatTensor(last_sequence).unsqueeze(0)
+    model.train() # MC Dropout env
 
-    # Enable dropout during inference for Monte Carlo estimates
-    model.train()  
-
-    n_samples = 50
-    mc_predictions = []
-    
+    n_samples = 30
+    mc_preds = []
     for _ in range(n_samples):
         with torch.no_grad():
-            mc_pred = model(last_sequence_t).numpy()[0]
-            mc_predictions.append(mc_pred)
+            mc_preds.append(model(last_sequence_t).numpy()[0])
             
-    mc_predictions_np = np.array(mc_predictions) # Shape: (50, 7)
-    
-    # Calculate Mean, 10th percentile (lower), 90th percentile (upper)
-    future_scaled = mc_predictions_np.mean(axis=0)
-    lower_scaled = np.percentile(mc_predictions_np, 10, axis=0)
-    upper_scaled = np.percentile(mc_predictions_np, 90, axis=0)
+    mc_preds_np = np.array(mc_preds)
+    future_returns_scaled = mc_preds_np.mean(axis=0)
+    lower_returns_scaled = np.percentile(mc_preds_np, 10, axis=0)
+    upper_returns_scaled = np.percentile(mc_preds_np, 90, axis=0)
 
-    # Inverse transform predictions mapping columns to 0
-    dummy_mean = np.zeros((forecast_days, num_features))
-    dummy_lower = np.zeros((forecast_days, num_features))
-    dummy_upper = np.zeros((forecast_days, num_features))
-    
-    dummy_mean[:, 0] = future_scaled
-    dummy_lower[:, 0] = lower_scaled
-    dummy_upper[:, 0] = upper_scaled
-    
-    future_prices = scaler.inverse_transform(dummy_mean)[:, 0]
-    lower_prices = scaler.inverse_transform(dummy_lower)[:, 0]
-    upper_prices = scaler.inverse_transform(dummy_upper)[:, 0]
+    # 7. Inverse Transform & Price Reconstruction
+    # Scale back to log return units
+    def reconstruct_prices(scaled_returns):
+        dummy = np.zeros((forecast_days, num_features))
+        dummy[:, 0] = scaled_returns
+        inv = scaler.inverse_transform(dummy)[:, 0]
+        # inv is array of 7 log returns: [r1, r2, r3, r4, r5, r6, r7]
+        # P_k = P_0 * exp(sum(r_1...r_k))
+        prices = []
+        current_cum_ret = 0
+        for r in inv:
+            current_cum_ret += r
+            prices.append(last_actual_price * np.exp(current_cum_ret))
+        return prices
 
-    # Build history (last 30 days)
+    future_prices = reconstruct_prices(future_returns_scaled)
+    lower_prices = reconstruct_prices(lower_returns_scaled)
+    upper_prices = reconstruct_prices(upper_returns_scaled)
+
+    # Build response
     history = []
-    recent_df = df.tail(30)
-    for idx, row in recent_df.iterrows():
+    for idx, row in df.tail(30).iterrows():
         history.append({
             "date": idx.strftime('%Y-%m-%d'),
             "price": round(float(row['Close']), 2),
             "isFuture": False
         })
 
-    # Build predictions
     last_date = df.index[-1]
     predictions = []
     for i in range(forecast_days):
         next_date = last_date + timedelta(days=i + 1)
-        while next_date.weekday() >= 5:
-            next_date += timedelta(days=1)
+        while next_date.weekday() >= 5: next_date += timedelta(days=1)
         predictions.append({
             "date": next_date.strftime('%Y-%m-%d'),
             "price": round(float(future_prices[i]), 2),
@@ -240,9 +232,13 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
             "walk_forward_mse": round(wf_mse, 6),
             "training_samples": len(scaled_data) - lookback - forecast_days,
             "features": num_features,
-            "model": "AttentionLSTM (2-layer, 64 hidden, self-attention)"
+            "model": "AttentionLSTM (Log Returns - Stationary)"
         }
     }
+
+    save_prediction(ticker, result)
+    print(f"[LSTM] Stationary prediction complete for {ticker}")
+    return result
 
     # Save to persistent database
     save_prediction(ticker, result)

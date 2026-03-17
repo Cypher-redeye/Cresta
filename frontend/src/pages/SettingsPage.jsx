@@ -4,12 +4,21 @@ import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { motion } from 'framer-motion';
-import { User, Shield, Moon, Sun, Globe, Bell, ChevronRight, Check } from 'lucide-react';
+import { User, Shield, Moon, Sun, Globe, Bell, ChevronRight, Check, CreditCard, Lock, Zap, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const SettingsPage = () => {
     const { t, i18n } = useTranslation();
     const { theme, toggleTheme } = useTheme();
     const { user } = useUser();
+    
+    // UI state for mock persistent settings
+    const [notifications, setNotifications] = React.useState({
+        email: true,
+        push: true,
+        weekly: false
+    });
+    const [currency, setCurrency] = React.useState('INR');
 
     const languages = [
         { code: 'en', name: 'English', nativeName: 'English' },
@@ -32,30 +41,35 @@ const SettingsPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Settings Navigation (Optional, for larger screens) */}
+                    {/* Settings Navigation */}
                     <div className="hidden md:block col-span-1 space-y-2">
                         <nav className="flex flex-col gap-1 sticky top-24">
-                            <a href="#profile" className="px-4 py-3 rounded-xl bg-emerald-50 dark:bg-neon-emerald/10 text-fintech-emerald dark:text-neon-emerald font-medium flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <User size={18} />
-                                    <span>{t('profile') || 'Profile'}</span>
-                                </div>
-                                <ChevronRight size={16} />
-                            </a>
-                            <a href="#appearance" className="px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 font-medium flex items-center justify-between transition-colors">
-                                <div className="flex items-center gap-3">
-                                    {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                                    <span>{t('appearance') || 'Appearance'}</span>
-                                </div>
-                                <ChevronRight size={16} />
-                            </a>
-                            <a href="#language" className="px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 font-medium flex items-center justify-between transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <Globe size={18} />
-                                    <span>{t('language') || 'Language'}</span>
-                                </div>
-                                <ChevronRight size={16} />
-                            </a>
+                            {[
+                                { id: 'profile', label: t('profile'), icon: User, href: '#profile' },
+                                { id: 'risk', label: t('risk_management'), icon: Zap, href: '#risk' },
+                                { id: 'appearance', label: t('appearance'), icon: theme === 'dark' ? Moon : Sun, href: '#appearance' },
+                                { id: 'notifications', label: t('notifications'), icon: Bell, href: '#notifications' },
+                                { id: 'language', label: t('language'), icon: Globe, href: '#language' },
+                                { id: 'security', label: t('security'), icon: Lock, href: '#security' },
+                            ].map((item) => (
+                                <a 
+                                    key={item.id} 
+                                    href={item.href} 
+                                    className={`px-4 py-3 rounded-xl flex items-center justify-between transition-all group ${
+                                        item.id === 'profile' 
+                                        ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold shadow-sm' 
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 font-medium'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-1.5 rounded-lg transition-colors ${item.id === 'profile' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-transparent text-gray-400 group-hover:text-emerald-500'}`}>
+                                            <item.icon size={18} />
+                                        </div>
+                                        <span>{item.label}</span>
+                                    </div>
+                                    <ChevronRight size={16} className={`transition-transform ${item.id === 'profile' ? 'translate-x-0' : 'translate-x-[-4px] opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                                </a>
+                            ))}
                         </nav>
                     </div>
 
@@ -111,6 +125,45 @@ const SettingsPage = () => {
                             </div>
                         </motion.section>
 
+                        {/* Risk Management Section */}
+                        <motion.section
+                            id="risk"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="glass-panel rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-fintech-card/50 backdrop-blur-xl"
+                        >
+                            <div className="p-6 border-b border-gray-200 dark:border-white/10">
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Zap className="text-amber-500" size={20} />
+                                    {t('risk_management')}
+                                </h2>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-4">
+                                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                        <Shield size={20} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h4 className="font-bold text-gray-900 dark:text-white">{t('risk_profile')}: {user?.risk_profile || 'Moderate'}</h4>
+                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">{t('active')}</span>
+                                        </div>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                            {t('risk_profile_desc', { profile: user?.risk_profile || 'Moderate' })}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Link
+                                    to="/risk-assessment"
+                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition-all font-semibold text-gray-700 dark:text-gray-300 group"
+                                >
+                                    {t('retake_risk_assessment')}
+                                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
+                        </motion.section>
+
                         {/* Appearance Section */}
                         <motion.section
                             id="appearance"
@@ -134,28 +187,86 @@ const SettingsPage = () => {
                                     <button
                                         onClick={() => theme === 'dark' && toggleTheme()}
                                         className={`flex flex-col items-center p-6 rounded-xl border-2 transition-all duration-200 ${theme === 'light'
-                                            ? 'border-fintech-emerald bg-emerald-50 dark:bg-emerald-900/20'
-                                            : 'border-gray-200 dark:border-white/10 hover:border-fintech-emerald/50 dark:hover:border-emerald-700 focus:outline-none'
+                                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-sm shadow-emerald-500/10'
+                                            : 'border-gray-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-700 focus:outline-none'
                                             }`}
                                     >
-                                        <Sun size={32} className={`mb-3 ${theme === 'light' ? 'text-fintech-emerald' : 'text-gray-400'}`} />
-                                        <span className={`font-medium ${theme === 'light' ? 'text-fintech-emerald dark:text-emerald-300' : 'text-gray-600 dark:text-gray-400'}`}>
-                                            {t('light_mode') || 'Light Mode'}
+                                        <Sun size={32} className={`mb-3 ${theme === 'light' ? 'text-emerald-500' : 'text-gray-400'}`} />
+                                        <span className={`font-medium ${theme === 'light' ? 'text-emerald-600 dark:text-emerald-300' : 'text-gray-600 dark:text-gray-400'}`}>
+                                            {t('light_mode')}
                                         </span>
                                     </button>
 
                                     <button
                                         onClick={() => theme === 'light' && toggleTheme()}
                                         className={`flex flex-col items-center p-6 rounded-xl border-2 transition-all duration-200 ${theme === 'dark'
-                                            ? 'border-neon-emerald bg-neon-emerald/10'
-                                            : 'border-gray-200 dark:border-white/10 hover:border-fintech-emerald/50 dark:hover:border-emerald-700 focus:outline-none'
+                                            ? 'border-emerald-500 bg-emerald-500/10 shadow-sm shadow-emerald-500/10'
+                                            : 'border-gray-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-700 focus:outline-none'
                                             }`}
                                     >
-                                        <Moon size={32} className={`mb-3 ${theme === 'dark' ? 'text-neon-emerald' : 'text-gray-400'}`} />
+                                        <Moon size={32} className={`mb-3 ${theme === 'dark' ? 'text-emerald-500' : 'text-gray-400'}`} />
                                         <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
-                                            {t('dark_mode') || 'Dark Mode'}
+                                            {t('dark_mode')}
                                         </span>
                                     </button>
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/5">
+                                    <label className="text-sm font-semibold text-gray-900 dark:text-white mb-4 block">{t('preferred_currency')}</label>
+                                    <div className="flex gap-3">
+                                        {['INR', 'USD'].map((curr) => (
+                                            <button
+                                                key={curr}
+                                                onClick={() => setCurrency(curr)}
+                                                className={`px-6 py-2 rounded-lg border-2 transition-all ${
+                                                    currency === curr 
+                                                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold' 
+                                                    : 'border-gray-200 dark:border-white/10 text-gray-500 hover:border-emerald-500/30'
+                                                }`}
+                                            >
+                                                {curr}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.section>
+
+                        {/* Notifications Section */}
+                        <motion.section
+                            id="notifications"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="glass-panel rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-fintech-card/50 backdrop-blur-xl"
+                        >
+                            <div className="p-6 border-b border-gray-200 dark:border-white/10">
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Bell className="text-emerald-500" size={20} />
+                                    {t('notifications')}
+                                </h2>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <p className="text-gray-500 dark:text-gray-400 text-sm">{t('manage_notifications')}</p>
+                                <div className="space-y-4">
+                                    {[
+                                        { id: 'email', label: t('email_alerts'), desc: 'Receive real-time email alerts for major market moves.' },
+                                        { id: 'push', label: t('browser_notifications'), desc: 'Get desktop alerts for AI buy/sell signals.' },
+                                        { id: 'weekly', label: t('weekly_insights'), desc: 'Personalized performance review every Monday.' },
+                                    ].map((pref) => (
+                                        <div key={pref.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-white/5">
+                                            <div>
+                                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{pref.label}</h4>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">{pref.desc}</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => setNotifications(prev => ({ ...prev, [pref.id]: !prev[pref.id] }))}
+                                                className={`w-12 h-6 rounded-full transition-colors relative ${notifications[pref.id] ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'}`}
+                                            >
+                                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${notifications[pref.id] ? 'left-7' : 'left-1'}`} />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </motion.section>
@@ -214,6 +325,41 @@ const SettingsPage = () => {
                             </div>
                         </motion.section>
 
+                        {/* Security Section */}
+                        <motion.section
+                            id="security"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="glass-panel rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-fintech-card/50 backdrop-blur-xl"
+                        >
+                            <div className="p-6 border-b border-gray-200 dark:border-white/10">
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <Lock className="text-red-500" size={20} />
+                                    {t('security')}
+                                </h2>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <p className="text-gray-500 dark:text-gray-400 text-sm">{t('security_subtitle')}</p>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50/30 dark:bg-white/5">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                                                <Shield size={20} />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{t('two_factor_auth')}</h4>
+                                                <p className="text-xs text-emerald-600 dark:text-emerald-400">{t('active')}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button className="w-full flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition-all text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <span>{t('change_password')}</span>
+                                        <ArrowRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.section>
                     </div>
                 </div>
             </div>

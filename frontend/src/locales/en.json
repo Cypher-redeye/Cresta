@@ -215,5 +215,22 @@
     "based_on_risk_prefix": "Based on your",
     "based_on_risk_suffix": "risk profile and our analysis of current market trends,",
     "login_success": "Login successful! Welcome back.",
-    "signup_success": "Account created successfully! Welcome to Cresta."
+    "signup_success": "Account created successfully! Welcome to Cresta.",
+    "notifications": "Notifications",
+    "security": "Security",
+    "currency": "Currency",
+    "risk_management": "Risk Management",
+    "email_alerts": "Email Alerts",
+    "browser_notifications": "Browser Notifications",
+    "weekly_insights": "Weekly Insights",
+    "preferred_currency": "Preferred Currency",
+    "change_password": "Change Password",
+    "two_factor_auth": "Two-Factor Authentication",
+    "active": "Active",
+    "inactive": "Inactive",
+    "retake_risk_assessment": "Retake Risk Assessment",
+    "risk_profile_desc": "Your current strategy is optimized for a {{profile}} risk tolerance.",
+    "account_security": "Account Security",
+    "manage_notifications": "Choose how you want to be notified about market changes and AI insights.",
+    "security_subtitle": "Manage your password and account protection settings."
 }

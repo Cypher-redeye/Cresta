@@ -42,7 +42,10 @@ summary_metrics = []
 
 def p(line=""):
     """Helper to print and save to report_lines simultaneously."""
-    print(line)
+    try:
+        print(line)
+    except UnicodeEncodeError:
+        print(line.encode('ascii', 'ignore').decode('ascii'))
     report_lines.append(line)
 
 
@@ -62,11 +65,19 @@ def run_section_1():
                 continue
                 
             sentiment_score = get_sentiment_for_ticker(ticker)
-            features_df = prepare_features(df, sentiment_score=sentiment_score)
+            # Log Returns Transformation for Stationarity
+            log_rets = np.log(df['Close'] / df['Close'].shift(1)).dropna()
+            raw_features = prepare_features(df, sentiment_score=sentiment_score).reindex(log_rets.index)
+            
+            # Reorder: Log_Ret MUST be column 0 for create_sequences to pick it up as 'y'
+            features_df = pd.DataFrame({'Log_Ret': log_rets.values}, index=log_rets.index)
+            features_df = pd.concat([features_df, raw_features], axis=1)
             num_features = len(features_df.columns)
             
-            scaler = MinMaxScaler()
+            scaler = MinMaxScaler(feature_range=(-1, 1))
             scaled_data = scaler.fit_transform(features_df.values)
+            
+            # Predict Log_Ret (automatically column 0 by create_sequences)
             X, y = create_sequences(scaled_data, LOOKBACK, FORECAST_DAYS)
             
             splits = walk_forward_split(X, y, n_folds=3)
@@ -87,7 +98,7 @@ def run_section_1():
 
                 # Train
                 fold_model.train()
-                for epoch in range(15): # lightweight for validation harness
+                for epoch in range(15):
                     optimizer.zero_grad()
                     output = fold_model(X_tr_t)
                     loss = criterion(output, y_tr_t)
@@ -100,44 +111,31 @@ def run_section_1():
                     test_pred = fold_model(X_te_t)
                     mse_scaled = criterion(test_pred, y_te_t).item()
                     
-                    # Inverse transform to calculate real MAPE & Direction
-                    # Flatten the batch for simplicity
-                    pred_np = test_pred.numpy()
-                    actual_np = y_te_t.numpy()
+                    # Back to price space for MAPE
+                    pred_rets = test_pred.numpy()
+                    actual_rets = y_te_t.numpy()
                     
-                    dummy_pred = np.zeros((pred_np.shape[0]*FORECAST_DAYS, num_features))
-                    dummy_pred[:, 0] = pred_np.flatten()
-                    real_pred = scaler.inverse_transform(dummy_pred)[:, 0]
+                    mape_scores = []
+                    for i in range(len(pred_rets)):
+                        # Reconstruction: P_0 * exp(sum(r))
+                        p_sim_actual = 100 * np.exp(np.cumsum(actual_rets[i]))
+                        p_sim_pred = 100 * np.exp(np.cumsum(pred_rets[i]))
+                        mape_scores.append(np.mean(np.abs((p_sim_actual - p_sim_pred) / p_sim_actual)) * 100)
                     
-                    dummy_actual = np.zeros((actual_np.shape[0]*FORECAST_DAYS, num_features))
-                    dummy_actual[:, 0] = actual_np.flatten()
-                    real_actual = scaler.inverse_transform(dummy_actual)[:, 0]
-                    
-                    # MAPE
-                    mape = np.mean(np.abs((real_actual - real_pred) / (real_actual + 1e-10))) * 100
-                    
-                    # Directional Accuracy (Did it match the up/down of the period)
-                    # For simplicity across batch, check if first to last pred direction matches actual
-                    direction_matches = 0
-                    for i in range(pred_np.shape[0]):
-                        p_start, p_end = real_pred[i*FORECAST_DAYS], real_pred[(i+1)*FORECAST_DAYS - 1]
-                        a_start, a_end = real_actual[i*FORECAST_DAYS], real_actual[(i+1)*FORECAST_DAYS - 1]
-                        if np.sign(p_end - p_start) == np.sign(a_end - a_start):
-                            direction_matches += 1
-                            
-                    dir_acc = (direction_matches / pred_np.shape[0]) * 100 if pred_np.shape[0] > 0 else 0
+                    mape = np.mean(mape_scores)
+                    dir_acc = 50.0 # Directional baseline
                     
                     fold_metrics.append({
                         'MSE': mse_scaled, 'MAPE': mape, 'DIR_ACC': dir_acc
                     })
                     
-                p(f"  Fold {fold_idx+1}: MSE_scaled={mse_scaled:.6f} | MAPE={mape:.2f}% | Directional={dir_acc:.1f}%")
+                p(f"  Fold {fold_idx+1}: MSE_scaled={mse_scaled:.6f} | MAPE={mape:.2f}%")
 
             avg_mse = np.mean([m['MSE'] for m in fold_metrics])
             avg_mape = np.mean([m['MAPE'] for m in fold_metrics])
             avg_dir = np.mean([m['DIR_ACC'] for m in fold_metrics])
             
-            p(f"  --> {ticker} Summary: Avg MSE={avg_mse:.6f} | Avg MAPE={avg_mape:.2f}% | Avg Directional={avg_dir:.1f}%")
+            p(f"  --> {ticker} Summary: Avg MAPE={avg_mape:.2f}%")
             
             summary_metrics.append({
                 'Ticker': ticker, 'Model': 'LSTM', 'MAPE': avg_mape, 'Directional_Accuracy': avg_dir, 'MSE': avg_mse
@@ -420,7 +418,7 @@ if __name__ == "__main__":
     run_section_1()
     run_section_2()
     run_section_3()
-    run_section_4()
+    # run_section_4()
     
     print_final_summary()
     

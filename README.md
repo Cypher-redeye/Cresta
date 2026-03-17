@@ -400,6 +400,15 @@ npm run dev
 * Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. *KDD '16*.
 * Markowitz, H. (1952). Portfolio Selection. *Journal of Finance*, 7(1), 77–91.
 
+## Contributors
+
+<div align="center">
+
+| [<img src="https://github.com/ankitrmishra01.png" width="100px;"/><br /><sub><b>Ankit Mishra</b></sub>](https://github.com/ankitrmishra01) | [<img src="https://github.com/Shivam-Panchal0210.png" width="100px;"/><br /><sub><b>Shivam Panchal</b></sub>](https://github.com/Shivam-Panchal0210) | [<img src="https://github.com/shubhamjhadhoni-jpg.png" width="100px;"/><br /><sub><b>Shubham Jhadhoni</b></sub>](https://github.com/shubhamjhadhoni-jpg) |
+| :---: | :---: | :---: |
+
+</div>
+
 ---
 
 ## Author

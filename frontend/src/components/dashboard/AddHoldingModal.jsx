@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Plus, Loader2, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { API_BASE } from '../../api';
+import { API_BASE, apiCall } from '../../api';
 
 const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
     const [ticker, setTicker] = useState('');
@@ -21,12 +21,12 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
         setSearching(true);
         setError('');
         try {
-            const res = await fetch(`${API_BASE}/search/?symbol=${ticker.trim()}`);
+            const res = await apiCall(`/search/?ticker=${ticker.trim()}`);
             if (!res.ok) throw new Error('Stock not found');
             const data = await res.json();
             setSearchResult(data);
-            if (data.current_price && !avgPrice) {
-                setAvgPrice(data.current_price.toString());
+            if (data.price && !avgPrice) {
+                setAvgPrice(data.price.toString());
             }
         } catch (e) {
             setError(t('stock_not_found'));
@@ -139,7 +139,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                     <div className="mt-2 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
                                         <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{searchResult.name}</p>
                                         <p className="text-xs text-emerald-600 dark:text-emerald-500">
-                                            CMP: ₹{searchResult.current_price} • {searchResult.suggestion || 'Market'}
+                                            CMP: ₹{searchResult.price} • {searchResult.suggestion || 'Market'}
                                         </p>
                                     </div>
                                 )}

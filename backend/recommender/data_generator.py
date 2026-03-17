@@ -55,53 +55,55 @@ def generate_data(num_samples=10000, output_path="investor_profiles.csv"):
         score = 0.0
         
         # Rule 1: "120 minus age" rule (Vanguard)
-        # Equity % = 120 - age. Higher equity = more aggressive
         equity_pct = 120 - age
-        if equity_pct >= 80:
-            score += 3.0    # Very young, high equity
+        if equity_pct >= 90:
+            score += 4.0    # Very young, ultra-high equity (Aggressive marker)
+        elif equity_pct >= 75:
+            score += 2.5    # Growth oriented
         elif equity_pct >= 60:
-            score += 2.0    # Mid-range
+            score += 1.5    
         elif equity_pct >= 40:
-            score += 1.0    # Conservative range
-        # else: very conservative (near retirement)
-        
-        # Rule 2: Income capacity (SEBI guidelines)
-        # Higher income = more capacity to absorb risk
-        if income > 2500000:     # > 25 LPA
-            score += 2.0
-        elif income > 1200000:   # > 12 LPA
-            score += 1.5
-        elif income > 600000:    # > 6 LPA
             score += 0.5
         
-        # Rule 3: Self-assessed risk tolerance (strongest signal)
-        score += (rt - 1) * 1.2
+        # Rule 2: Income capacity (SEBI guidelines) - Refined for Aggressive distinction
+        if income > 4000000:     # > 40 LPA (High wealth)
+            score += 3.0
+        elif income > 2000000:   # > 20 LPA
+            score += 2.0
+        elif income > 1000000:   # > 10 LPA
+            score += 1.0
+        elif income < 500000:    # Low income limits risk capacity
+            score -= 1.0
+        
+        # Rule 3: Self-assessed risk tolerance (Primary driver)
+        # Aggressive users must have RT 4 or 5
+        score += (rt - 1) * 1.5
         
         # Rule 4: Goal-based adjustment
         goal_scores = {
-            "Wealth": 1.5,      # Long-term growth
-            "Retirement": 0.5,  # Depends on timeline
-            "Tax": 0.0,         # Tax saving, neutral
-            "Income": -1.0,     # Regular income, conservative
-            "Education": 0.5    # Medium-term goal
+            "Wealth": 2.0,      # High score for Aggressive
+            "Retirement": 0.5,
+            "Tax": 0.0,
+            "Income": -1.5,     # Penalty for conservative goal
+            "Education": 0.5
         }
         score += goal_scores.get(goal, 0)
         
         # Rule 5: Experience factor
-        if exp > 10:
-            score += 0.5    # Experienced investors can handle more risk
-        elif exp < 2:
-            score -= 0.5    # New investors, be cautious
-        
-        # Rule 6: Behavioral noise (15% randomness)
-        # Real people don't perfectly follow rules
-        noise = np.random.normal(0, 0.7)
+        if exp > 15:
+            score += 1.0    # Expert investors
+        elif exp < 3:
+            score -= 1.0    # Novices
+            
+        # Rule 6: Behavioral noise - Reduced for minority classes to ensure pattern detection
+        noise_std = 0.5 if (score > 8.0 or score < 2.0) else 1.0
+        noise = np.random.normal(0, noise_std)
         score += noise
         
-        # Classification thresholds
-        if score <= 3.0:
+        # Classification thresholds (Adjusted for better balance)
+        if score <= 4.0:
             labels.append("Conservative")
-        elif score <= 6.5:
+        elif score <= 8.5:
             labels.append("Moderate")
         else:
             labels.append("Aggressive")
@@ -120,7 +122,7 @@ def generate_data(num_samples=10000, output_path="investor_profiles.csv"):
     print(f"\nClass distribution:")
     print(df["User_Class"].value_counts(normalize=True).round(3))
     print(f"\nAge stats: mean={df['Age'].mean():.0f}, std={df['Age'].std():.0f}")
-    print(f"Income stats: mean=₹{df['Income'].mean():,.0f}, median=₹{df['Income'].median():,.0f}")
+    print(f"Income stats: mean=INR {df['Income'].mean():,.0f}, median=INR {df['Income'].median():,.0f}")
 
 
 if __name__ == "__main__":
