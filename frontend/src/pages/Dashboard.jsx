@@ -7,6 +7,7 @@ import AssetAllocation from '../components/dashboard/AssetAllocation';
 import AIInsights from '../components/dashboard/AIInsights';
 import AddHoldingModal from '../components/dashboard/AddHoldingModal';
 import AlertBanner from '../components/dashboard/AlertBanner';
+import PersonalizedTicker from '../components/dashboard/PersonalizedTicker';
 import {
     DollarSign,
     Briefcase,
@@ -23,7 +24,7 @@ import { motion } from 'framer-motion';
 import { useUser } from '../context/UserContext';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
-import Skeleton from '../components/common/Skeleton';
+import InlineLoadingScreen from '../components/common/InlineLoadingScreen';
 import HoldingsTable from '../components/dashboard/HoldingsTable';
 import { API_BASE, apiCall } from '../api';
 
@@ -63,6 +64,8 @@ const Dashboard = () => {
 
     const userEmail = user?.email || localStorage.getItem('user_email') || '';
 
+    const [hasLoadedHoldings, setHasLoadedHoldings] = useState(false);
+
     // Fetch holdings from backend
     const fetchHoldings = useCallback(async () => {
         if (!user) return;
@@ -75,6 +78,8 @@ const Dashboard = () => {
         } catch (e) {
             console.error("Failed to fetch holdings:", e);
             showToast(t('failed_load_portfolio'), 'error');
+        } finally {
+            setHasLoadedHoldings(true);
         }
     }, [user]);
 
@@ -190,22 +195,7 @@ const Dashboard = () => {
     if (isLoading) {
         return (
             <DashboardLayout>
-                <div className="space-y-8">
-                    <Skeleton className="w-full h-10 mb-8" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40 w-full" />)}
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                        <div className="lg:col-span-2 flex flex-col gap-6">
-                            <Skeleton className="w-full h-[400px]" />
-                            <Skeleton className="w-full h-[300px]" />
-                        </div>
-                        <div className="lg:col-span-1 flex flex-col gap-6">
-                            <Skeleton className="w-full h-[250px]" />
-                            <Skeleton className="w-full h-[450px]" />
-                        </div>
-                    </div>
-                </div>
+                <InlineLoadingScreen text="Loading Dashboard..." subtext="Syncing your portfolio data" />
             </DashboardLayout>
         );
     }
@@ -217,32 +207,32 @@ const Dashboard = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="glass-panel p-12 rounded-3xl border border-gray-200 dark:border-white/10 text-center space-y-8 dark:bg-fintech-card/30 backdrop-blur-3xl"
+                        className="apple-glass apple-card-glow p-12 rounded-3xl text-center space-y-8 relative overflow-hidden"
                     >
                         <div className="flex justify-center flex-wrap gap-12 mb-8">
                             <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 rounded-2xl bg-fintech-emerald/20 dark:bg-emerald-500/20 flex items-center justify-center text-fintech-emerald dark:text-emerald-400">
+                                <div className="w-16 h-16 rounded-2xl bg-notion-emerald-bg flex items-center justify-center text-notion-emerald">
                                     <Rocket size={32} />
                                 </div>
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('personalized_journey')}</span>
+                                <span className="text-sm font-medium text-notion-muted">{t('personalized_journey')}</span>
                             </div>
                             <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 rounded-2xl bg-fintech-emerald/20 dark:bg-emerald-500/20 flex items-center justify-center text-fintech-emerald dark:text-emerald-400">
+                                <div className="w-16 h-16 rounded-2xl bg-notion-emerald-bg flex items-center justify-center text-notion-emerald">
                                     <ShieldCheck size={32} />
                                 </div>
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('risk_matched_ai')}</span>
+                                <span className="text-sm font-medium text-notion-muted">{t('risk_matched_ai')}</span>
                             </div>
                             <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500 dark:text-emerald-400">
+                                <div className="w-16 h-16 rounded-2xl bg-notion-emerald-bg flex items-center justify-center text-notion-emerald">
                                     <PieChartIcon size={32} />
                                 </div>
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('optimal_allocation')}</span>
+                                <span className="text-sm font-medium text-notion-muted">{t('optimal_allocation')}</span>
                             </div>
                         </div>
 
                         <div className="space-y-4 max-w-2xl mx-auto">
-                            <h2 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">{t('ready_build_future')}</h2>
-                            <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed">
+                            <h2 className="text-4xl font-bold text-notion-text tracking-tight">{t('ready_build_future')}</h2>
+                            <p className="text-notion-muted text-lg leading-relaxed">
                                 {t('ai_needs_understand')}
                             </p>
                         </div>
@@ -250,21 +240,21 @@ const Dashboard = () => {
                         <div className="pt-8">
                             <Link
                                 to="/risk-assessment"
-                                className="px-10 py-5 bg-emerald-500 rounded-2xl text-white font-bold text-lg hover:bg-emerald-600 hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] transform hover:-translate-y-1 transition-all inline-flex items-center gap-3 group"
+                                className="stark-btn-primary !px-8 !py-4 rounded-lg text-md hover:scale-[1.02] transition-transform duration-200 inline-flex items-center gap-3 group"
                             >
                                 {t('start_risk_assessment')}
-                                <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-6 text-left pt-12 border-t border-gray-200 dark:border-white/5">
-                            <div className="p-6 rounded-2xl bg-white/50 dark:bg-white/5 space-y-2">
-                                <h4 className="text-gray-900 dark:text-white font-semibold">{t('realtime_analysis')}</h4>
-                                <p className="text-sm text-gray-500 font-normal">{t('realtime_analysis_desc')}</p>
+                        <div className="grid md:grid-cols-2 gap-6 text-left pt-12 border-t border-notion-border">
+                            <div className="p-6 rounded-2xl bg-notion-hover border border-notion-border space-y-2">
+                                <h4 className="text-notion-text font-semibold">{t('realtime_analysis')}</h4>
+                                <p className="text-sm text-notion-muted font-normal">{t('realtime_analysis_desc')}</p>
                             </div>
-                            <div className="p-6 rounded-2xl bg-white/50 dark:bg-white/5 space-y-2">
-                                <h4 className="text-gray-900 dark:text-white font-semibold">{t('custom_ai_models')}</h4>
-                                <p className="text-sm text-gray-500 font-normal">{t('custom_ai_models_desc')}</p>
+                            <div className="p-6 rounded-2xl bg-notion-hover border border-notion-border space-y-2">
+                                <h4 className="text-notion-text font-semibold">{t('custom_ai_models')}</h4>
+                                <p className="text-sm text-notion-muted font-normal">{t('custom_ai_models_desc')}</p>
                             </div>
                         </div>
                     </motion.div>
@@ -284,27 +274,28 @@ const Dashboard = () => {
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="relative mb-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 flex items-center justify-between gap-4 group/banner"
+                    className="relative mb-6 p-5 rounded-2xl apple-glass border border-amber-500/40 flex items-center justify-between gap-4 group/banner shadow-[0_0_20px_rgba(245,158,11,0.05)] overflow-hidden"
                 >
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-amber-500/20 text-amber-500">
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-50" />
+                    <div className="flex items-center gap-4 relative z-10">
+                        <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
                             <Activity size={20} />
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-gray-800 dark:text-white">{t('update_risk_profile')}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{t('risk_assessment_old')}</p>
+                            <p className="text-sm font-bold text-notion-text">{t('update_risk_profile')}</p>
+                            <p className="text-xs text-notion-muted">{t('risk_assessment_old')}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <Link
                             to="/risk-assessment"
-                            className="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
+                            className="shrink-0 px-4 py-2 bg-amber-50 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
                         >
                             {t('retake_quiz')} <ArrowRight size={14} />
                         </Link>
                         <button
                             onClick={handleDismissRiskBanner}
-                            className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            className="p-2 rounded-lg hover:bg-notion-border text-notion-muted hover:text-notion-text transition-colors"
                         >
                             <X size={16} />
                         </button>
@@ -317,25 +308,27 @@ const Dashboard = () => {
                 animate="show"
                 className="space-y-8"
             >
+                <PersonalizedTicker holdings={holdings} onUpdate={updateHolding} />
+                
                 {/* Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <motion.div variants={itemVariants}>
+                <div className="flex overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 hide-scrollbar">
+                    <motion.div variants={itemVariants} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-0 snap-center shrink-0">
                         <StatCard title={t('total_invested')} value={`₹${totals.invested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
                             change={`${holdings.length} ${t('stocks')}`} isPositive={true} icon={DollarSign} delay={0}
                             subtitle={t('in_portfolio')} />
                     </motion.div>
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-0 snap-center shrink-0">
                         <StatCard title={t('current_value')} value={`₹${totals.current.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
                             change={`${pnl >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%`} isPositive={pnl >= 0} icon={Briefcase} delay={0}
                             subtitle={t('live_market_value')} />
                     </motion.div>
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-0 snap-center shrink-0">
                         <StatCard title={t('risk_profile')}
                             value={(() => { try { return JSON.parse(localStorage.getItem('risk_assessment_result'))?.User_Class || 'Moderate'; } catch { return 'Moderate'; } })()}
                             change={t('ai_matched')} isPositive={true} icon={Activity} delay={0}
                             subtitle={t('based_on_assessment')} />
                     </motion.div>
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={itemVariants} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-0 snap-center shrink-0">
                         <StatCard title={t('total_pnl')} value={`₹${Math.abs(pnl).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
                             change={`${pnl >= 0 ? '+' : '-'}${Math.abs(pnlPercent).toFixed(2)}%`} isPositive={pnl >= 0} icon={DollarSign} delay={0}
                             subtitle={t('unrealised')} />
@@ -348,34 +341,38 @@ const Dashboard = () => {
                         <motion.div variants={itemVariants}>
                             <PortfolioChart delay={0.5} />
                         </motion.div>
-                        <motion.div variants={itemVariants}>
-                            {/* Add Stock Button */}
-                            <div className="flex justify-end mb-3">
-                                <button
-                                    onClick={() => setShowAddModal(true)}
-                                    className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-lg hover:shadow-emerald-500/25"
-                                >
-                                    <Plus size={16} /> {t('add_stock')}
-                                </button>
-                            </div>
-                            <HoldingsTable
-                                holdings={holdings}
-                                onDelete={deleteHolding}
-                                onUpdate={updateHolding}
-                                signals={signals}
-                            />
-                        </motion.div>
                     </div>
 
                     <div className="lg:col-span-1 flex flex-col gap-6">
                         <motion.div variants={itemVariants}>
                             <AssetAllocation holdings={holdings} delay={0.6} />
                         </motion.div>
-                        <motion.div variants={itemVariants}>
-                            <AIInsights delay={0.7} />
-                        </motion.div>
                     </div>
                 </div>
+
+                {/* Full Width Sections */}
+                <motion.div variants={itemVariants} className="mt-6">
+                    {/* Add Stock Button */}
+                    <div className="flex justify-end mb-3">
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="stark-btn-primary !px-4 !py-2 rounded-lg text-xs hover:scale-[1.02] transition-transform duration-200 flex items-center gap-2 border border-transparent"
+                        >
+                            <Plus size={14} /> {t('add_stock')}
+                        </button>
+                    </div>
+                    <HoldingsTable
+                        holdings={holdings}
+                        onDelete={deleteHolding}
+                        onUpdate={updateHolding}
+                        signals={signals}
+                        isLoading={!hasLoadedHoldings}
+                    />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <AIInsights delay={0.7} isLoading={!hasLoadedHoldings} />
+                </motion.div>
             </motion.div>
 
             {/* Add Holding Modal */}

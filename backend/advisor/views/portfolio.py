@@ -1,9 +1,11 @@
 import json
+import logging
 import yfinance as yf
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+import pandas as pd
 
 from ..models import Holding, Transaction
 from ..serializers import HoldingSerializer, HoldingUpdateSerializer, HoldingDeleteSerializer
@@ -15,19 +17,27 @@ def get_holdings(request):
     """Get all holdings for the authenticated user with live prices."""
     user = request.user
 
-    holdings = Holding.objects.filter(user=user)
+    holdings = list(Holding.objects.filter(user=user))
+
+    tickers = list(set([h.ticker for h in holdings]))
+    prices = {}
+    if tickers:
+        try:
+            df = yf.download(tickers, period='1d', progress=False)['Close']
+            if len(df) > 0:
+                last_row = df.iloc[-1]
+                for ticker in tickers:
+                    val = last_row.get(ticker)
+                    if pd.notna(val):
+                        prices[ticker] = float(val)
+        except Exception as e:
+            print(f"Error fetching bulk prices: {e}")
 
     result = []
     for h in holdings:
-        ltp = h.avg_price  # fallback
-        try:
-            ticker = yf.Ticker(h.ticker)
-            info = ticker.info
-            ltp = info.get('currentPrice', info.get('regularMarketPrice', h.avg_price))
-            if not ltp:
-                ltp = h.avg_price
-        except:
-            pass
+        ltp = prices.get(h.ticker, h.avg_price)
+        if not ltp:
+            ltp = h.avg_price
 
         result.append({
             "id": h.id,
@@ -124,7 +134,8 @@ def add_holding(request):
             "message": "Holding added successfully"
         })
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logging.getLogger('security').error(f"Error in add_holding: {e}")
+        return Response({"error": "An internal error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -163,7 +174,8 @@ def update_holding(request):
             "message": "Holding updated"
         })
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logging.getLogger('security').error(f"Error in update_holding: {e}")
+        return Response({"error": "An internal error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -184,7 +196,8 @@ def delete_holding(request):
 
         return Response({"message": "Holding deleted successfully"})
     except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logging.getLogger('security').error(f"Error in delete_holding: {e}")
+        return Response({"error": "An internal error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -200,18 +213,22 @@ def get_portfolio_history(request):
 
     try:
         all_histories = {}
-        for h in holdings:
+        tickers = list(set([h.ticker for h in holdings]))
+        if tickers:
             try:
-                ticker = yf.Ticker(h.ticker)
-                hist = ticker.history(period=period)
-                if not hist.empty:
-                    all_histories[h.ticker] = {
-                        'qty': h.qty,
-                        'prices': {idx.strftime('%Y-%m-%d'): round(float(row['Close']), 2)
-                                   for idx, row in hist.iterrows()}
-                    }
+                df_close = yf.download(tickers, period=period, progress=False)['Close']
+                for h in holdings:
+                    ticker = h.ticker
+                    if ticker in df_close.columns:
+                        hist = df_close[ticker].dropna()
+                        if not hist.empty:
+                            all_histories[ticker] = {
+                                'qty': h.qty,
+                                'prices': {idx.strftime('%Y-%m-%d'): round(float(val), 2)
+                                           for idx, val in hist.items()}
+                            }
             except Exception as e:
-                print(f"History error for {h.ticker}: {e}")
+                print(f"History bulk fetch error: {e}")
 
         if not all_histories:
             return Response({"data": []})
@@ -253,7 +270,13 @@ def get_portfolio_signals(request):
     if not holdings.exists():
         return Response({"signals": [], "alerts": []})
 
-    risk_profile = request.query_params.get('risk', 'Moderate')
+    try:
+        risk_profile = request.user.profile.risk_profile
+        if not risk_profile:
+            risk_profile = 'Moderate'
+    except Exception:
+        risk_profile = 'Moderate'
+        
     stop_loss = {"Conservative": 0.07, "Moderate": 0.10, "Aggressive": 0.15}.get(risk_profile, 0.10)
 
     total_invested = sum(h.qty * h.avg_price for h in holdings)
@@ -262,16 +285,26 @@ def get_portfolio_signals(request):
     signals = []
     alerts = []
 
+    tickers = list(set([h.ticker for h in holdings]))
+    hist_data = {}
+    if tickers:
+        try:
+            df_close = yf.download(tickers, period="3mo", progress=False)['Close']
+            for t in tickers:
+                if t in df_close.columns:
+                    hist_data[t] = df_close[t].dropna()
+        except Exception as e:
+            print(f"Error fetching bulk history: {e}")
+
     for h in holdings:
         try:
-            ticker = yf.Ticker(h.ticker)
-            info = ticker.info
-            ltp = info.get('currentPrice', info.get('regularMarketPrice', h.avg_price))
-            if not ltp:
+            close_series = hist_data.get(h.ticker)
+            if close_series is not None and not close_series.empty:
+                ltp = float(close_series.iloc[-1])
+                hist = pd.DataFrame({'Close': close_series})
+            else:
                 ltp = h.avg_price
-
-            # Fetch 3 months of history for technical indicators
-            hist = ticker.history(period="3mo")
+                hist = pd.DataFrame()
             trend = 0
             macd_signal_val = "neutral"
             bollinger_position = "middle"

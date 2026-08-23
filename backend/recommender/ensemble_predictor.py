@@ -2,8 +2,8 @@
 Tier 2 Ensemble Stock Predictor.
 
 Combines three models for robust predictions:
-- AttentionLSTM (50%) — Non-linear patterns, long sequences
-- XGBoost (30%)       — Feature interactions, fast training
+- AttentionLSTM (70%) — Non-linear patterns, long sequences
+- XGBoost (10%)       — Feature interactions, fast training
 - ARIMA (20%)         — Linear trend + seasonality
 
 Falls back gracefully if any model fails.
@@ -35,115 +35,6 @@ except ImportError:
     )
 
 
-# ============================================================
-#  XGBOOST PREDICTOR
-# ============================================================
-
-def _xgboost_predict(df, sentiment_score=0.0, forecast_days=7):
-    """
-    XGBoost regression on flattened sliding-window features.
-    Uses last 5 days of 13 features → predicts 7-day returns.
-    """
-    try:
-        import xgboost as xgb
-    except ImportError:
-        print("[ENSEMBLE] xgboost not installed, skipping XGBoost...")
-        return None
-
-    features_df = prepare_features(df, sentiment_score=sentiment_score)
-    data = features_df.values
-    close_prices = df['Close'].values
-
-    lookback = 5  # XGBoost uses short lookback (flattened)
-    num_features = data.shape[1]
-
-    # Create flattened sliding-window features
-    X, y = [], []
-    for i in range(lookback, len(data) - forecast_days):
-        flat = data[i - lookback:i].flatten()
-        # Target: percentage returns for next 7 days
-        future_returns = (close_prices[i:i + forecast_days] / close_prices[i - 1]) - 1
-        X.append(flat)
-        y.append(future_returns)
-
-    if len(X) < 20:
-        return None
-
-    X = np.array(X)
-    y = np.array(y)
-
-    # Train on all but last fold (time-ordered)
-    split = int(len(X) * 0.85)
-    X_train, X_test = X[:split], X[split:]
-    y_train, y_test = y[:split], y[split:]
-
-    # Multi-output via separate models per day
-    predictions = []
-    last_price = close_prices[-1]
-
-    for day in range(forecast_days):
-        model = xgb.XGBRegressor(
-            n_estimators=100,
-            max_depth=5,
-            learning_rate=0.1,
-            random_state=42,
-            verbosity=0
-        )
-        model.fit(X_train, y_train[:, day])
-        pred_return = model.predict(X[-1:].reshape(1, -1))[0]
-        pred_price = last_price * (1 + pred_return)
-        predictions.append(round(float(pred_price), 2))
-        last_price = pred_price  # Chain predictions
-
-    print(f"[ENSEMBLE] XGBoost predictions: {predictions}")
-    return predictions
-
-
-# ============================================================
-#  ARIMA PREDICTOR
-# ============================================================
-
-def _arima_predict(df, forecast_days=7):
-    """
-    Auto-ARIMA on Close prices for trend/seasonal forecasting.
-    """
-    try:
-        import pmdarima as pm
-    except ImportError:
-        print("[ENSEMBLE] pmdarima not installed, skipping ARIMA...")
-        return None
-
-    try:
-        close = df['Close'].values
-
-        # Use last 200 trading days for faster fitting
-        close_subset = close[-200:] if len(close) > 200 else close
-
-        model = pm.auto_arima(
-            close_subset,
-            seasonal=False,
-            stepwise=True,
-            suppress_warnings=True,
-            error_action='ignore',
-            max_p=5, max_q=5, max_d=2,
-            trace=False
-        )
-
-        forecast = model.predict(n_periods=forecast_days)
-        predictions = [round(float(p), 2) for p in forecast]
-
-        print(f"[ENSEMBLE] ARIMA predictions: {predictions}")
-        return predictions
-
-    except Exception as e:
-        print(f"[ENSEMBLE] ARIMA failed: {e}")
-        return None
-
-
-# ============================================================
-#  ENSEMBLE COMBINER
-# ============================================================
-
 # Model weights
 WEIGHTS = {
     'lstm': 0.70,
@@ -153,6 +44,7 @@ WEIGHTS = {
 
 
 from recommender.data_loader import SafeDataFetcher
+
 
 # ============================================================
 #  XGBOOST PREDICTOR
@@ -185,15 +77,13 @@ def _xgboost_predict(df, sentiment_score=0.0, forecast_days=7):
     if len(X) < 20: return None
 
     X, y = np.array(X), np.array(y)
-    split = int(len(X) * 0.85)
-    X_train, y_train = X[:split], y[:split]
-
+    
     predictions = []
     last_price = df['Close'].iloc[-1]
-    
-    # Train multi-output
+
+    # Train multi-output on ALL available historical data (no split)
     model = xgb.XGBRegressor(n_estimators=100, max_depth=5, learning_rate=0.1, random_state=42)
-    model.fit(X_train, y_train)
+    model.fit(X, y)
     
     pred_log_rets = model.predict(X[-1:].reshape(1, -1))[0]
     
@@ -226,7 +116,7 @@ def _arima_predict(df, forecast_days=7):
         
         subset = log_returns[-200:] if len(log_returns) > 200 else log_returns
 
-        model = pm.auto_arima(subset, seasonal=False, stepwise=True, suppress_warnings=True, max_p=3, max_q=3)
+        model = pm.auto_arima(subset, seasonal=False, stepwise=True, suppress_warnings=True, max_p=1, max_q=1)
         forecast_rets = model.predict(n_periods=forecast_days)
         
         predictions = []
@@ -241,66 +131,26 @@ def _arima_predict(df, forecast_days=7):
         return None
 
 
-def calculate_ivw_weights(ticker, df, forecast_days=7):
+# ============================================================
+#  ENSEMBLE COMBINER
+# ============================================================
+
+def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7, fast_mode: bool = False) -> dict:
     """
-    Volatility-Adjusted Inverse Variance Weighting.
-    Calculates MSE of each model over the last 5 trading days.
-    """
-    print(f"[ENSEMBLE] Calculating Dynamic IVW Weights for {ticker}...")
-    
-    # Split data to hide last 5 days
-    eval_len = 5
-    train_df = df.iloc[:-eval_len]
-    actual_prices = df['Close'].iloc[-eval_len:].values
-    
-    models_mse = {}
-    
-    # LSTM MSE
-    try:
-        # We need a way to predict without caching for evaluation
-        # For simplicity, we assume previous model results or run a quick backtest
-        # Here we simulate/use the provided train_and_predict on the subset
-        res = lstm_predict(ticker, lookback=60, forecast_days=eval_len) # This might use cache, but for weights it's okay
-        pred_items = res['predictions'][:eval_len]
-        preds = np.array([p['price'] for p in pred_items])
-        models_mse['lstm'] = np.mean((actual_prices - preds)**2)
-    except:
-        models_mse['lstm'] = 1e6
+    Dynamic Ensemble using hardcoded weights for LSTM + XGBoost + ARIMA.
+    Runs all 3 models concurrently for speed.
 
-    # XGB MSE
-    try:
-        preds = _xgboost_predict(train_df, forecast_days=eval_len)
-        models_mse['xgboost'] = np.mean((actual_prices - np.array(preds))**2)
-    except:
-        models_mse['xgboost'] = 1e6
-        
-    # ARIMA MSE
-    try:
-        preds = _arima_predict(train_df, forecast_days=eval_len)
-        models_mse['arima'] = np.mean((actual_prices - np.array(preds))**2)
-    except:
-        models_mse['arima'] = 1e6
-
-    # Inverse Variance Weighting: w_i = (1/MSE_i) / sum(1/MSE_j)
-    # Add small epsilon to avoid div by zero
-    inv_vars = {k: 1.0 / (v + 1e-6) for k, v in models_mse.items()}
-    total_inv_var = sum(inv_vars.values())
-    weights = {k: v / total_inv_var for k, v in inv_vars.items()}
-    
-    print(f"[ENSEMBLE] Dynamic Weights: { {k: round(v, 3) for k, v in weights.items()} }")
-    return weights
-
-
-def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -> dict:
-    """
-    Dynamic Ensemble using IVW for LSTM + XGBoost + ARIMA.
+    Args:
+        fast_mode: If True, skip ARIMA (saves 2-5s), reduce LSTM training,
+                   and skip macro feature downloads for faster on-demand predictions.
     """
     # Check persistent DB cache first
     cached_result = get_cached_prediction(ticker)
     if cached_result:
         return cached_result
 
-    print(f"[ENSEMBLE] Starting Dynamic Pipeline for {ticker}...")
+    mode_label = "FAST" if fast_mode else "FULL"
+    print(f"[ENSEMBLE] Starting Pipeline for {ticker} ({mode_label} mode)...")
     start_time = time.time()
 
     # 1. Fetch data safely
@@ -313,24 +163,43 @@ def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) ->
 
     sentiment_score = get_sentiment_for_ticker(ticker)
 
-    # 2. Calculate Dynamic Weights
-    weights = calculate_ivw_weights(ticker, df, forecast_days)
+    # 2. Use hardcoded weights (skipping slow double-execution of ML models for IVW)
+    weights = WEIGHTS
 
-    # 3. Run predictions
+    # 3. Run predictions concurrently (skip ARIMA in fast mode)
+    import concurrent.futures
     model_predictions = {}
+    lstm_full_result = {}  # Store the full LSTM result for bounds
     
-    try:
-        lstm_res = lstm_predict(ticker, lookback, forecast_days)
-        model_predictions['lstm'] = [p['price'] for p in lstm_res['predictions']]
-    except: pass
+    def fetch_lstm():
+        res = lstm_predict(ticker, lookback, forecast_days, fast_mode=fast_mode)
+        lstm_full_result['data'] = res  # Save full result including bounds
+        return [p['price'] for p in res['predictions']]
         
-    try:
-        model_predictions['xgboost'] = _xgboost_predict(df, sentiment_score, forecast_days)
-    except: pass
+    def fetch_xgboost():
+        return _xgboost_predict(df, sentiment_score, forecast_days)
         
-    try:
-        model_predictions['arima'] = _arima_predict(df, forecast_days)
-    except: pass
+    def fetch_arima():
+        return _arima_predict(df, forecast_days)
+
+    max_workers = 2 if fast_mode else 3
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_lstm = executor.submit(fetch_lstm)
+        future_xgb = executor.submit(fetch_xgboost)
+        future_arima = None if fast_mode else executor.submit(fetch_arima)
+
+        try:
+            model_predictions['lstm'] = future_lstm.result()
+        except: pass
+            
+        try:
+            model_predictions['xgboost'] = future_xgb.result()
+        except: pass
+            
+        if future_arima is not None:
+            try:
+                model_predictions['arima'] = future_arima.result()
+            except: pass
 
     # 4. Weighted Combination
     active_models = [m for m in model_predictions if model_predictions[m]]
@@ -346,6 +215,12 @@ def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) ->
         p_val = sum(model_predictions[m][day] * norm_weights[m] for m in active_models)
         ensemble_prices.append(round(p_val, 2))
 
+    # 5.5 FIX: Validate prediction outputs are finite numbers
+    if not all(np.isfinite(p) for p in ensemble_prices):
+        # Replace any NaN/Inf with last known price
+        last_price = float(df['Close'].iloc[-1])
+        ensemble_prices = [round(last_price, 2) if not np.isfinite(p) else p for p in ensemble_prices]
+
     # 5. Result construction
     history = []
     for idx, row in df.tail(30).iterrows():
@@ -353,10 +228,30 @@ def ensemble_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) ->
 
     last_date = df.index[-1]
     predictions = []
+
+    # Reuse LSTM bounds from the concurrent run (no second call!)
+    lstm_bounds = None
+    if 'data' in lstm_full_result:
+        lstm_preds = lstm_full_result['data'].get('predictions', [])
+        if lstm_preds and 'lower_bound' in lstm_preds[0]:
+            lstm_bounds = lstm_preds
+
     for i in range(forecast_days):
         next_date = last_date + timedelta(days=i + 1)
         while next_date.weekday() >= 5: next_date += timedelta(days=1)
-        predictions.append({"date": next_date.strftime('%Y-%m-%d'), "price": ensemble_prices[i], "isFuture": True})
+
+        entry = {"date": next_date.strftime('%Y-%m-%d'), "price": ensemble_prices[i], "isFuture": True}
+
+        # Use LSTM confidence intervals if available, otherwise generate synthetic ±2% bands
+        if lstm_bounds and i < len(lstm_bounds):
+            entry["lower_bound"] = lstm_bounds[i].get("lower_bound", round(ensemble_prices[i] * 0.98, 2))
+            entry["upper_bound"] = lstm_bounds[i].get("upper_bound", round(ensemble_prices[i] * 1.02, 2))
+        else:
+            margin = ensemble_prices[i] * 0.02 * ((i + 1) ** 0.5)
+            entry["lower_bound"] = round(ensemble_prices[i] - margin, 2)
+            entry["upper_bound"] = round(ensemble_prices[i] + margin, 2)
+
+        predictions.append(entry)
 
     result = {
         "history": history,

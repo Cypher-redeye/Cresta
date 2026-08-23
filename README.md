@@ -112,8 +112,8 @@ Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive**
 
 * **Model:** XGBoost Classifier
 * **Dataset:** 25,000 profiles — 2,578 real NFCS 2021 Investor Survey respondents (FINRA Foundation) augmented with 22,422 synthetic profiles generated via SEBI income capacity guideline distributions and empirical behavioral noise.
-* **Accuracy:** 68% (Validated on heterogeneous synthetic noise)
-* **Aggressive Recall:** 97% — solved the high-bias "Moderate" issue
+* **Accuracy:** 84% (5-Fold Stratified Cross-Validation)
+* **Conservative Recall:** 84% — critical for fiduciary safety
 
 **Explainable AI (XAI) — Feature Importance:**
 
@@ -139,18 +139,20 @@ Cresta dynamically classifies users as **Conservative, Moderate, or Aggressive**
 
 **Forecasting Performance (Walk-Forward Validated):**
 
-| Ticker | Sector | Avg Ensemble MAPE | Status |
+| Ticker | Sector | Directional Accuracy | MAPE |
 |---|---|---|---|
-| RELIANCE.NS | Energy/Conglomerate | 1.33% | ✅ Verified |
-| TCS.NS | IT Services | 3.85% | ✅ Verified |
-| INFY.NS | IT Services | 2.69% | ✅ Verified |
-| HDFCBANK.NS | Banking | 2.67% | ✅ Verified |
-| ICICIBANK.NS | Banking | 2.51% | ✅ Verified |
-| SUNPHARMA.NS | Pharma | 0.82% | ✅ Verified |
-| MARUTI.NS | Auto | 7.66% | ✅ Verified |
-| ONGC.NS | Energy | 4.30% | ✅ Verified |
+| RELIANCE.NS | Energy/Conglomerate | 85.2% | 10.84% |
+| ICICIBANK.NS | Banking | 70.4% | 6.75% |
+| HDFCBANK.NS | Banking | 72.6% | 7.01% |
+| MARUTI.NS | Auto | 70.4% | 17.38% |
+| ONGC.NS | Energy | 78.5% | 12.73% |
+| TCS.NS | IT Services | 68.9% | 9.83% |
+| SUNPHARMA.NS | Pharma | 60.7% | 5.98% |
+| INFY.NS | IT Services | 54.1%* | 10.66% |
 
-**Average Ensemble MAPE across test set: 3.23%** (Dramatic improvement from ~11-18%)
+*\*Data-limited — insufficient 20-year historical coverage. System suppresses recommendations and serves data-limitation warning for stocks below 60% directional accuracy threshold.*
+
+**Average directional accuracy across 7 liquid stocks: 72.3%**
 
 ---
 
@@ -379,10 +381,20 @@ npm run dev
 
 ---
 
+## 🆕 Recent Updates & Changelog
+
+- **Forecast Engine Optimization:** Achieved faster generation times by running LSTM, XGBoost, and ARIMA ensembles concurrently via `ThreadPoolExecutor` and optimizing ARIMA grid-search parameters.
+- **Deep Localization (i18n):** Completed full translation and rollout of Hindi, Gujarati, and Punjabi support across all dashboard components and AI reasoning views.
+- **Settings Dashboard Overhaul:** Deployed advanced configurations for Risk Management, Notification Preferences, Account Security, and Currency Defaults.
+- **Auth & Onboarding Flow Fixes:** Resolved edge-case login/register blocks and fixed recurring Risk Assessment prompts for Google OAuth users by syncing Django models with accurate timestamps.
+- **UI & Graphing Tying:** Addressed missing rendering of 7-day forecast graphs on specific stock tickers and ironed out data-fetching states.
+
+---
+
 ## 🗺️ Roadmap
 
 - [ ] **Oracle Cloud Deployment** — full ML stack on 4 OCPU / 24GB RAM free tier
-- [ ] **Portfolio Backtesting** — simulate historical strategy vs Nifty50 benchmark with Sharpe ratio, drawdown, CAGR
+- [x] **Portfolio Backtesting** — simulate historical strategy vs Nifty50 benchmark with Sharpe ratio, drawdown, CAGR ✅
 - [ ] **Options Chain Analyzer** — IV and Greeks visualization for F&O traders
 - [ ] **Mutual Fund Coverage** — extend AI scoring to top 50 Indian MFs
 - [ ] **Mobile App** — React Native port with push-based watchlist alerts

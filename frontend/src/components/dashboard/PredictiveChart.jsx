@@ -10,7 +10,8 @@ import {
     ReferenceLine
 } from 'recharts';
 import { motion } from 'framer-motion';
-import { TrendingUp, Info, Loader2, X } from 'lucide-react';
+import { TrendingUp, Info, X } from 'lucide-react';
+import Logo from '../common/Logo';
 import { useTranslation } from 'react-i18next';
 import { API_BASE, apiCall } from '../../api';
 
@@ -25,12 +26,30 @@ const PredictiveChart = ({ symbol, onClose }) => {
             setLoading(true);
             setError(null);
             try {
-                const cleanSymbol = symbol.replace('.NS', '');
-                const res = await apiCall(`/prediction/?symbol=${cleanSymbol}`);
-                const result = await res.json();
+                const cleanSymbol = symbol.replace('.NS', '').replace('.BO', '');
+                let res = await apiCall(`/prediction/?symbol=${cleanSymbol}`);
+                let result = await res.json();
                 if (result.error) throw new Error(result.error);
 
+                if (result.task_id) {
+                    let taskStatus = 'processing';
+                    while (taskStatus === 'processing') {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        const pollRes = await apiCall(`/prediction/status/${result.task_id}/?symbol=${cleanSymbol}`);
+                        const pollResult = await pollRes.json();
+                        if (pollResult.error) throw new Error(pollResult.error);
+                        
+                        taskStatus = pollResult.status;
+                        if (taskStatus === 'completed') {
+                            result = pollResult;
+                        } else if (taskStatus === 'failed' || taskStatus === 'FAILURE') {
+                            throw new Error(pollResult.error || 'Prediction task failed');
+                        }
+                    }
+                }
+
                 // Process data: create separate keys for historical and future
+                let lastHistorical = null;
                 const processed = result.data.map((item, index, arr) => {
                     const entry = {
                         date: item.date,
@@ -39,6 +58,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
 
                     if (!item.isFuture) {
                         entry.historical = item.price;
+                        lastHistorical = item.price;
                         // Add bridge point: if next item is future, also set future to current price
                         if (index < arr.length - 1 && arr[index + 1].isFuture) {
                             entry.future = item.price;
@@ -49,6 +69,18 @@ const PredictiveChart = ({ symbol, onClose }) => {
                         entry.future = item.price;
                         entry.lower_bound = item.lower_bound;
                         entry.upper_bound = item.upper_bound;
+                        entry.base_price = lastHistorical;
+                        
+                        if (lastHistorical) {
+                            const expectedReturn = (item.price - lastHistorical) / lastHistorical;
+                            const boundWidth = (item.upper_bound - item.lower_bound) / lastHistorical;
+                            entry.expected_return = expectedReturn;
+                            
+                            // Conviction logic based on bound width
+                            if (boundWidth < 0.02) entry.conviction = 'High';
+                            else if (boundWidth < 0.05) entry.conviction = 'Medium';
+                            else entry.conviction = 'Low';
+                        }
                     }
 
                     return entry;
@@ -67,26 +99,53 @@ const PredictiveChart = ({ symbol, onClose }) => {
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const item = payload[0].payload;
-            const price = item.historical || item.future;
-            return (
-                <div className="bg-fintech-card/90 backdrop-blur-md border border-white/10 p-3 rounded-lg shadow-xl">
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">{item.date}</p>
-                    <p className="text-sm font-extrabold text-white">₹{price?.toLocaleString()}</p>
-                    {item.isFuture && (
-                        <div className="mt-1 flex flex-col gap-1">
-                            <div className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-                                <span className="text-[10px] text-blue-400 font-bold">{t('ai_forecast')}</span>
-                            </div>
-                            {item.lower_bound && item.upper_bound && (
-                                <p className="text-[9px] text-gray-500 font-medium">
-                                    80% CI: ₹{item.lower_bound?.toLocaleString()} - ₹{item.upper_bound?.toLocaleString()}
-                                </p>
-                            )}
+            
+            if (!item.isFuture) {
+                return (
+                    <div className="apple-glass apple-card-glow p-3 rounded-xl border-none shadow-xl">
+                        <p className="text-[9px] text-notion-muted font-bold uppercase mb-1">{item.date}</p>
+                        <p className="text-sm font-extrabold text-notion-text">₹{item.historical?.toLocaleString()}</p>
+                    </div>
+                );
+            } else {
+                // Future point: Show Direction & Bounds, obscure exact price
+                const expectedRet = item.expected_return || 0;
+                const lowerRet = (item.lower_bound - item.base_price) / item.base_price;
+                const upperRet = (item.upper_bound - item.base_price) / item.base_price;
+                
+                const direction = expectedRet > 0.005 ? 'Bullish 📈' : expectedRet < -0.005 ? 'Bearish 📉' : 'Neutral ➖';
+                const dirColor = expectedRet > 0.005 ? 'text-emerald-400' : expectedRet < -0.005 ? 'text-red-400' : 'text-gray-400';
+                
+                let convictionColor = 'text-gray-400';
+                if (item.conviction === 'High') convictionColor = 'text-emerald-400';
+                if (item.conviction === 'Medium') convictionColor = 'text-blue-400';
+                if (item.conviction === 'Low') convictionColor = 'text-orange-400';
+
+                return (
+                    <div className="apple-glass p-3 rounded-xl border-none min-w-[140px] shadow-xl">
+                        <p className="text-[9px] text-notion-muted font-bold uppercase mb-1">{item.date}</p>
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                            <span className="text-[10px] text-blue-400 font-bold">{t('ai_forecast')}</span>
                         </div>
-                    )}
-                </div>
-            );
+                        
+                        <p className={`text-sm font-extrabold ${dirColor} mb-2`}>{direction}</p>
+                        
+                        <div className="flex flex-col gap-1">
+                            <div className="flex justify-between items-center text-[10px]">
+                                <span className="text-notion-muted font-medium">Conviction:</span>
+                                <span className={`font-bold ${convictionColor}`}>{item.conviction}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-[10px]">
+                                <span className="text-notion-muted font-medium">Expected Move:</span>
+                                <span className="font-bold text-notion-text">
+                                    {(lowerRet * 100).toFixed(1)}% to {(upperRet * 100).toFixed(1)}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
         }
         return null;
     };
@@ -94,20 +153,37 @@ const PredictiveChart = ({ symbol, onClose }) => {
     // Find the divider date and determine if performance is positive
     const dividerDate = chartData.find(d => d.isFuture)?.date;
     const historicalData = chartData.filter(d => !d.isFuture && d.historical !== undefined);
-    const isPositive = historicalData.length >= 2 
-        ? (historicalData[historicalData.length - 1].historical >= historicalData[0].historical)
-        : true;
-
     const chartColors = {
-        stroke: isPositive ? '#10B981' : '#ef4444',
-        fill: isPositive ? '#10B981' : '#ef4444'
+        stroke: 'var(--accent-emerald, #00ff66)',
+        fill: 'var(--accent-emerald, #00ff66)'
     };
+
+    // Calculate Overall Signal Badge
+    const getOverallSignal = () => {
+        const lastPoint = chartData[chartData.length - 1];
+        if (!lastPoint || !lastPoint.isFuture || !lastPoint.base_price) return null;
+        
+        // Use threshold consistent with backtester (env var or default 1%)
+        const buyThreshold = parseFloat(import.meta.env.VITE_BUY_THRESHOLD || "0.01");
+        const sellThreshold = parseFloat(import.meta.env.VITE_SELL_THRESHOLD || "-0.01");
+        
+        const expectedReturn = lastPoint.expected_return;
+        const lowerBoundRet = (lastPoint.lower_bound - lastPoint.base_price) / lastPoint.base_price;
+        
+        if (expectedReturn > buyThreshold && lowerBoundRet > -0.01) {
+            return { label: 'Strong Buy', color: 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' };
+        } else if (expectedReturn < sellThreshold) {
+            return { label: 'Bearish', color: 'bg-red-500/20 text-red-500 border-red-500/30' };
+        }
+        return { label: 'Hold', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
+    };
+    const signalBadge = getOverallSignal();
 
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-panel p-5 rounded-2xl relative"
+            className="apple-glass p-5 rounded-2xl relative"
         >
             {onClose && (
                 <button
@@ -122,6 +198,11 @@ const PredictiveChart = ({ symbol, onClose }) => {
                 <div className="flex items-center gap-2 mb-1">
                     <TrendingUp className="text-fintech-emerald dark:text-emerald-400 w-4 h-4" />
                     <h4 className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">{t('growth_forecast')}</h4>
+                    {signalBadge && (
+                        <span className={`ml-2 px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border ${signalBadge.color}`}>
+                            {signalBadge.label}
+                        </span>
+                    )}
                 </div>
                 <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
                     {t('past_present_future')}
@@ -130,7 +211,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center h-48 gap-3">
-                    <Loader2 className="w-8 h-8 text-fintech-emerald dark:text-emerald-500 animate-spin" />
+                    <Logo width={48} height={48} animateDrawing={true} className="drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     <p className="text-xs text-gray-500">{t('analyzing_trends')}</p>
                 </div>
             ) : error ? (
@@ -151,17 +232,24 @@ const PredictiveChart = ({ symbol, onClose }) => {
                                     <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                            <CartesianGrid vertical={false} horizontal={false} />
                             <XAxis dataKey="date" hide />
                             <YAxis
                                 domain={['auto', 'auto']}
                                 orientation="right"
-                                stroke="#ffffff30"
+                                stroke="var(--notion-muted)"
+                                strokeOpacity={0.4}
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: 'var(--notion-muted)' }}
                                 fontSize={9}
                                 tickFormatter={(v) => `₹${v}`}
                                 width={55}
                             />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip
+                                cursor={{ stroke: 'var(--notion-muted)', strokeWidth: 0.5, strokeDasharray: '4 4' }}
+                                content={<CustomTooltip />}
+                            />
 
                             <Area
                                 type="monotone"
@@ -173,6 +261,7 @@ const PredictiveChart = ({ symbol, onClose }) => {
                                 connectNulls={false}
                                 isAnimationActive={true}
                                 dot={false}
+                                activeDot={{ r: 4, stroke: 'var(--accent-emerald)', strokeWidth: 1.5, fill: '#fff', className: 'pulse-dot' }}
                             />
 
                             {/* Confidence Interval Band (Subtle fill) */}
@@ -188,8 +277,8 @@ const PredictiveChart = ({ symbol, onClose }) => {
                                 type="monotone"
                                 dataKey="lower_bound"
                                 stroke="none"
-                                fill="#0d0d0d" // Masking the area below the lower bound to fake a floating band
-                                fillOpacity={0.8}
+                                fill="var(--notion-card)" // Dynamic theme background masking to fake a floating band
+                                fillOpacity={1}
                                 isAnimationActive={true}
                             />
 
@@ -204,10 +293,11 @@ const PredictiveChart = ({ symbol, onClose }) => {
                                 connectNulls={false}
                                 isAnimationActive={true}
                                 dot={false}
+                                activeDot={{ r: 4, stroke: '#3B82F6', strokeWidth: 1.5, fill: '#fff', className: 'pulse-dot' }}
                             />
 
                             {dividerDate && (
-                                <ReferenceLine x={dividerDate} stroke="#ffffff40" strokeDasharray="3 3" label="" />
+                                <ReferenceLine x={dividerDate} stroke="var(--notion-border)" strokeDasharray="3 3" label="" />
                             )}
                         </AreaChart>
                     </ResponsiveContainer>

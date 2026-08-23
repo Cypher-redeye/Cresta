@@ -47,18 +47,18 @@ def get_sentiment_for_ticker(ticker):
         data = get_cached_sentiment(ticker)
         return data.get('score', 0.0)
     except Exception:
-        try:
-            from recommender.sentiment import get_market_sentiment
-            data = get_market_sentiment(ticker)
-            return data.get('score', 0.0)
-        except Exception:
-            return 0.0
+        return 0.0
 
 
-def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -> dict:
+def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7, fast_mode: bool = False) -> dict:
     """
     Fetch real data, train AttentionLSTM with log returns for stationarity,
     and predict next 7 days.
+
+    Args:
+        fast_mode: If True, reduce training intensity for faster on-demand predictions.
+                   Reduces walk-forward folds (3→1), final epochs (60→15),
+                   MC samples (30→10), and skips macro features.
     """
     set_seed(42)
     # Check persistent DB cache
@@ -67,7 +67,8 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
         print(f"[LSTM] Returning DB cached result for {ticker}")
         return cached_result
 
-    print(f"[LSTM] Processing {ticker} with Log Returns...")
+    mode_label = "FAST" if fast_mode else "FULL"
+    print(f"[LSTM] Processing {ticker} with Log Returns ({mode_label} mode)...")
 
     # 1. Fetch data using SafeDataFetcher
     try:
@@ -82,8 +83,8 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
     # 2. Get sentiment score
     sentiment_score = get_sentiment_for_ticker(ticker)
 
-    # 3. Prepare features
-    features_df = prepare_features(df, sentiment_score=sentiment_score)
+    # 3. Prepare features (skip macro downloads in fast mode)
+    features_df = prepare_features(df, sentiment_score=sentiment_score, skip_macro=fast_mode)
     
     # --- STATIONARITY OVERHAUL: Log Returns Transformation ---
     # We predict Log Returns, not raw prices.
@@ -103,20 +104,24 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
     scaler = MinMaxScaler(feature_range=(-1, 1)) # Better for centered returns
     scaled_data = scaler.fit_transform(features_df.values)
 
-    # 5. Training / Loading
+    # 5. Training / Loading — fast_mode uses fewer epochs and folds
+    n_folds = 1 if fast_mode else 3
+    fold_epochs = 20 if fast_mode else 40
+    final_epochs = 15 if fast_mode else 60
+
     model, loaded_scaler = load_saved_model(ticker, num_features)
     test_loss_val = 0.0
     wf_mse = 0.0
 
     if model is None or loaded_scaler is None:
-        print(f"[LSTM] Training new AttentionLSTM for {ticker} (Target: Log Returns)...")
+        print(f"[LSTM] Training new AttentionLSTM for {ticker} ({n_folds} folds × {fold_epochs} + {final_epochs} final)...")
         X, y = create_sequences(scaled_data, lookback, forecast_days)
 
         if len(X) < 10:
             raise ValueError(f"Not enough sequences for training {ticker}.")
 
         # --- Walk-Forward Validation ---
-        splits = walk_forward_split(X, y, n_folds=3)
+        splits = walk_forward_split(X, y, n_folds=n_folds)
         fold_losses = []
 
         for fold_idx, ((X_tr, y_tr), (X_te, y_te)) in enumerate(splits):
@@ -133,7 +138,7 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
             y_te_t = torch.FloatTensor(y_te)
 
             fold_model.train()
-            for epoch in range(40):
+            for epoch in range(fold_epochs):
                 optimizer.zero_grad()
                 output = fold_model(X_tr_t)
                 loss = criterion(output, y_tr_t)
@@ -156,7 +161,7 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
         y_all_t = torch.FloatTensor(y)
 
         model.train()
-        for epoch in range(60):
+        for epoch in range(final_epochs):
             optimizer.zero_grad()
             output = model(X_all_t)
             loss = criterion(output, y_all_t)
@@ -168,11 +173,11 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
         save_model(ticker, model, scaler, num_features)
 
     # 6. Prediction with MC Dropout
+    n_samples = 10 if fast_mode else 30
     last_sequence = scaled_data[-lookback:]
     last_sequence_t = torch.FloatTensor(last_sequence).unsqueeze(0)
     model.train() # MC Dropout env
 
-    n_samples = 30
     mc_preds = []
     for _ in range(n_samples):
         with torch.no_grad():
@@ -232,18 +237,12 @@ def train_and_predict(ticker: str, lookback: int = 60, forecast_days: int = 7) -
             "walk_forward_mse": round(wf_mse, 6),
             "training_samples": len(scaled_data) - lookback - forecast_days,
             "features": num_features,
-            "model": "AttentionLSTM (Log Returns - Stationary)"
+            "model": f"AttentionLSTM (Log Returns - {'Fast' if fast_mode else 'Full'})"
         }
     }
 
     save_prediction(ticker, result)
     print(f"[LSTM] Stationary prediction complete for {ticker}")
-    return result
-
-    # Save to persistent database
-    save_prediction(ticker, result)
-
-    print(f"[LSTM] Prediction complete for {ticker}")
     return result
 
 

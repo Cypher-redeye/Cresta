@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Clock } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { useSearch } from '../context/SearchContext';
 import { useUser } from '../context/UserContext';
 import { useToast } from '../context/ToastContext';
@@ -14,6 +15,7 @@ import SearchResultCard from '../components/markets/SearchResultCard';
 import MarketIndices from '../components/markets/MarketIndices';
 import TopMovers from '../components/markets/TopMovers';
 import MarketNews from '../components/markets/MarketNews';
+import Logo from '../components/common/Logo';
 
 // Mock Data Generator for mini charts
 const generateChartData = (points = 50) => {
@@ -228,17 +230,27 @@ const MarketsPage = () => {
 
                     {/* Search Status */}
                     {searchQuery && !user && (
-                        <div className="mt-4 p-3 bg-fintech-emerald/10 dark:bg-emerald-500/10 border border-fintech-emerald/20 dark:border-emerald-500/20 rounded-lg text-sm text-fintech-emerald dark:text-neon-emerald flex items-center gap-2">
+                        <div className="mt-4 p-3 bg-notion-emerald-bg border border-notion-border rounded-lg text-sm text-notion-emerald flex items-center gap-2">
                             <Clock className="w-4 h-4" />
                             <span>{t('sign_in_unlock')}</span>
                         </div>
                     )}
-                    {searchLoading && <p className="text-fintech-emerald dark:text-emerald-600 mt-2 animate-pulse">{t('searching_for')} "{searchQuery}"...</p>}
+                    {/* Search Status / Loading State */}
+                    {searchLoading && (
+                        <div className="mt-6 w-full max-w-lg apple-glass p-4 rounded-2xl border border-notion-border/50 shadow-sm flex items-center gap-4 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-notion-emerald/5 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+                            <div className="relative shrink-0 w-8 h-8 rounded-full border-[3px] border-notion-border/50 border-t-notion-emerald animate-spin shadow-[0_0_10px_rgba(16,185,129,0.2)]"></div>
+                            <div className="relative flex-1">
+                                <p className="text-sm font-extrabold text-notion-text tracking-wide">{t('searching_for')} <span className="text-notion-emerald">"{searchQuery}"</span></p>
+                                <p className="text-[11px] text-notion-muted font-bold mt-0.5 uppercase tracking-widest">{t('analyzing_market_data', 'Aggregating AI Insights...')}</p>
+                            </div>
+                        </div>
+                    )}
                     {searchError && <p className="text-red-500 mt-2">Error: {searchError}</p>}
 
                     {/* Main Status Indicators */}
                     {loading && !indicesData.length && (
-                        <div className="flex items-center gap-2 mt-2 text-fintech-emerald dark:text-neon-emerald animate-pulse">
+                        <div className="flex items-center gap-2 mt-2 text-notion-emerald animate-pulse">
                             <span className="w-2 h-2 bg-current rounded-full"></span>
                             <span className="text-sm font-medium">{t('fetching_live_data')}</span>
                         </div>
@@ -247,9 +259,9 @@ const MarketsPage = () => {
                         <div className="mt-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 p-3 rounded border border-red-200 dark:border-red-800/30">
                             <p className="font-bold">⚠️ {t('connection_error')}</p>
                             <p>{error}</p>
-                            <p className="text-xs mt-1 text-gray-500">
+                            <p className="text-xs mt-1 text-notion-muted">
                                 {t('troubleshooting')}:<br />
-                                1. Ensure backend is running at <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">http://127.0.0.1:8000</code><br />
+                                1. Ensure backend is running at <code className="bg-notion-hover px-1 rounded">http://127.0.0.1:8000</code><br />
                                 2. Check console logs (F12) for detailed error.<br />
                                 3. Try disabling ad blockers or VPN.
                             </p>
@@ -259,13 +271,18 @@ const MarketsPage = () => {
             </div>
 
             {/* Search Result Card */}
-            <SearchResultCard
-                searchResult={searchResult}
-                user={user}
-                showSearchChart={showSearchChart}
-                setShowSearchChart={setShowSearchChart}
-                t={t}
-            />
+            <AnimatePresence mode="wait">
+                {searchResult && (
+                    <SearchResultCard
+                        key={`search-result-${searchResult.symbol}`}
+                        searchResult={searchResult}
+                        user={user}
+                        showSearchChart={showSearchChart}
+                        setShowSearchChart={setShowSearchChart}
+                        t={t}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* Market Indices Cards */}
             <MarketIndices indicesData={indicesData} chartData={chartData} t={t} />
@@ -291,12 +308,27 @@ const MarketsPage = () => {
         </div>
     );
 
+    const renderLoadingScreen = () => (
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="relative">
+                <div className="absolute inset-0 bg-notion-emerald/20 blur-xl rounded-full animate-pulse" />
+                <Logo width={72} height={72} className="relative z-10 animate-pulse" />
+            </div>
+            <h2 className="mt-8 text-xl font-bold text-notion-text tracking-tight animate-pulse">
+                {t('analyzing_market_data', 'Analyzing Market Data...')}
+            </h2>
+            <p className="mt-2 text-sm text-notion-muted">
+                {t('fetching_live_data', 'Fetching live market conditions')}
+            </p>
+        </div>
+    );
+
     if (!user) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-fintech-bg transition-colors duration-300">
+            <div className="min-h-screen bg-notion-bg text-notion-text transition-colors duration-300">
                 <Navbar />
                 <main className="container mx-auto px-6 py-32">
-                    {renderContent()}
+                    {loading && indicesData.length === 0 ? renderLoadingScreen() : renderContent()}
                 </main>
                 <Footer />
             </div>
@@ -305,7 +337,7 @@ const MarketsPage = () => {
 
     return (
         <DashboardLayout>
-            {renderContent()}
+            {loading && indicesData.length === 0 ? renderLoadingScreen() : renderContent()}
         </DashboardLayout>
     );
 };

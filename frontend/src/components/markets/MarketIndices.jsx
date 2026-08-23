@@ -21,12 +21,13 @@ const MarketIndices = ({ indicesData, chartData, t }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="glass-panel p-6 rounded-2xl border border-gray-200 dark:border-white/10 bg-white/50 dark:bg-fintech-card/50 backdrop-blur-xl"
+                    className="apple-glass p-6 md:p-8 rounded-3xl border border-notion-border/50 shadow-lg relative overflow-hidden group hover:border-notion-emerald/30 transition-all duration-500 hover:shadow-2xl"
                 >
+                    <div className="absolute top-[-50%] right-[-10%] w-[60%] h-[150%] bg-gradient-radial from-notion-emerald/5 to-transparent blur-[40px] -z-10 pointer-events-none group-hover:from-notion-emerald/10 transition-all duration-500" />
                     <div className="flex justify-between items-start mb-4">
                         <div>
-                            <h3 className="text-gray-500 dark:text-gray-400 font-medium">{index.name}</h3>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                            <h3 className="text-notion-muted font-medium">{index.name}</h3>
+                            <div className="text-2xl font-bold text-notion-text mt-1">
                                 {index.value}
                             </div>
                         </div>
@@ -38,7 +39,7 @@ const MarketIndices = ({ indicesData, chartData, t }) => {
                         const trendIsPositive = chartData.length >= 2 
                             ? chartData[chartData.length - 1].value >= chartData[0].value 
                             : index.isPositive;
-                        const mainColor = trendIsPositive ? "#10B981" : "#ef4444";
+                        const mainColor = trendIsPositive ? "var(--accent-emerald)" : "#ef4444";
                         
                         return (
                             <div className="h-16">

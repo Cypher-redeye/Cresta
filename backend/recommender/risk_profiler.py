@@ -119,6 +119,27 @@ class RiskProfiler:
         pred_idx = self.model.predict(sample)[0]
         return self.label_encoder.classes_[pred_idx]
 
+    def get_feature_importance(self) -> dict:
+        """
+        Return feature importance scores from the XGBoost model.
+        Uses native feature_importances_ (no SHAP dependency).
+        Returns dict like: {'Age': 0.15, 'Income': 0.35, ...}
+        """
+        if self.model is None:
+            if os.path.exists(self.model_path):
+                data = joblib.load(self.model_path)
+                self.model = data['model']
+                self.goal_encoder = data['goal_encoder']
+                self.label_encoder = data['label_encoder']
+            else:
+                return {}
+
+        importances = self.model.feature_importances_
+        return {
+            col: round(float(imp), 4)
+            for col, imp in zip(self.feature_cols, importances)
+        }
+
 if __name__ == "__main__":
     # Internal test/train
     profiler = RiskProfiler()

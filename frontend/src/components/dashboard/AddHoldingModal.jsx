@@ -74,32 +74,41 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
         setError('');
     };
 
-    if (!isOpen) return null;
-
     return (
         <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-                onClick={onClose}
-            >
+            {isOpen && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="w-full max-w-md bg-white dark:bg-fintech-card border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden"
-                    onClick={e => e.stopPropagation()}
+                    key="modal-container"
+                    className="fixed inset-0 z-[99998] flex items-end md:items-center justify-center md:p-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                 >
+                    <div 
+                        className="absolute inset-0 bg-black/60 backdrop-blur-md cursor-pointer" 
+                        onClick={onClose} 
+                    />
+                    
+                    <motion.div
+                        initial={{ y: "100%", opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: "100%", opacity: 0 }}
+                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                        className="relative w-full md:max-w-md bg-notion-card border border-notion-border rounded-t-3xl md:rounded-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-2xl overflow-hidden z-10"
+                        onClick={e => e.stopPropagation()}
+                    >
+                    {/* Mobile Drag Handle */}
+                    <div className="w-full flex justify-center pt-4 pb-2 md:hidden shrink-0 bg-notion-bg/50">
+                        <div className="w-12 h-1.5 bg-notion-border rounded-full" />
+                    </div>
                     {/* Header */}
-                    <div className="p-6 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <Plus size={18} className="text-fintech-emerald dark:text-emerald-500" />
+                    <div className="p-4 md:p-6 border-b border-notion-border flex items-center justify-between bg-notion-bg/50">
+                        <h3 className="text-lg font-bold text-notion-text flex items-center gap-2">
+                            <Plus size={18} className="text-notion-emerald" />
                             {t('add_stock_holding')}
                         </h3>
-                        <button onClick={() => { resetForm(); onClose(); }} className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">
-                            <X size={18} className="text-gray-400" />
+                        <button onClick={() => { resetForm(); onClose(); }} className="p-2 hover:bg-notion-hover rounded-lg transition-colors">
+                            <X size={18} className="text-notion-muted" />
                         </button>
                     </div>
 
@@ -107,15 +116,15 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                     {success ? (
                         <div className="p-12 flex flex-col items-center gap-4">
                             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' }}>
-                                <CheckCircle size={48} className="text-emerald-400" />
+                                <CheckCircle size={48} className="text-notion-emerald" />
                             </motion.div>
-                            <p className="text-lg font-bold text-gray-900 dark:text-white">{t('holding_added_success')}</p>
+                            <p className="text-lg font-bold text-notion-text">{t('holding_added_success')}</p>
                         </div>
                     ) : (
                         <div className="p-6 space-y-4">
                             {/* Stock Search */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
+                                <label className="block text-xs font-bold text-notion-muted uppercase tracking-wider mb-1.5">
                                     {t('stock_symbol')} *
                                 </label>
                                 <div className="flex gap-2">
@@ -125,20 +134,20 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                         onChange={e => setTicker(e.target.value.toUpperCase())}
                                         onKeyDown={e => e.key === 'Enter' && searchStock()}
                                         placeholder="e.g. RELIANCE, TCS, INFY"
-                                        className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
+                                        className="flex-1 px-4 py-2.5 bg-notion-bg border border-notion-border rounded-xl text-sm text-notion-text placeholder-notion-muted/50 focus:ring-1 focus:ring-notion-emerald focus:border-notion-emerald outline-none"
                                     />
                                     <button
                                         onClick={searchStock}
                                         disabled={searching}
-                                        className="px-4 py-2.5 bg-fintech-emerald/10 dark:bg-emerald-500/10 hover:bg-fintech-emerald/20 dark:hover:bg-emerald-500/20 text-fintech-emerald dark:text-emerald-400 border border-fintech-emerald/20 dark:border-emerald-500/20 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+                                        className="px-4 py-2.5 bg-notion-emerald-bg hover:bg-notion-emerald-bg/85 text-notion-emerald border border-notion-emerald/30 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
                                     >
                                         {searching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                                     </button>
                                 </div>
                                 {searchResult && (
-                                    <div className="mt-2 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
-                                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{searchResult.name}</p>
-                                        <p className="text-xs text-emerald-600 dark:text-emerald-500">
+                                    <div className="mt-2 p-3 bg-notion-emerald-bg border border-notion-emerald/30 rounded-lg">
+                                        <p className="text-sm font-bold text-notion-emerald">{searchResult.name}</p>
+                                        <p className="text-xs text-notion-emerald/80">
                                             CMP: ₹{searchResult.price} • {searchResult.suggestion || 'Market'}
                                         </p>
                                     </div>
@@ -148,7 +157,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                             {/* Quantity & Price */}
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
+                                    <label className="block text-xs font-bold text-notion-muted uppercase tracking-wider mb-1.5">
                                         {t('quantity')} *
                                     </label>
                                     <input
@@ -157,11 +166,11 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                         onChange={e => setQty(e.target.value)}
                                         placeholder="10"
                                         min="1"
-                                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
+                                        className="w-full px-4 py-2.5 bg-notion-bg border border-notion-border rounded-xl text-sm text-notion-text placeholder-notion-muted/50 focus:ring-1 focus:ring-notion-emerald focus:border-notion-emerald outline-none"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
+                                    <label className="block text-xs font-bold text-notion-muted uppercase tracking-wider mb-1.5">
                                         {t('avg_buy_price')} *
                                     </label>
                                     <input
@@ -170,21 +179,21 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                         onChange={e => setAvgPrice(e.target.value)}
                                         placeholder="1500.00"
                                         step="0.01"
-                                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
+                                        className="w-full px-4 py-2.5 bg-notion-bg border border-notion-border rounded-xl text-sm text-notion-text placeholder-notion-muted/50 focus:ring-1 focus:ring-notion-emerald focus:border-notion-emerald outline-none"
                                     />
                                 </div>
                             </div>
 
                             {/* Purchase Date (optional) */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">
+                                <label className="block text-xs font-bold text-notion-muted uppercase tracking-wider mb-1.5">
                                     {t('purchase_date_optional')}
                                 </label>
                                 <input
                                     type="date"
                                     value={purchaseDate}
                                     onChange={e => setPurchaseDate(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none"
+                                    className="w-full px-4 py-2.5 bg-notion-bg border border-notion-border rounded-xl text-sm text-notion-text focus:ring-1 focus:ring-notion-emerald focus:border-notion-emerald outline-none"
                                 />
                             </div>
 
@@ -197,7 +206,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                             <button
                                 onClick={handleSubmit}
                                 disabled={submitting || !ticker || !qty || !avgPrice}
-                                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-notion-emerald hover:bg-notion-emerald/90 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                             >
                                 {submitting ? (
                                     <><Loader2 size={16} className="animate-spin" /> {t('adding')}</>
@@ -208,7 +217,8 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                         </div>
                     )}
                 </motion.div>
-            </motion.div>
+                </motion.div>
+            )}
         </AnimatePresence>
     );
 };

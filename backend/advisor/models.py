@@ -10,12 +10,12 @@ class UserProfile(models.Model):
     investment_goal = models.CharField(max_length=50, blank=True, default='')
     age = models.IntegerField(null=True, blank=True)
     income = models.IntegerField(null=True, blank=True)
-    picture = models.URLField(blank=True, default='')
+    picture = models.URLField(max_length=500, null=True, blank=True)
     last_assessment_date = models.DateTimeField(null=True, blank=True)
     
     # Email Verification
     email_verified = models.BooleanField(default=False)
-    verification_token = models.CharField(max_length=64, blank=True)
+    verification_token_hash = models.CharField(max_length=128, blank=True)
     verification_token_expires = models.DateTimeField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)

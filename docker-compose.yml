@@ -16,16 +16,29 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
 
   # --- Redis (Cache + Celery Broker) ---
   redis:
     image: redis:7-alpine
     restart: always
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
 
   # --- Django Backend (Gunicorn) ---
   backend:
@@ -44,10 +57,16 @@ services:
     volumes:
       - model_data:/app/saved_models
       - model_data:/app/recommender/saved_models
+      - app_logs:/app/logs
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              gunicorn robo_advisor.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 8G
 
   # --- Celery Worker (ML Tasks) ---
   celery_worker:
@@ -66,7 +85,13 @@ services:
     volumes:
       - model_data:/app/saved_models
       - model_data:/app/recommender/saved_models
+      - app_logs:/app/logs
     command: python -m celery -A robo_advisor worker -l info --concurrency=2
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 12G
 
   # --- Celery Beat (Scheduled Tasks) ---
   celery_beat:
@@ -81,6 +106,11 @@ services:
       redis:
         condition: service_healthy
     command: python -m celery -A robo_advisor beat -l info
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
 
   # --- Frontend (Nginx + React) ---
   frontend:
@@ -92,9 +122,15 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ssl_certs:/etc/letsencrypt
     depends_on:
       - backend
 
 volumes:
   postgres_data:
   model_data:
+  redis_data:
+  app_logs:
+  ssl_certs:

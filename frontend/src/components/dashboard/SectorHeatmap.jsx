@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Activity, Loader2, BarChart2 } from 'lucide-react';
+import { Activity, BarChart2 } from 'lucide-react';
+import Logo from '../common/Logo';
 import { useTranslation } from 'react-i18next';
 import { API_BASE } from '../../../api';
 
@@ -69,8 +70,8 @@ const SectorHeatmap = () => {
             {/* Main Content Area */}
             <div className="relative z-10 min-h-[160px]">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center min-h-[160px] gap-3">
-                        <Loader2 className="w-8 h-8 text-fintech-emerald animate-spin opacity-80" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-notion-bg/50 backdrop-blur-sm z-10">
+                        <Logo width={48} height={48} animateDrawing={true} className="mb-2 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                         <p className="text-xs text-gray-400 font-medium tracking-wide">Scanning News Nodes...</p>
                     </div>
                 ) : error ? (

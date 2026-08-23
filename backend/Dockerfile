@@ -16,7 +16,11 @@ COPY . .
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
 # Create dirs for model storage
-RUN mkdir -p saved_models recommender/saved_models
+RUN mkdir -p saved_models recommender/saved_models logs
+
+# P1-6 FIX: Run as non-root user
+RUN useradd -m -r appuser && chown -R appuser:appuser /app
+USER appuser
 
 EXPOSE 8000
 

@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { usePerformance } from '../../context/PerformanceContext';
 
 const BackgroundEffects = ({ isDark, style }) => {
   const canvasRef = useRef(null);
+  const { isLowPerformance } = usePerformance();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,7 +31,7 @@ const BackgroundEffects = ({ isDark, style }) => {
         this.x = Math.random() * w;
         this.y = Math.random() * h;
         this.text = dataPoints[Math.floor(Math.random() * dataPoints.length)];
-        this.maxAlpha = isDark ? 0.25 + Math.random() * 0.20 : 0.35 + Math.random() * 0.25;
+        this.maxAlpha = isDark ? 0.35 + Math.random() * 0.35 : 0.45 + Math.random() * 0.40;
         this.alpha = 0; this.fadeIn = true;
         this.speed = 0.004 + Math.random() * 0.006;
         this.size = 11 + Math.floor(Math.random() * 7);
@@ -48,9 +50,14 @@ const BackgroundEffects = ({ isDark, style }) => {
       draw(ctx) {
         const pos = this.text.includes('▲') || this.text.includes('+') || this.text === 'BUY';
         const neg = this.text.includes('▼') || this.text.includes('−') || this.text === 'SELL';
-        const otherColor = isDark ? `rgba(16,185,129,${this.alpha * 0.75})` : `rgba(5,120,85,${this.alpha * 0.9})`;
-        ctx.fillStyle = pos ? `rgba(16,185,129,${this.alpha})` : neg ? `rgba(239,68,68,${this.alpha})` : otherColor;
-        ctx.font = `500 ${this.size}px monospace`;
+        if (pos) {
+          ctx.fillStyle = isDark ? `rgba(0, 255, 102, ${this.alpha})` : `rgba(0, 170, 68, ${this.alpha})`; // cyber neon green
+        } else if (neg) {
+          ctx.fillStyle = isDark ? `rgba(255, 0, 85, ${this.alpha})` : `rgba(230, 0, 68, ${this.alpha})`; // neon pink-red
+        } else {
+          ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${this.alpha * 0.45})` : `rgba(0, 0, 0, ${this.alpha * 0.4})`; // monochrome default
+        }
+        ctx.font = `500 ${this.size}px 'JetBrains Mono', monospace`;
         ctx.fillText(this.text, this.x, this.y);
       }
     }
@@ -59,47 +66,9 @@ const BackgroundEffects = ({ isDark, style }) => {
 
     const draw = () => {
       const w = canvas.width, h = canvas.height;
-      // Background base
-      ctx.fillStyle = isDark ? '#121212' : '#f0f4f8';
+      // Pure Apple/Vercel backgrounds (true black / white)
+      ctx.fillStyle = isDark ? '#000000' : '#ffffff';
       ctx.fillRect(0, 0, w, h);
-
-      const b1 = 0.5 + 0.5 * Math.sin(t * 1.5);
-      const b2 = 0.5 + 0.5 * Math.sin(t * 1.0 + 2.0);
-      const b3 = 0.5 + 0.5 * Math.sin(t * 0.7 + 4.0);
-      const b4 = 0.5 + 0.5 * Math.sin(t * 0.9 + 5.0);
-      const base = isDark ? 1 : 2.4;
-
-      let r, g;
-      // Left glow
-      r = w * (0.55 + b1 * 0.18);
-      g = ctx.createRadialGradient(w*0.06, h*0.52, 0, w*0.06, h*0.52, r);
-      g.addColorStop(0, `rgba(16,185,129,${(0.22 + b1*0.16)*base})`);
-      g.addColorStop(0.45, `rgba(16,185,129,${(0.08 + b1*0.07)*base})`);
-      g.addColorStop(1, 'rgba(16,185,129,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-
-      // Top-right glow
-      r = w * (0.45 + b2 * 0.15);
-      g = ctx.createRadialGradient(w*0.85, h*0.18, 0, w*0.85, h*0.18, r);
-      g.addColorStop(0, `rgba(16,185,129,${(0.18 + b2*0.14)*base})`);
-      g.addColorStop(0.45, `rgba(16,185,129,${(0.06 + b2*0.05)*base})`);
-      g.addColorStop(1, 'rgba(16,185,129,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-
-      // Bottom glow (moved up to be visible)
-      r = w * (0.50 + b3 * 0.16);
-      g = ctx.createRadialGradient(w*0.48, h*0.82, 0, w*0.48, h*0.82, r);
-      g.addColorStop(0, `rgba(5,150,105,${(0.20 + b3*0.14)*base})`);
-      g.addColorStop(1, 'rgba(5,150,105,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-
-      // New breathing dot (Top-left)
-      r = w * (0.35 + b4 * 0.12);
-      g = ctx.createRadialGradient(w*0.25, h*0.22, 0, w*0.25, h*0.22, r);
-      g.addColorStop(0, `rgba(16,185,129,${(0.15 + b4*0.12)*base})`);
-      g.addColorStop(0.45, `rgba(16,185,129,${(0.05 + b4*0.04)*base})`);
-      g.addColorStop(1, 'rgba(16,185,129,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
 
       floats.forEach(f => { f.update(w, h); f.draw(ctx); });
       t += 0.025;
@@ -112,6 +81,8 @@ const BackgroundEffects = ({ isDark, style }) => {
       cancelAnimationFrame(animId);
     };
   }, [isDark]);
+
+  if (isLowPerformance) return null;
 
   return (
     <canvas

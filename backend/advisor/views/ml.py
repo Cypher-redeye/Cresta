@@ -53,6 +53,51 @@ def recommend_api(request):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+def _fallback_prediction(symbol):
+    try:
+        ticker = yf.Ticker(symbol)
+        df = ticker.history(period="1mo")
+
+        if df.empty:
+            return Response({"error": "No data"}, status=status.HTTP_404_NOT_FOUND)
+
+        history = []
+        for index, row in df.iterrows():
+            history.append({
+                "date": index.strftime('%Y-%m-%d'),
+                "price": round(row['Close'], 2),
+                "isFuture": False
+            })
+
+        last_price = history[-1]['price']
+        recent_trend = (last_price - history[max(0, len(history)-5)]['price']) / 5
+
+        from datetime import timedelta
+        last_date = df.index[-1]
+
+        predictions = []
+        for i in range(1, 8):
+            next_date = last_date + timedelta(days=i)
+            pred_price = last_price + (recent_trend * i) + (last_price * 0.005 * (i ** 0.5))
+            margin = last_price * 0.02 * (i ** 0.5)  # ±2% widening band
+            predictions.append({
+                "date": next_date.strftime('%Y-%m-%d'),
+                "price": round(pred_price, 2),
+                "lower_bound": round(pred_price - margin, 2),
+                "upper_bound": round(pred_price + margin, 2),
+                "isFuture": True
+            })
+
+        return Response({
+            "symbol": symbol,
+            "data": history + predictions,
+            "model": "Trend (fallback)",
+            "status": "completed"
+        })
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_prediction(request):
@@ -64,6 +109,10 @@ def get_prediction(request):
     TICKER_ALIASES = {
         'INFOSYS': 'INFY', 'TATAMOTORS': 'TATAMTRDVR', 'BAJAJFINSERV': 'BAJFINANCE',
         'STATEBANK': 'SBIN', 'SBI': 'SBIN',
+        'LT': 'LT', 'LARSEN': 'LT', 'L&T': 'LT',
+        'ETERNAL': 'ETERNAL', 'ZOMATO': 'ETERNAL',
+        'TATA MOTORS': 'TATAMOTORS', 'TATA STEEL': 'TATASTEEL',
+        'ADANI': 'ADANIENT', 'ADANI ENTERPRISES': 'ADANIENT',
     }
     base = symbol.upper().replace('.NS', '').replace('.BO', '')
     if base in TICKER_ALIASES:
@@ -74,61 +123,76 @@ def get_prediction(request):
         symbol = f"{symbol}.NS"
 
     try:
-        # Tier 2: Use ensemble predictor (LSTM + XGBoost + ARIMA)
-        from recommender.ensemble_predictor import ensemble_predict
-        result = ensemble_predict(symbol)
-        combined_data = result['history'] + result['predictions']
+        from recommender.stock_predictor import get_cached_prediction
+        cached = get_cached_prediction(symbol)
+        if cached:
+            combined_data = cached['history'] + cached['predictions']
+            return Response({
+                "symbol": symbol,
+                "data": combined_data,
+                "model": "Ensemble (AttentionLSTM + XGBoost + ARIMA)",
+                "metrics": cached.get('metrics', {}),
+                "model_breakdown": cached.get('model_breakdown', {}),
+                "status": "completed"
+            })
 
+        from advisor.tasks import run_ensemble_prediction_task
+        task = run_ensemble_prediction_task.delay(symbol, fast_mode=True)
         return Response({
             "symbol": symbol,
-            "data": combined_data,
-            "model": "Ensemble (AttentionLSTM + XGBoost + ARIMA)",
-            "metrics": result.get('metrics', {}),
-            "model_breakdown": result.get('model_breakdown', {})
+            "task_id": task.id,
+            "status": "processing"
         })
 
     except Exception as ensemble_error:
-        print(f"Ensemble failed for {symbol}: {ensemble_error}")
+        print(f"Ensemble task start failed for {symbol}: {ensemble_error}")
+        return _fallback_prediction(symbol)
 
-        # Fallback to LSTM only
-        try:
-            ticker = yf.Ticker(symbol)
-            df = ticker.history(period="1mo")
 
-            if df.empty:
-                return Response({"error": "No data"}, status=status.HTTP_404_NOT_FOUND)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_prediction_status(request, task_id):
+    from celery.result import AsyncResult
+    symbol = request.query_params.get('symbol', 'UNKNOWN')
+    
+    # Ticker alias mapping (reuse from get_prediction)
+    TICKER_ALIASES = {
+        'INFOSYS': 'INFY', 'TATAMOTORS': 'TATAMTRDVR', 'BAJAJFINSERV': 'BAJFINANCE',
+        'STATEBANK': 'SBIN', 'SBI': 'SBIN',
+        'LT': 'LT', 'LARSEN': 'LT', 'L&T': 'LT',
+        'ETERNAL': 'ETERNAL', 'ZOMATO': 'ETERNAL',
+        'TATA MOTORS': 'TATAMOTORS', 'TATA STEEL': 'TATASTEEL',
+        'ADANI': 'ADANIENT', 'ADANI ENTERPRISES': 'ADANIENT',
+    }
+    base = symbol.upper().replace('.NS', '').replace('.BO', '')
+    if base in TICKER_ALIASES:
+        symbol = TICKER_ALIASES[base]
 
-            history = []
-            for index, row in df.iterrows():
-                history.append({
-                    "date": index.strftime('%Y-%m-%d'),
-                    "price": round(row['Close'], 2),
-                    "isFuture": False
-                })
-
-            last_price = history[-1]['price']
-            recent_trend = (last_price - history[max(0, len(history)-5)]['price']) / 5
-
-            from datetime import timedelta
-            last_date = df.index[-1]
-
-            predictions = []
-            for i in range(1, 8):
-                next_date = last_date + timedelta(days=i)
-                pred_price = last_price + (recent_trend * i) + (last_price * 0.005 * (i ** 0.5))
-                predictions.append({
-                    "date": next_date.strftime('%Y-%m-%d'),
-                    "price": round(pred_price, 2),
-                    "isFuture": True
-                })
-
+    if not symbol.endswith('.NS') and not symbol.endswith('.BO') and not symbol.startswith('^'):
+        symbol = f"{symbol}.NS"
+        
+    task = AsyncResult(task_id)
+    
+    if task.state == 'PENDING' or task.state == 'STARTED':
+        return Response({'status': 'processing'})
+    elif task.state == 'SUCCESS':
+        task_result = task.result
+        if task_result.get('status') == 'SUCCESS':
+            result = task_result['result']
+            combined_data = result['history'] + result['predictions']
             return Response({
-                "symbol": symbol,
-                "data": history + predictions,
-                "model": "Trend (fallback)"
+                "status": "completed",
+                "data": combined_data,
+                "model": "Ensemble (AttentionLSTM + XGBoost + ARIMA)",
+                "metrics": result.get('metrics', {}),
+                "model_breakdown": result.get('model_breakdown', {})
             })
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return _fallback_prediction(symbol)
+    elif task.state == 'FAILURE':
+        return _fallback_prediction(symbol)
+    else:
+        return Response({'status': task.state})
 
 
 @api_view(['GET'])

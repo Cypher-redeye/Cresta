@@ -41,8 +41,8 @@ const AlertBanner = ({ alerts = [], onDismiss }) => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.1 }}
                             className={`relative overflow-hidden rounded-2xl border p-4 ${isHigh
-                                ? 'bg-red-500/10 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
-                                : 'bg-amber-500/10 border-amber-500/20'
+                                ? 'bg-red-500/10 border-red-500/30 shadow-sm'
+                                : 'bg-amber-500/10 border-amber-500/20 shadow-sm'
                                 }`}
                         >
                             {/* Animated pulse for high urgency */}
@@ -57,11 +57,11 @@ const AlertBanner = ({ alerts = [], onDismiss }) => {
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className="font-bold text-sm text-gray-900 dark:text-white">{alert.name}</span>
-                                        <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">{alert.ticker}</span>
+                                        <span className="font-bold text-sm text-notion-text">{alert.name}</span>
+                                        <span className="text-[10px] text-notion-muted font-mono">{alert.ticker}</span>
                                         <SignalBadge signal={alert.signal} />
                                     </div>
-                                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">{alert.reason}</p>
+                                    <p className="text-xs text-notion-text leading-relaxed">{alert.reason}</p>
                                     <div className="mt-2 flex items-center gap-1.5 text-xs">
                                         <ChevronRight size={12} className={isSell ? 'text-red-400' : 'text-amber-400'} />
                                         <span className={`font-semibold ${isSell ? 'text-red-400' : 'text-amber-400'}`}>
@@ -73,9 +73,9 @@ const AlertBanner = ({ alerts = [], onDismiss }) => {
                                 {onDismiss && (
                                     <button
                                         onClick={() => onDismiss(alert.id)}
-                                        className="p-1 hover:bg-white/5 rounded-lg transition-colors shrink-0"
+                                        className="p-1 hover:bg-notion-hover rounded-lg transition-colors shrink-0"
                                     >
-                                        <X size={14} className="text-gray-500" />
+                                        <X size={14} className="text-notion-muted" />
                                     </button>
                                 )}
                             </div>

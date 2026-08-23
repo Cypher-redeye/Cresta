@@ -7,6 +7,7 @@ and assembles them into a feature matrix for the LSTM model.
 import pandas as pd
 import yfinance as yf
 import logging
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -53,13 +54,17 @@ def compute_obv(close, volume):
     return obv
 
 
-def prepare_features(df, sentiment_score=0.0):
+def prepare_features(df, sentiment_score=0.0, skip_macro=False):
     """
     Create feature matrix from raw OHLCV data.
 
     13 Features (Tier 2):
     Close, Volume, SMA_5, SMA_20, RSI_14, Daily_Return, Price_Range,
     MACD, MACD_Signal, Bollinger_Upper, Bollinger_Lower, OBV, Sentiment
+
+    Args:
+        skip_macro: If True, skip expensive yfinance macro downloads (USD/INR, VIX, Crude).
+                    Uses zero-fill instead. Saves 3-6 seconds per call.
     """
     features = pd.DataFrame(index=df.index)
 
@@ -83,26 +88,51 @@ def prepare_features(df, sentiment_score=0.0):
 
     features['OBV'] = compute_obv(df['Close'], df['Volume'])
 
-    # Tier 3 Macro Features
-    start_date = df.index[0]
-    try:
-        usd_inr = yf.download("INR=X", start=start_date, progress=False)['Close']
-        vix = yf.download("^INDIAVIX", start=start_date, progress=False)['Close']
-        crude = yf.download("CL=F", start=start_date, progress=False)['Close']
-        
-        # We need to flatten MultiIndex columns if yfinance returns them
-        if isinstance(usd_inr, pd.DataFrame): usd_inr = usd_inr.iloc[:, 0]
-        if isinstance(vix, pd.DataFrame): vix = vix.iloc[:, 0]
-        if isinstance(crude, pd.DataFrame): crude = crude.iloc[:, 0]
-
-        features['USD_INR'] = usd_inr.reindex(df.index).ffill().bfill()
-        features['VIX'] = vix.reindex(df.index).ffill().bfill()
-        features['CRUDE'] = crude.reindex(df.index).ffill().bfill()
-    except Exception as e:
-        logger.error(f"Failed to fetch macro features: {e}")
+    # Tier 3 Macro Features (cached for 24h to avoid slow re-downloads)
+    if skip_macro:
+        # Fast mode: skip expensive macro downloads, use zero-fill
         features['USD_INR'] = 0.0
         features['VIX'] = 0.0
         features['CRUDE'] = 0.0
+    else:
+        start_date = df.index[0]
+        try:
+            macro_cache_key = f"macro_features:{start_date.strftime('%Y%m%d')}"
+            cached_macro = cache.get(macro_cache_key)
+            
+            if cached_macro:
+                usd_inr_data, vix_data, crude_data = cached_macro
+                usd_inr = pd.Series(usd_inr_data['values'], index=pd.to_datetime(usd_inr_data['index']))
+                vix = pd.Series(vix_data['values'], index=pd.to_datetime(vix_data['index']))
+                crude = pd.Series(crude_data['values'], index=pd.to_datetime(crude_data['index']))
+            else:
+                usd_inr = yf.download("INR=X", start=start_date, progress=False)['Close']
+                vix = yf.download("^INDIAVIX", start=start_date, progress=False)['Close']
+                crude = yf.download("CL=F", start=start_date, progress=False)['Close']
+                
+                # Flatten MultiIndex columns if yfinance returns them
+                if isinstance(usd_inr, pd.DataFrame): usd_inr = usd_inr.iloc[:, 0]
+                if isinstance(vix, pd.DataFrame): vix = vix.iloc[:, 0]
+                if isinstance(crude, pd.DataFrame): crude = crude.iloc[:, 0]
+                
+                # Cache the raw data for 24 hours
+                try:
+                    cache.set(macro_cache_key, (
+                        {'values': usd_inr.tolist(), 'index': [str(i) for i in usd_inr.index]},
+                        {'values': vix.tolist(), 'index': [str(i) for i in vix.index]},
+                        {'values': crude.tolist(), 'index': [str(i) for i in crude.index]},
+                    ), timeout=86400)
+                except Exception:
+                    pass  # Cache save failure is non-critical
+
+            features['USD_INR'] = usd_inr.reindex(df.index).ffill().bfill()
+            features['VIX'] = vix.reindex(df.index).ffill().bfill()
+            features['CRUDE'] = crude.reindex(df.index).ffill().bfill()
+        except Exception as e:
+            logger.error(f"Failed to fetch macro features: {e}")
+            features['USD_INR'] = 0.0
+            features['VIX'] = 0.0
+            features['CRUDE'] = 0.0
 
     # Sentiment as a constant feature (from FinBERT)
     features['Sentiment'] = sentiment_score

@@ -54,14 +54,14 @@ def get_market_sentiment(ticker: str) -> dict:
         return {"score": 0.0, "confidence": 0.0, "headlines": []}
 
     # Analyze sentiment for each headline
-    results = pipe(headlines[:10])  # Limit to 10 for speed
+    results = pipe(headlines[:3])  # Limit to 3 for speed
 
     scored_headlines = []
     weighted_score = 0.0
     total_confidence = 0.0
     valid_results = 0
 
-    for hl, res in zip(headlines[:10], results):
+    for hl, res in zip(headlines[:3], results):
         label = res.get('label', '').lower()
         confidence = round(res.get('score', 0.5), 3)  # FinBERT confidence
 

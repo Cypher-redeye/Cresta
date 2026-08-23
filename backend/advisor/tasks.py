@@ -10,10 +10,14 @@ try:
     from celery import shared_task
 except ImportError:
     # Fallback: if celery not installed, make tasks callable as regular functions
-    def shared_task(func):
-        func.delay = func
-        func.apply_async = lambda *a, **kw: func()
-        return func
+    def shared_task(*args, **kwargs):
+        def decorator(func):
+            func.delay = func
+            func.apply_async = lambda *a, **kw: func()
+            return func
+        if args and callable(args[0]):
+            return decorator(args[0])
+        return decorator
 
 
 # ============= SENTIMENT PRE-COMPUTATION =============
@@ -28,7 +32,7 @@ NIFTY_TICKERS = [
 ]
 
 
-@shared_task
+@shared_task(time_limit=600, soft_time_limit=540, rate_limit='10/m')
 def precompute_sentiment():
     """
     Pre-compute FinBERT sentiment for all NIFTY 50 stocks.
@@ -56,7 +60,8 @@ def precompute_sentiment():
             success += 1
             print(f"  ✓ {ticker}: score={sentiment['score']:.3f}")
         except Exception as e:
-            print(f"  ✗ {ticker}: {e}")
+            import logging
+            logging.getLogger(__name__).error(f"Sentiment failed for {ticker}: {e}")
             errors += 1
 
     # Cache the full results map
@@ -71,14 +76,68 @@ def get_cached_sentiment(ticker):
     """
     Get pre-computed sentiment from cache, fallback to live computation.
     Used by engine.py instead of calling FinBERT directly.
+    
+    Fallback chain:
+    1. Django cache (instant)
+    2. Live FinBERT analysis (real headlines + sentiment)
+    3. Raw yfinance news (real headlines, neutral sentiment, no ML)
+    4. Empty headlines (final fallback)
     """
     cached = cache.get(f'sentiment:{ticker}')
     if cached and time.time() - cached.get('timestamp', 0) < 86400:
         return cached
 
-    # Fallback: compute live
-    from recommender.sentiment import get_market_sentiment
-    return get_market_sentiment(ticker)
+    # Fallback 1: call live FinBERT sentiment
+    try:
+        from recommender.sentiment import get_market_sentiment
+        live = get_market_sentiment(ticker)
+        if live.get('headlines'):
+            result = {
+                'score': live['score'],
+                'confidence': live.get('confidence', 0.5),
+                'headlines': live['headlines'],
+                'timestamp': time.time()
+            }
+            cache.set(f'sentiment:{ticker}', result, timeout=86400)
+            return result
+    except Exception as e:
+        print(f"[SENTIMENT] FinBERT fallback failed for {ticker}: {e}")
+
+    # Fallback 2: fetch raw headlines from yfinance WITHOUT FinBERT
+    try:
+        import yfinance as yf
+        stock = yf.Ticker(ticker)
+        news = stock.news
+        if news:
+            raw_headlines = []
+            for item in news[:5]:
+                content = item.get('content', item)
+                title = content.get('title', '') or item.get('title', '')
+                if title:
+                    raw_headlines.append({
+                        "text": title,
+                        "sentiment": "neutral",
+                        "confidence": 0.5
+                    })
+            if raw_headlines:
+                result = {
+                    'score': 0.0,
+                    'confidence': 0.5,
+                    'headlines': raw_headlines,
+                    'timestamp': time.time()
+                }
+                cache.set(f'sentiment:{ticker}', result, timeout=86400)
+                return result
+    except Exception as e:
+        print(f"[SENTIMENT] Raw news fallback failed for {ticker}: {e}")
+
+    # Final fallback: neutral with empty headlines
+    return {
+        'score': 0.0,
+        'confidence': 0.5,
+        'headlines': [],
+        'timestamp': time.time()
+    }
 
 
 # ============= LSTM PRE-TRAINING =============
@@ -94,7 +153,7 @@ TOP_TICKERS = [
 ]
 
 
-@shared_task
+@shared_task(time_limit=1800, soft_time_limit=1740, rate_limit='5/m')
 def pretrain_lstm_models():
     """
     Pre-train ensemble models (AttentionLSTM + XGBoost + ARIMA) for popular stocks.
@@ -121,7 +180,21 @@ def pretrain_lstm_models():
     return {'success': success, 'errors': errors}
 
 
-@shared_task
+@shared_task(time_limit=300, soft_time_limit=280)
+def run_ensemble_prediction_task(symbol, fast_mode=True):
+    """
+    On-demand ensemble prediction task.
+    Runs fast_mode by default to prioritize response time over exhaustive ARIMA search.
+    """
+    from recommender.ensemble_predictor import ensemble_predict
+    try:
+        result = ensemble_predict(symbol, fast_mode=fast_mode)
+        return {"status": "SUCCESS", "result": result}
+    except Exception as e:
+        return {"status": "FAILURE", "error": str(e)}
+
+
+@shared_task(time_limit=3600, soft_time_limit=3540)
 def daily_ml_refresh():
     """Master task: runs both sentiment + LSTM pre-computation."""
     print("[CELERY] === Daily ML Refresh Started ===")
@@ -136,7 +209,7 @@ def daily_ml_refresh():
 
 # ============= ALERTING & MONITORING =============
 
-@shared_task
+@shared_task(time_limit=300, soft_time_limit=280, rate_limit='4/m')
 def check_price_alerts():
     """
     Checks active WatchlistAlerts against live yfinance prices.

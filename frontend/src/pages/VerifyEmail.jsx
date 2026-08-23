@@ -1,52 +1,62 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
+import Logo from '../components/common/Logo';
 import { API_BASE } from '../api';
 
 const VerifyEmail = () => {
+    const { t } = useTranslation();
     const [status, setStatus] = useState('loading');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
+    const email = searchParams.get('email');
 
     useEffect(() => {
-        if (!token) {
+        if (!token || !email) {
             setStatus('error');
-            setMessage('Invalid verification link.');
+            setMessage(t('invalid_link'));
             return;
         }
 
         const verify = async () => {
             try {
-                const res = await fetch(`${API_BASE}/auth/verify-email/?token=${token}`);
+                const res = await fetch(`${API_BASE}/auth/verify-email/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, email })
+                });
                 const data = await res.json();
                 
                 if (res.ok) {
                     setStatus('success');
                 } else {
                     setStatus('error');
-                    setMessage(data.error || 'Verification failed.');
+                    setMessage(data.error || t('verification_failed_generic'));
                 }
             } catch (err) {
                 setStatus('error');
-                setMessage('Connection error. Please try again later.');
+                setMessage(t('connection_error_retry'));
             }
         };
 
         verify();
-    }, [token]);
+    }, [token, email, t]);
 
-    const containerClasses = "min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0d0d0d] p-6";
-    const cardClasses = "max-w-md w-full glass-panel p-10 rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl bg-white dark:bg-fintech-card/30 backdrop-blur-xl text-center";
+    const containerClasses = "min-h-screen flex items-center justify-center bg-notion-bg text-notion-text p-6";
+    const cardClasses = "max-w-md w-full bg-notion-card border border-notion-border p-10 rounded-3xl shadow-sm text-center";
 
     if (status === 'loading') {
         return (
             <div className={containerClasses}>
                 <div className={cardClasses}>
-                    <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mx-auto mb-6" />
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Verifying your email...</h2>
-                    <p className="text-gray-500 mt-2">Please wait a moment.</p>
+                    <div className="flex justify-center mb-6">
+                        <Logo width={64} height={64} animateDrawing={true} className="drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-notion-text">{t('verifying_email')}</h2>
+                    <p className="text-notion-muted mt-2">{t('please_wait')}</p>
                 </div>
             </div>
         );
@@ -56,18 +66,18 @@ const VerifyEmail = () => {
         return (
             <div className={containerClasses}>
                 <div className={cardClasses}>
-                    <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
-                        <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+                    <div className="w-20 h-20 bg-notion-emerald-bg rounded-full flex items-center justify-center mx-auto mb-8">
+                        <CheckCircle2 className="w-12 h-12 text-notion-emerald" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Email Verified!</h2>
-                    <p className="text-gray-600 dark:text-gray-400 mb-8">
-                        Your account has been successfully verified. You can now access all features.
+                    <h2 className="text-3xl font-bold text-notion-text mb-4">{t('email_verified')}</h2>
+                    <p className="text-notion-muted mb-8">
+                        {t('email_verified_desc')}
                     </p>
                     <button 
                         onClick={() => navigate('/auth')}
-                        className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-2xl transition-all shadow-lg shadow-emerald-500/20"
+                        className="w-full py-4 bg-notion-emerald hover:bg-notion-emerald/90 text-white font-bold rounded-2xl transition-all shadow-sm"
                     >
-                        Go to Sign In
+                        {t('go_to_sign_in')}
                     </button>
                 </div>
             </div>
@@ -77,18 +87,18 @@ const VerifyEmail = () => {
     return (
         <div className={containerClasses}>
             <div className={cardClasses}>
-                <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
-                    <XCircle className="w-12 h-12 text-red-500" />
+                <div className="w-20 h-20 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <XCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Verification Failed</h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-8">
-                    {message || "This verification link is invalid or has expired."}
+                <h2 className="text-3xl font-bold text-notion-text mb-4">{t('verification_failed')}</h2>
+                <p className="text-notion-muted mb-8">
+                    {message || t('invalid_verification_link')}
                 </p>
                 <button 
                     onClick={() => navigate('/auth', { state: { isSignUp: true } })}
-                    className="w-full py-4 bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white font-bold rounded-2xl transition-all hover:bg-gray-300 dark:hover:bg-white/20"
+                    className="w-full py-4 bg-notion-hover border border-notion-border text-notion-text font-bold rounded-2xl transition-all hover:bg-notion-border"
                 >
-                    Back to Sign Up
+                    {t('back_to_sign_up')}
                 </button>
             </div>
         </div>

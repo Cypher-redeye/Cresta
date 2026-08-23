@@ -3,6 +3,7 @@ import createGlobe from 'cobe';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE } from '../../api';
 import { useTheme } from '../../context/ThemeContext';
+import { usePerformance } from '../../context/PerformanceContext';
 
 /* ─────────────────────────────────────────────────────────────────────
  * Exchanges
@@ -117,7 +118,7 @@ const LIGHT_GLOBE = {
     mapSamples: 24000,
     mapBrightness: 1.8,
     baseColor: [0.88, 0.92, 0.96],       // soft blue-grey sphere
-    markerColor: [0.03, 0.57, 0.70],     // teal markers (#0891B2ish)
+    markerColor: [0.1, 0.1, 0.1],        // black markers
     glowColor: [0.85, 0.90, 0.96],       // subtle cool glow
 };
 const DARK_GLOBE = {
@@ -143,7 +144,8 @@ const IndiaGlobe = () => {
     const globeRef = useRef(null);
 
     const { theme } = useTheme();
-    const isDark = theme === 'dark';
+    const { isLowPerformance } = usePerformance();
+    const isDark = false;
 
     const [activeExchange, setActiveExchange] = useState(EXCHANGES[0]);
     const [liveData, setLiveData] = useState({});
@@ -170,7 +172,7 @@ const IndiaGlobe = () => {
 
     /* ── Globe + rotation (re-create on theme change) ──────── */
     useEffect(() => {
-        if (!canvasRef.current) return;
+        if (!canvasRef.current || isLowPerformance) return;
         let width = 0;
         const onResize = () => { if (canvasRef.current) width = canvasRef.current.offsetWidth; };
         window.addEventListener('resize', onResize);
@@ -194,11 +196,24 @@ const IndiaGlobe = () => {
             ...palette,
             markers,
             onRender: (state) => {
-                if (!pointerInteracting.current) {
-                    phiRef.current += 0.002;
+                let currentPhi = 0;
+                
+                // If intro is active, slave our rotation to the intro's exact scroll rotation
+                if (typeof window !== 'undefined' && window.__CRESTA_INTRO_ACTIVE && window.__CRESTA_INTRO_PHI !== undefined) {
+                    currentPhi = window.__CRESTA_INTRO_PHI;
+                    phiRef.current = currentPhi - startPhi; // Keep internal state synced so we resume from here
+                } else {
+                    if (!pointerInteracting.current) {
+                        phiRef.current += 0.002;
+                    }
+                    currentPhi = startPhi + phiRef.current + pointerInteractionMovement.current;
                 }
-                const phi = startPhi + phiRef.current + pointerInteractionMovement.current;
-                state.phi = phi;
+                
+                if (typeof window !== 'undefined') {
+                    window.__INDIA_GLOBE_PHI = currentPhi;
+                }
+                
+                state.phi = currentPhi;
                 state.width = width * 2;
                 state.height = width * 2;
 
@@ -211,7 +226,7 @@ const IndiaGlobe = () => {
                     const r = width / 2, cx = width / 2, cy = width / 2;
                     const positions = {};
                     for (const ex of EXCHANGES) {
-                        const p = projectMarker(ex.lat, ex.lng, phi);
+                        const p = projectMarker(ex.lat, ex.lng, currentPhi);
                         positions[ex.id] = { x: cx + p.x * r * 0.92, y: cy + p.y * r * 0.92, visible: p.visible };
                     }
                     setMarkerPositions(positions);
@@ -237,21 +252,27 @@ const IndiaGlobe = () => {
         <div ref={containerRef} className="relative w-full h-[420px] md:h-[500px] flex items-center justify-center">
             {/* Globe */}
             <div className="relative w-[300px] h-[300px] md:w-[380px] md:h-[380px]">
-                <canvas
-                    ref={canvasRef}
-                    onPointerDown={(e) => { pointerInteracting.current = e.clientX - pointerInteractionMovement.current; canvasRef.current.style.cursor = 'grabbing'; }}
-                    onPointerUp={() => { pointerInteracting.current = null; canvasRef.current.style.cursor = 'grab'; }}
-                    onPointerOut={() => { pointerInteracting.current = null; if (canvasRef.current) canvasRef.current.style.cursor = 'grab'; }}
-                    onMouseMove={(e) => { if (pointerInteracting.current !== null) pointerInteractionMovement.current = (e.clientX - pointerInteracting.current) / 200; }}
-                    onTouchMove={(e) => { if (pointerInteracting.current !== null && e.touches[0]) pointerInteractionMovement.current = (e.touches[0].clientX - pointerInteracting.current) / 200; }}
-                    style={{ width: '100%', height: '100%', cursor: 'grab', contain: 'layout paint size', opacity: 0, transition: 'opacity 1s ease' }}
-                />
+                {isLowPerformance ? (
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-100 to-blue-200 border border-blue-300 shadow-[inset_0_-20px_60px_rgba(0,0,0,0.1),0_10px_30px_rgba(0,0,0,0.05)] opacity-90 transition-opacity duration-1000 flex items-center justify-center relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_30%,rgba(255,255,255,0.8)_0%,transparent_60%)] pointer-events-none"></div>
+                        <div className="absolute w-full h-[1px] bg-blue-300/30 top-1/2 left-0 -translate-y-1/2 pointer-events-none"></div>
+                        <div className="absolute h-full w-[1px] bg-blue-300/30 left-1/2 top-0 -translate-x-1/2 pointer-events-none"></div>
+                    </div>
+                ) : (
+                    <canvas
+                        ref={canvasRef}
+                        onPointerDown={(e) => { pointerInteracting.current = e.clientX - pointerInteractionMovement.current; canvasRef.current.style.cursor = 'grabbing'; }}
+                        onPointerUp={() => { pointerInteracting.current = null; canvasRef.current.style.cursor = 'grab'; }}
+                        onPointerOut={() => { pointerInteracting.current = null; if (canvasRef.current) canvasRef.current.style.cursor = 'grab'; }}
+                        onMouseMove={(e) => { if (pointerInteracting.current !== null) pointerInteractionMovement.current = (e.clientX - pointerInteracting.current) / 200; }}
+                        onTouchMove={(e) => { if (pointerInteracting.current !== null && e.touches[0]) pointerInteractionMovement.current = (e.touches[0].clientX - pointerInteracting.current) / 200; }}
+                        style={{ width: '100%', height: '100%', cursor: 'grab', contain: 'layout paint size', opacity: 0, transition: 'opacity 1s ease' }}
+                    />
+                )}
                 {/* Outer glow ring */}
                 <div className="absolute inset-0 rounded-full pointer-events-none"
                     style={{
-                        background: isDark
-                            ? 'radial-gradient(circle, transparent 55%, rgba(6,182,212,0.06) 70%, transparent 80%)'
-                            : 'radial-gradient(circle, transparent 55%, rgba(8,145,178,0.08) 70%, transparent 80%)',
+                        background: 'radial-gradient(circle, transparent 55%, rgba(0,0,0,0.03) 70%, transparent 80%)',
                     }}
                 />
             </div>
@@ -296,10 +317,7 @@ const IndiaGlobe = () => {
                     exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.3 }}
                     className="absolute bottom-0 md:bottom-2 left-1/2 -translate-x-1/2 z-20"
                 >
-                    <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-sm border ${isDark
-                            ? 'bg-gray-900/60 border-white/5'
-                            : 'bg-white/70 border-gray-200/60 shadow-sm'
-                        }`}>
+                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-notion-border shadow-sm">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         <span className={`text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] ${isDark ? 'text-gray-400' : 'text-gray-600'
                             }`}>
@@ -318,7 +336,7 @@ const IndiaGlobe = () => {
 /* ─────────────────────────────────────────────────────────────────────
  * ExchangeCard — theme-aware glass card
  * ──────────────────────────────────────────────────────────────────── */
-const ExchangeCard = ({ exchange, data, isDark }) => {
+const ExchangeCard = ({ exchange, data }) => {
     const pos = data.positive;
     const sparkline = React.useMemo(() => {
         const seed = exchange.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -330,11 +348,7 @@ const ExchangeCard = ({ exchange, data, isDark }) => {
 
     return (
         <div
-            className={`backdrop-blur-xl rounded-2xl p-4 md:p-5 shadow-2xl max-w-[210px] md:max-w-[230px] border ${isDark
-                    ? 'bg-gray-900/80 border-white/10'
-                    : 'bg-white/80 border-gray-200/60 shadow-lg'
-                }`}
-            style={{ borderColor: isDark ? `${exchange.color}33` : `${exchange.color}22` }}
+            className="bg-white rounded-xl p-4 md:p-5 shadow-sm max-w-[210px] md:max-w-[230px] border border-gray-200"
         >
             <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -344,21 +358,19 @@ const ExchangeCard = ({ exchange, data, isDark }) => {
                     {exchange.flag} {exchange.name}
                 </span>
             </div>
-            <div className={`text-xl md:text-2xl font-black tracking-tight mb-1 ${isDark ? 'text-white' : 'text-gray-900'
-                }`}>
+            <div className="text-xl md:text-2xl font-black tracking-tight mb-1 text-gray-900">
                 {data.value}
             </div>
             <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold ${pos ? 'text-emerald-500' : 'text-red-500'}`}>{data.change}</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${pos ? 'bg-emerald-500/15 text-emerald-600' : 'bg-red-500/15 text-red-600'
+                <span className={`text-xs font-bold ${pos ? 'text-emerald-600' : 'text-red-500'}`}>{data.change}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${pos ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
                     }`}>
                     {data.percent}
                 </span>
             </div>
             <div className="mt-2 flex items-center gap-1.5">
                 <div className="w-1 h-1 rounded-full" style={{ backgroundColor: exchange.color }} />
-                <span className={`text-[8px] uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'
-                    }`}>
+                <span className="text-[8px] uppercase tracking-wider text-gray-500">
                     {exchange.location}
                 </span>
             </div>
@@ -367,10 +379,8 @@ const ExchangeCard = ({ exchange, data, isDark }) => {
                     <div key={i} className="w-[3px] rounded-full"
                         style={{
                             height: `${h}%`,
-                            backgroundColor: pos
-                                ? '#10B981'
-                                : '#ef4444',
-                            opacity: isDark ? 0.6 : 0.5
+                            backgroundColor: pos ? '#10b981' : '#ef4444',
+                            opacity: 0.8
                         }}
                     />
                 ))}

@@ -13,7 +13,9 @@ from .markets import (
 
 from .auth import google_login, token_refresh, get_me, signup, verify_email, VerifiedTokenObtainPairView
 
-from .ml import recommend_api, get_prediction, sector_sentiment
+from .ml import recommend_api, get_prediction, get_prediction_status, sector_sentiment
+
+from .backtest import run_backtest, run_portfolio_backtest
 
 from .portfolio import (
     get_holdings,

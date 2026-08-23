@@ -1,60 +1,245 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --notion-bg: #ffffff;
+  --notion-text: #000000;
+  --notion-muted: #666666;
+  --notion-border: #e5e5e5;
+  --notion-hover: #f5f5f5;
+  --notion-card: #ffffff;
+  --notion-sidebar: #fafafa;
+  
+  --accent-emerald: #00aa44;
+  --accent-emerald-bg: rgba(0, 170, 68, 0.08);
+  --accent-blue: #0070f3;
+  --accent-blue-bg: rgba(0, 112, 243, 0.08);
+
+  /* Fluid Typography */
+  --step-0: clamp(1rem, 0.96rem + 0.22vw, 1.13rem);
+  --step-1: clamp(1.2rem, 1.12rem + 0.43vw, 1.44rem);
+  --step-2: clamp(1.44rem, 1.29rem + 0.74vw, 1.86rem);
+  --step-3: clamp(1.73rem, 1.48rem + 1.23vw, 2.43rem);
+  --step-4: clamp(2.07rem, 1.68rem + 1.98vw, 3.19rem);
+  --step-5: clamp(2.49rem, 1.88rem + 3.07vw, 4.23rem);
+  --step-6: clamp(2.99rem, 2.08rem + 4.53vw, 5.56rem);
+}
+
+.dark {
+  --notion-bg: #000000;
+  --notion-text: #ffffff;
+  --notion-muted: #888888;
+  --notion-border: rgba(255, 255, 255, 0.08);
+  --notion-hover: rgba(255, 255, 255, 0.04);
+  --notion-card: #0A0A0A;
+  --notion-sidebar: #000000;
+  
+  --accent-emerald: #00ff66;
+  --accent-emerald-bg: rgba(0, 255, 102, 0.12);
+  --accent-blue: #00f0ff;
+  --accent-blue-bg: rgba(0, 240, 255, 0.12);
+}
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 dark:bg-fintech-bg dark:text-white font-sans antialiased overflow-x-hidden transition-colors duration-300;
+    @apply bg-notion-bg text-notion-text font-sans antialiased overflow-x-hidden transition-colors duration-300;
+  }
+  
+  h1 {
+    font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  
+  h2 {
+    font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Modern minimalist scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--notion-border);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--notion-muted);
   }
 }
 
 @layer utilities {
 
-  /* Global Lucide icon hover and active animations */
+  /* Generic icons should not scale on hover in a professional app. Removed .lucide:hover scale */
   .lucide {
-    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
-    will-change: transform;
-    transform-origin: center;
-  }
-
-  .lucide:hover,
-  button:hover .lucide,
-  a:hover .lucide,
-  .group:hover .lucide {
-    transform: scale(1.15) !important;
-  }
-
-  .lucide:active,
-  button:active .lucide,
-  a:active .lucide,
-  .group:active .lucide {
-    transform: scale(0.9) !important;
+    transition: color 0.15s ease-in-out;
   }
 
   .glass-panel {
-    @apply border border-gray-200 shadow-xl dark:border-white/10;
-    backdrop-filter: blur(12px);
-    background-color: rgba(255, 255, 255, 0.85);
+    @apply bg-notion-card border border-notion-border rounded-xl transition-all duration-300;
+    border-width: 0.5px !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
   }
-
-  .dark .glass-panel {
-    background-color: rgba(255, 255, 255, 0.12);
+  
+  .glass-panel:hover {
+    border-color: var(--notion-muted);
   }
 
   .glass-btn {
-    @apply bg-gradient-to-r from-fintech-emerald/10 to-fintech-blue/10 dark:from-neon-emerald/20 dark:to-neon-blue/20 backdrop-blur-md border border-gray-200 dark:border-white/10 hover:border-fintech-emerald/50 dark:hover:border-neon-emerald/50 transition-all duration-300;
+    @apply bg-notion-bg border border-notion-border hover:bg-notion-hover text-notion-text transition-colors duration-200;
+    border-width: 0.5px !important;
+    backdrop-filter: none !important;
   }
 
   .text-glow {
-    text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
-    /* fintech-emerald glow */
+    text-shadow: none !important;
   }
 
-  .dark .text-glow {
-    text-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
-    /* neon-emerald glow */
+  /* Monospace metrics matching JetBrains Mono */
+  .monospace-stats {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* High contrast stark buttons for Vercel/Apple vibe */
+  .stark-btn-primary {
+    @apply bg-notion-text text-notion-bg font-semibold px-5 py-2.5 rounded-lg transition-all duration-200 hover:opacity-90 active:scale-[0.98] border border-transparent flex items-center justify-center;
+  }
+
+  .stark-btn-secondary {
+    @apply bg-transparent text-notion-text border border-notion-border hover:bg-notion-hover hover:border-notion-muted font-semibold px-5 py-2.5 rounded-lg transition-all duration-200 active:scale-[0.98] flex items-center justify-center;
+  }
+
+  /* Apple Design System Utility Tokens - Converted to Solid Stark Layers */
+  .apple-glass {
+    @apply bg-notion-card border border-notion-border transition-colors duration-200;
+    border-width: 0.5px !important;
+  }
+  
+  .dark .apple-glass {
+    background: #0A0A0A !important;
+  }
+
+  .apple-card-glow {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+  }
+
+  .apple-card-glow:active {
+    transform: scale(0.98);
+  }
+
+  .apple-card-glow:hover {
+    border-color: var(--notion-muted) !important;
+  }
+  
+  .dark .apple-card-glow:hover {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .apple-header-1 {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.1;
+  }
+
+  .apple-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--notion-muted);
+  }
+
+  .apple-display {
+    font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  }
+
+  /* Vercel/Apple Spring Transition physics */
+  .transition-spring {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  /* Bottom Sheet Overlay utilities */
+  .bottom-sheet-overlay {
+    @apply fixed inset-0 z-50 bg-black/40 backdrop-blur-md md:hidden;
+  }
+  
+  .bottom-sheet-content {
+    @apply fixed bottom-0 left-0 right-0 z-50 bg-notion-card border-t border-notion-border rounded-t-3xl p-6 pb-8 md:hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+  }
+
+  .bottom-sheet-handle {
+    @apply w-12 h-1.5 bg-notion-border rounded-full mx-auto mb-6 shrink-0;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Pulse Animation for Active Chart Dots */
+  @keyframes chartPulse {
+    0% {
+      stroke-width: 1.5px;
+      stroke-opacity: 1;
+    }
+    50% {
+      stroke-width: 6px;
+      stroke-opacity: 0.35;
+    }
+    100% {
+      stroke-width: 1.5px;
+      stroke-opacity: 1;
+    }
+  }
+
+  .pulse-dot {
+    animation: chartPulse 1.5s infinite cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: center;
+  }
+
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
   }
 
 }

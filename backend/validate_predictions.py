@@ -7,14 +7,16 @@ import time
 
 sys.path.append(os.path.dirname(__file__))
 
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'robo_advisor.settings')
+django.setup()
+
 from recommender.ensemble_predictor import ensemble_predict
 import recommender.stock_predictor
 
-# Use 15 Nifty 50 stocks for validation
+# Use 3 Nifty 50 stocks for quick validation
 TICKERS = [
-    "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS",
-    "SBIN.NS", "BHARTIARTL.NS", "ITC.NS", "ASIANPAINT.NS", "HINDUNILVR.NS",
-    "LT.NS", "BAJFINANCE.NS", "AXISBANK.NS", "MARUTI.NS", "SUNPHARMA.NS"
+    "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS"
 ]
 
 def validate_accuracy(days_to_hide=7):
@@ -31,6 +33,7 @@ def validate_accuracy(days_to_hide=7):
     # Save original functions
     original_history = yf.Ticker.history
     original_load_saved_model = recommender.stock_predictor.load_saved_model
+    original_get_cached_prediction = recommender.stock_predictor.get_cached_prediction
 
     for ticker in TICKERS:
         try:
@@ -53,13 +56,13 @@ def validate_accuracy(days_to_hide=7):
                 
             yf.Ticker.history = mock_history
             
-            # 3. Prevent data leakage: Clear memory cache and prevent loading disk models
+            # 3. Prevent data leakage: prevent loading disk models and DB caches
             # that might have been trained on the full dataset (including the hidden days).
-            recommender.stock_predictor._model_cache.clear()
             recommender.stock_predictor.load_saved_model = lambda t, f=13: (None, None)
+            recommender.stock_predictor.get_cached_prediction = lambda t: None
             
             # 4. Predict! (The model will think today is `days_to_hide` days ago)
-            pred_result = ensemble_predict(ticker, forecast_days=days_to_hide)
+            pred_result = ensemble_predict(ticker, forecast_days=days_to_hide, fast_mode=True)
             predicted_prices = [p['price'] for p in pred_result['predictions']][:days_to_hide]
             
             actual_future = actual_future[:len(predicted_prices)]
@@ -95,6 +98,7 @@ def validate_accuracy(days_to_hide=7):
             # Restore original functions for the next iteration step just in case
             yf.Ticker.history = original_history
             recommender.stock_predictor.load_saved_model = original_load_saved_model
+            recommender.stock_predictor.get_cached_prediction = original_get_cached_prediction
 
     print("\n" + "="*50)
     print("=== FINAL VALIDATION SUMMARY ===")

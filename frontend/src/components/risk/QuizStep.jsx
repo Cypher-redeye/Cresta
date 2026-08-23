@@ -1,44 +1,38 @@
 import React from 'react';
-import { Info, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 
 /**
- * Renders a single quiz question with selectable option buttons.
+ * Renders a single quiz question with animated option cards.
+ * Resolves translation keys from riskData via t().
  */
 const QuizStep = ({ question, step, answers, onOptionSelect }) => {
+    const { t } = useTranslation();
+
     return (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-start gap-4">
-                    <span className="w-8 h-8 rounded-full bg-emerald-600/10 text-emerald-600 flex items-center justify-center text-sm shrink-0 mt-1">
-                        {step + 1}
-                    </span>
-                    {question.question}
+        <div className="space-y-6 ml-12">
+            <div>
+                <h2 className="text-2xl font-bold text-notion-text">
+                    {t(question.questionKey)}
                 </h2>
-                <p className="text-gray-500 dark:text-gray-400 ml-12 text-sm italic italic flex items-center gap-2">
-                    <Info className="w-3 h-3" /> {question.description}
+                <p className="text-notion-muted mt-1 text-lg">
+                    {t(question.descriptionKey)}
                 </p>
             </div>
-
-            <div className="grid gap-4 ml-12">
+            <div className="space-y-3">
                 {question.options.map((option, idx) => (
-                    <button
+                    <motion.button
                         key={idx}
+                        whileHover={{ x: 5 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => onOptionSelect(option.score)}
-                        className={`group p-5 rounded-2xl border-2 text-left transition-all duration-300 relative overflow-hidden
+                        className={`w-full text-left py-5 px-8 rounded-2xl border font-semibold transition-all text-lg apple-glass
                             ${answers[step] === option.score
-                                ? 'border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10'
-                                : 'border-gray-200 dark:border-white/5 hover:border-emerald-500/40 bg-white/50 dark:bg-fintech-card/30'}`}
+                                ? 'border-notion-emerald bg-notion-emerald-bg text-notion-emerald shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                                : 'border-notion-border text-notion-muted hover:border-notion-emerald/50 hover:text-notion-text'}`}
                     >
-                        <div className="flex justify-between items-center relative z-10">
-                            <span className={`font-semibold text-lg ${answers[step] === option.score ? 'text-emerald-600 dark:text-neon-emerald' : 'text-gray-700 dark:text-gray-300'}`}>
-                                {option.text}
-                            </span>
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
-                                ${answers[step] === option.score ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-300 dark:border-white/10'}`}>
-                                {answers[step] === option.score && <Check className="w-4 h-4" />}
-                            </div>
-                        </div>
-                    </button>
+                        {t(option.labelKey)}
+                    </motion.button>
                 ))}
             </div>
         </div>

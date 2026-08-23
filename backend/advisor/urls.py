@@ -23,6 +23,7 @@ urlpatterns = [
     # ML
     path("recommend/", views.recommend_api),
     path("prediction/", views.get_prediction),
+    path("prediction/status/<str:task_id>/", views.get_prediction_status),
     path("api/sector-sentiment/", views.sector_sentiment),
     # Portfolio CRUD (JWT-protected)
     path("holdings/", views.get_holdings),
@@ -37,4 +38,7 @@ urlpatterns = [
     path("watchlist/remove/", views.remove_from_watchlist),
     # Transactions
     path("transactions/", views.get_transactions),
+    # Backtesting Engine
+    path("backtest/", views.run_backtest),
+    path("backtest/portfolio/", views.run_portfolio_backtest),
 ]

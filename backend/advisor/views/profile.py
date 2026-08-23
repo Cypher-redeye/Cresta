@@ -16,7 +16,7 @@ def get_profile(request):
     return Response({
         'email': request.user.email,
         'name': request.user.get_full_name() or request.user.username,
-        'picture': profile.picture,
+        'picture': request.build_absolute_uri(profile.picture.url) if profile.picture else None,
         'risk_score': profile.risk_score,
         'risk_profile': profile.risk_profile,
         'investment_goal': profile.investment_goal,
@@ -36,9 +36,20 @@ def save_profile(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     for field, value in serializer.validated_data.items():
         setattr(profile, field, value)
+    
+    from django.utils import timezone
+    profile.last_assessment_date = timezone.now()
+    
+    if 'picture' in request.FILES:
+        profile.picture = request.FILES['picture']
+
     profile.save()
 
-    return Response({'message': 'Profile updated', 'risk_profile': profile.risk_profile})
+    return Response({
+        'message': 'Profile updated', 
+        'risk_profile': profile.risk_profile,
+        'picture': request.build_absolute_uri(profile.picture.url) if profile.picture else None
+    })
 
 
 # ============= WATCHLIST =============

@@ -3,6 +3,65 @@ import { API_BASE, refreshToken } from '../api';
 
 const UserContext = createContext();
 
+// Helper: check if cached insights have real news headlines
+const hasFreshHeadlines = () => {
+    try {
+        const cached = localStorage.getItem('ai_insights_data');
+        if (!cached) return false;
+        const data = JSON.parse(cached);
+        const stocks = data?.Recommended_Stocks || [];
+        if (stocks.length === 0) return false;
+        // Check if at least one stock has real headlines with 'text' key
+        return stocks.some(s => s.Headlines?.length > 0 && s.Headlines[0]?.text);
+    } catch { return false; }
+};
+
+// Helper: auto-fetch AI recommendations if user has a saved profile but no cached insights
+const fetchRecommendationsIfNeeded = async (profileData) => {
+    if (!profileData?.risk_profile) return;
+    // Re-fetch if no data OR if existing data has stale/missing headlines
+    if (localStorage.getItem('ai_insights_data') && hasFreshHeadlines()) return;
+    if (!profileData.risk_score || !profileData.age || !profileData.income || !profileData.investment_goal) return;
+
+    try {
+        const token = localStorage.getItem('access_token');
+
+        // Normalize risk_score: DB may store 1-5 (from recommend_api) or 8-32 (from save_profile)
+        let riskTolerance = profileData.risk_score;
+        if (riskTolerance > 5) {
+            // Map 8-32 raw score to 1-5 Risk_Tolerance
+            if (riskTolerance <= 12) riskTolerance = 1;
+            else if (riskTolerance <= 18) riskTolerance = 2;
+            else if (riskTolerance <= 24) riskTolerance = 3;
+            else if (riskTolerance <= 28) riskTolerance = 4;
+            else riskTolerance = 5;
+        }
+
+        const res = await fetch(`${API_BASE}/recommend/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                Age: profileData.age,
+                Income: profileData.income,
+                Risk_Tolerance: riskTolerance,
+                Investment_Goal: profileData.investment_goal
+            })
+        });
+        if (res.ok) {
+            const aiData = await res.json();
+            if (aiData.Recommended_Stocks) {
+                localStorage.setItem('ai_insights_data', JSON.stringify(aiData));
+                window.dispatchEvent(new Event('ai_insights_updated'));
+            }
+        }
+    } catch (e) {
+        console.error('Auto-fetch recommendations failed:', e);
+    }
+};
+
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         const savedUser = localStorage.getItem('user');
@@ -41,6 +100,8 @@ export const UserProvider = ({ children }) => {
                     if (data.risk_profile) {
                         setHasCompletedRiskAssessment(true);
                         localStorage.setItem('risk_assessment_completed', 'true');
+                        // Auto-fetch recommendations if not cached
+                        fetchRecommendationsIfNeeded(data);
                     }
                 } else {
                     logout();
@@ -68,6 +129,11 @@ export const UserProvider = ({ children }) => {
         if (tokens) {
             localStorage.setItem('access_token', tokens.access);
             localStorage.setItem('refresh_token', tokens.refresh);
+        }
+
+        // Auto-fetch AI recommendations in background after login
+        if (userData?.risk_profile) {
+            fetchRecommendationsIfNeeded(userData);
         }
     };
 

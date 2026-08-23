@@ -36,7 +36,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',  # P0-7 FIX: Enable refresh token blacklisting
     'advisor',
+    'chatbot',
     "corsheaders",
 ]
 
@@ -101,6 +103,7 @@ if DATABASE_URL and DATABASE_URL.startswith('postgres'):
                 'PASSWORD': match.group('password'),
                 'HOST': match.group('host'),
                 'PORT': match.group('port'),
+                'CONN_MAX_AGE': 600,  # 6.4 FIX: Connection pooling (10 min)
             }
         }
     else:
@@ -140,6 +143,10 @@ USE_TZ = True
 # ============= STATIC FILES =============
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -151,7 +158,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ============= DRF =============
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'advisor.exceptions.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'advisor.authentication.CookieJWTAuthentication',  # P0-4: Cookie-first auth
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -160,10 +169,14 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '30/min',
         'user': '100/min',
+        'login': '20/h',          # 1.3 FIX: Brute-force protection (20/hour)
+        'predictions': '10/min',  # 5.3 FIX: ML endpoint throttle
+        'chat': '20/h',           # Phase 2: Chatbot rate limit
     },
 }
 
@@ -191,6 +204,12 @@ else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+            'TIMEOUT': 3600,
+            'OPTIONS': {
+                'MAX_ENTRIES': 1000,
+                'CULL_FREQUENCY': 3,
+            }
         }
     }
 
@@ -216,6 +235,9 @@ if not DEBUG:
 
 
 # ============= LOGGING =============
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -230,10 +252,31 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_DIR / 'cresta.log'),
+            'maxBytes': 10 * 1024 * 1024,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'security': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_DIR / 'security.log'),
+            'maxBytes': 5 * 1024 * 1024,
+            'backupCount': 3,
+            'formatter': 'verbose',
+        },
     },
     'root': {
-        'handlers': ['console'],
+        'handlers': ['console', 'file'],
         'level': 'INFO' if not DEBUG else 'DEBUG',
+    },
+    'loggers': {
+        'security': {
+            'handlers': ['security', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
 
@@ -249,3 +292,12 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Cresta <noreply@crest
 
 # Frontend URL for email links
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+
+
+# ============= JWT COOKIE SETTINGS =============
+# P0-4 FIX: httpOnly cookie config for secure token storage
+JWT_COOKIE_SECURE = not DEBUG        # Secure flag (HTTPS only in prod)
+JWT_COOKIE_SAMESITE = 'Lax'          # CSRF protection
+JWT_COOKIE_HTTPONLY = True            # Not accessible via JS
+JWT_ACCESS_COOKIE_NAME = 'access_token'
+JWT_REFRESH_COOKIE_NAME = 'refresh_token'

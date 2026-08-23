@@ -1,6 +1,7 @@
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import StockLogo from '../common/StockLogo';
 
 const defaultIndices = [
     { name: 'NIFTY 50', value: '22,530.75', change: '+124.50', percent: '+0.56%' },
@@ -46,7 +47,7 @@ const MarketTicker = () => {
     }, []);
 
     return (
-        <div className="w-full bg-white/50 dark:bg-fintech-card/30 border-b border-gray-200 dark:border-white/10 overflow-hidden py-2 backdrop-blur-sm transition-colors duration-300">
+        <div className="w-full bg-notion-sidebar border-b border-notion-border overflow-hidden py-2 transition-colors duration-300">
             <div className="flex whitespace-nowrap">
                 {/* We double the list to create a seamless loop */}
                 <motion.div
@@ -64,8 +65,9 @@ const MarketTicker = () => {
                         const isPositive = changeStr.startsWith('+');
                         return (
                             <div key={i} className="flex items-center gap-2 text-sm">
-                                <span className="font-semibold text-gray-700 dark:text-gray-300">{index.name}</span>
-                                <span className="font-mono text-gray-900 dark:text-white">{index.value}</span>
+                                <StockLogo ticker={index.name} size={16} />
+                                <span className="font-semibold text-notion-muted">{index.name}</span>
+                                <span className="font-mono text-notion-text">{index.value}</span>
                                 <span className={`flex items-center text-xs font-medium ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
                                     {isPositive ? <TrendingUp size={12} className="mr-1" /> : <TrendingDown size={12} className="mr-1" />}
                                     {index.change} ({index.percent})

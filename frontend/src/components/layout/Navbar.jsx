@@ -1,62 +1,108 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
+import { Menu, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import Logo from '../common/Logo';
 import ThemeToggle from '../common/ThemeToggle';
+import MagneticWrapper from '../common/MagneticWrapper';
 
 const Navbar = () => {
     const { t } = useTranslation();
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const navLinks = [
+        { name: t('features'), path: '#features' },
+        { name: t('about_us'), path: '#about' },
+        { name: t('markets'), path: '/markets' },
+    ];
 
     return (
-        <div 
-            style={{
-                position: 'fixed',
-                top: '24px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 50,
-                background: isDark ? 'rgba(13, 13, 13, 0.7)' : 'rgba(255, 255, 255, 0.8)',
-                border: isDark ? '1px solid rgba(16, 185, 129, 0.15)' : '1px solid rgba(16, 185, 129, 0.25)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-            }}
-            className="flex items-center gap-8 px-6 py-2.5 rounded-full shadow-2xl transition-all duration-300"
-        >
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-                <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:scale-110 transition-transform">
-                    <path d="M50 15L85 75H15L50 15Z" stroke="#10B981" strokeWidth="8" strokeLinejoin="round" />
-                    <circle cx="50" cy="45" r="5" fill="#10B981" />
-                    <path d="M50 45L35 65M50 45L65 65" stroke="#10B981" strokeWidth="4" strokeLinecap="round" />
-                </svg>
-                <span className={`text-lg font-bold tracking-tight ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>
-                    Cresta<span className="text-[#10B981]">.</span>
-                </span>
-            </Link>
+        <>
+            <nav
+                className={`fixed z-50 left-1/2 -translate-x-1/2 transition-all duration-300 w-[90%] max-w-[850px] rounded-full apple-glass flex items-center h-14 ${
+                    scrolled ? 'top-4' : 'top-6'
+                }`}
+            >
+            <div className="w-full px-6 flex items-center justify-between">
+                
+                {/* Logo */}
+                <MagneticWrapper strength={0.3}>
+                    <Link to="/" className="flex items-center gap-2 group">
+                        <Logo width={22} height={22} className="transition-transform duration-300 group-hover:scale-105 active:scale-95" />
+                        <span className="text-notion-text font-bold text-[15px] tracking-tight select-none">Cresta</span>
+                    </Link>
+                </MagneticWrapper>
 
-            {/* Nav Links */}
-            <nav className="flex items-center gap-6">
-                <a 
-                    href="#about" 
-                    className={`text-sm font-semibold transition-colors ${isDark ? 'text-white hover:text-white' : 'text-[#0f172a] hover:text-[#10B981]'}`}
-                >
-                    {t('about')}
-                </a>
+                {/* Desktop Nav */}
+                <div className="hidden md:flex items-center gap-8">
+                    {navLinks.map((link) => (
+                        <MagneticWrapper key={link.name} strength={0.2}>
+                            <a 
+                                href={link.path}
+                                className="text-[13px] font-semibold text-notion-muted hover:text-notion-text transition-colors duration-250 block px-2 py-1"
+                            >
+                                {link.name}
+                            </a>
+                        </MagneticWrapper>
+                    ))}
+                </div>
+
+                {/* Right CTA & Mobile Toggle */}
+                <div className="flex items-center gap-3">
+
+                    <ThemeToggle />
+                    
+                    <MagneticWrapper strength={0.4} className="hidden md:flex">
+                        <Link
+                            to="/auth"
+                            className="stark-btn-primary !py-1 !px-3.5 !rounded-full text-[12px] tracking-wide"
+                        >
+                            {t('get_started')}
+                        </Link>
+                    </MagneticWrapper>
+                    
+                    <button 
+                        className="md:hidden text-notion-text"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    >
+                        {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
+                </div>
+            </div>
             </nav>
 
-            {/* Actions */}
-            <div className={`flex items-center gap-4 border-l pl-6 ${isDark ? 'border-white/10' : 'border-black/10'}`}>
-                <Link 
-                    to="/auth" 
-                    className="px-4 py-1.5 rounded-lg border-[1.5px] border-[#10B981] bg-transparent text-sm font-bold text-[#10B981] hover:bg-[#10B981]/10 transition-all duration-300"
-                >
-                    {t('login')}
-                </Link>
-                <ThemeToggle />
+            {/* Mobile Menu */}
+            <div className={`fixed inset-0 bg-notion-bg z-40 transition-transform duration-300 pt-28 px-8 md:hidden flex flex-col ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
+                <div className="flex flex-col gap-8 text-center mt-10">
+                    {navLinks.map((link) => (
+                        <a 
+                            key={link.name} 
+                            href={link.path}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-2xl font-semibold text-notion-muted hover:text-notion-text transition-colors duration-200"
+                        >
+                            {link.name}
+                        </a>
+                    ))}
+                    <Link
+                        to="/auth"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="stark-btn-primary mt-8 py-4 text-lg font-bold w-full rounded-2xl text-center flex items-center justify-center"
+                    >
+                        {t('get_started')}
+                    </Link>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 
