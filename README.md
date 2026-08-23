@@ -201,10 +201,11 @@ graph TD
     Client[React + Vite Frontend] <-->|HTTPS / REST API| Nginx[Nginx Reverse Proxy]
     Nginx <-->|Gunicorn| Django[Django 5 Backend]
     Django <-->|Task Queue| Redis[Redis Broker]
-    Redis <--> Celery[Celery + Celery Beat]
+    Redis <--> Celery[Celery Workers]
     Celery <-->|Train/Predict| PyTorch[Attention-LSTM Engine]
     Celery <-->|Analyze News| FinBERT[HuggingFace NLP]
     Django <-->|Classify Risk| XGBoost[XGBoost Profiler]
+    Django <-->|AI Co-pilot| Gemini[Google Gemini 2.5]
     Django <--> Postgres[(PostgreSQL)]
     PyTorch <--> YF[yfinance API]
 ```
@@ -213,60 +214,76 @@ graph TD
 
 ```mermaid
 erDiagram
-    USER ||--o{ PORTFOLIO : owns
+    USER ||--o{ HOLDING : has
+    USER ||--o{ TRANSACTION : executes
+    USER ||--o{ WATCHLIST_ITEM : monitors
+    USER ||--o{ WATCHLIST_ALERT : sets
+    USER ||--o{ PAPER_TRADE : simulates
+    
     USER {
         int id PK
         string email
         string password_hash
     }
-    INVESTOR_PROFILE ||--|| USER : belongs_to
-    INVESTOR_PROFILE {
+    
+    USER_PROFILE ||--|| USER : belongs_to
+    USER_PROFILE {
         int id PK
         int age
-        decimal income
-        int risk_tolerance
-        string user_class "Aggressive/Moderate/Conservative"
+        int income
+        string investment_goal
+        string risk_profile "Aggressive/Balanced/Conservative"
+        int risk_score
         boolean email_verified
     }
-    PORTFOLIO ||--o{ HOLDING : contains
-    PORTFOLIO {
-        int id PK
-        decimal total_value
-        decimal cash_balance
-    }
-    HOLDING ||--o{ ALERT : triggers
+    
     HOLDING {
         int id PK
         string ticker
-        decimal quantity
-        decimal average_buy_price
+        string name
+        int qty
+        float avg_price
+        date purchase_date
     }
+
+    TRANSACTION {
+        int id PK
+        string ticker
+        string transaction_type "BUY/SELL"
+        int qty
+        float price
+        float total_value
+    }
+
+    WATCHLIST_ITEM {
+        int id PK
+        string ticker
+        string name
+    }
+
     STOCK_PREDICTION {
         string ticker PK
         json history_array
         json future_forecast_array
+        json metrics
         timestamp last_updated
     }
-    ALERT {
-        int id PK
-        string ticker
-        string signal "Buy/Sell/Hold"
-        boolean is_active
-    }
+    
     PAPER_TRADE {
         int id PK
         string ticker
         string action "BUY/SELL"
-        decimal quantity
+        int quantity
         decimal price_at_trade
         timestamp created_at
     }
+    
     WATCHLIST_ALERT {
         int id PK
         string ticker
         decimal target_price
         string condition "ABOVE/BELOW"
-        boolean triggered
+        boolean is_active
     }
 ```
 
