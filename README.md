@@ -315,6 +315,12 @@ erDiagram
 * Paper trading and watchlist alert models
 * Live ticker tape: SENSEX, NIFTY, BANK NIFTY, NIFTY IT, NASDAQ, S&P 500, USD/INR, GOLD
 
+### 💬 AI Co-pilot & Chatbot
+* Context-aware conversational AI powered by Google Gemini 2.5 Flash
+* Uses LangChain with memory buffers for continuous dialogue
+* Capable of real-time stock price lookup and personalized financial guidance
+* Rate-limited and prompt-injection-protected backend
+
 ---
 
 ## 🛠️ Technology Stack
@@ -327,6 +333,7 @@ erDiagram
 | Cache | Redis | ML results, live ticker data |
 | Auth | JWT + Google OAuth | Authentication, email verification |
 | ML | PyTorch, XGBoost, statsmodels, FinBERT | Ensemble advisory engine |
+| GenAI | Gemini 2.5 Flash, LangChain | Conversational AI Co-pilot & context memory |
 | MLOps | MLflow | CV loss curves, model versions, hyperparameters |
 | DevOps | Docker, Nginx, Gunicorn | Containerization, production serving |
 | i18n | react-i18next | English, Hindi, Gujarati, Punjabi |
@@ -378,6 +385,7 @@ npm run dev
 | `EMAIL_HOST_USER` | SMTP sender address |
 | `EMAIL_HOST_PASSWORD` | SMTP app password |
 | `FRONTEND_URL` | Frontend URL for email verification links |
+| `GEMINI_API_KEY` | Google Gemini API Key for the Chatbot |
 
 ---
 
@@ -388,6 +396,8 @@ npm run dev
 - **Settings Dashboard Overhaul:** Deployed advanced configurations for Risk Management, Notification Preferences, Account Security, and Currency Defaults.
 - **Auth & Onboarding Flow Fixes:** Resolved edge-case login/register blocks and fixed recurring Risk Assessment prompts for Google OAuth users by syncing Django models with accurate timestamps.
 - **UI & Graphing Tying:** Addressed missing rendering of 7-day forecast graphs on specific stock tickers and ironed out data-fetching states.
+- **AI Chatbot Integration:** Embedded a real-time conversational co-pilot powered by Gemini 2.5 Flash.
+- **Security & Quality Audit:** Removed legacy code, optimized component rendering, and ensured complete protection against prompt injection and XSS.
 
 ---
 
