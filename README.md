@@ -420,7 +420,7 @@ npm run dev
 
 ## 🗺️ Roadmap
 
-- [ ] **Oracle Cloud Deployment** — full ML stack on 4 OCPU / 24GB RAM free tier
+- [ ] **DigitalOcean Deployment** — containerized ML stack utilizing GitHub Student Developer Pack ($200 credits)
 - [x] **Portfolio Backtesting** — simulate historical strategy vs Nifty50 benchmark with Sharpe ratio, drawdown, CAGR ✅
 - [ ] **Options Chain Analyzer** — IV and Greeks visualization for F&O traders
 - [ ] **Mutual Fund Coverage** — extend AI scoring to top 50 Indian MFs
