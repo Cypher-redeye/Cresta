@@ -77,9 +77,23 @@
     </td>
   </tr>
   <tr>
-    <td align="center" width="100%">
+    <td align="center" width="50%">
       <img src="docs/screenshots/11-hindi-mode.png" alt="Hindi Mode" width="100%" />
-      <br /><sub><b>Full Hindi Mode</b> — entire dashboard rendered in Hindi including nav, tooltips, AI reasoning, holdings table, and alerts. Gujarati and Punjabi also supported.</sub>
+      <br /><sub><b>Full Hindi Mode</b> — entire dashboard rendered in Hindi including nav, tooltips, AI reasoning, holdings table, and alerts.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/12-backtest.png" alt="Portfolio Backtesting" width="100%" />
+      <br /><sub><b>Portfolio Backtesting</b> — simulate historical strategy vs Nifty50 benchmark.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/13-backtest-results.png" alt="Backtest Results" width="100%" />
+      <br /><sub><b>Backtest Results</b> — detailed metrics including Sharpe ratio, drawdown, and CAGR.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/screenshots/14-risk-assement.png" alt="Risk Assessment" width="100%" />
+      <br /><sub><b>Intelligent Risk Profiling</b> — dynamic classification based on XGBoost profiling.</sub>
     </td>
   </tr>
 </table>
