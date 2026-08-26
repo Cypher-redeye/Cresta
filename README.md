@@ -461,18 +461,6 @@ npm run dev
 </div>
 
 ---
-
-## Author
-
-<div align="center">
-
-**Om Sharma**
-AI Engineering Student · Parul University · Batch 2023–2027
-
-[![GitHub](https://img.shields.io/badge/GitHub-Cypher--redeye-181717?style=for-the-badge&logo=github)](https://github.com/Cypher-redeye)
-
-*Built end-to-end as a final year capstone project. Every architectural decision is production-intent.*
-
 </div>
 
 ---
