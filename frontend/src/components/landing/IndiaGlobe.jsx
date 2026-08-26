@@ -173,8 +173,8 @@ const IndiaGlobe = () => {
     /* ── Globe + rotation (re-create on theme change) ──────── */
     useEffect(() => {
         if (!canvasRef.current || isLowPerformance) return;
-        let width = 0;
-        const onResize = () => { if (canvasRef.current) width = canvasRef.current.offsetWidth; };
+        let width = (canvasRef.current && canvasRef.current.offsetWidth) || 320;
+        const onResize = () => { if (canvasRef.current && canvasRef.current.offsetWidth > 0) width = canvasRef.current.offsetWidth; };
         window.addEventListener('resize', onResize);
         onResize();
 
@@ -187,15 +187,17 @@ const IndiaGlobe = () => {
 
         const palette = isDark ? DARK_GLOBE : LIGHT_GLOBE;
 
-        const globe = createGlobe(canvasRef.current, {
-            devicePixelRatio: 2,
-            width: width * 2,
-            height: width * 2,
-            phi: startPhi,
-            theta: GLOBE_THETA,
-            ...palette,
-            markers,
-            onRender: (state) => {
+        let globe = null;
+        try {
+            globe = createGlobe(canvasRef.current, {
+                devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+                width: width * 2,
+                height: width * 2,
+                phi: startPhi,
+                theta: GLOBE_THETA,
+                ...palette,
+                markers,
+                onRender: (state) => {
                 let currentPhi = 0;
                 
                 // If intro is active, slave our rotation to the intro's exact scroll rotation
@@ -234,9 +236,15 @@ const IndiaGlobe = () => {
             },
         });
         globeRef.current = globe;
+        } catch (e) {
+            console.warn('Globe initialization skipped:', e);
+        }
 
         setTimeout(() => { if (canvasRef.current) canvasRef.current.style.opacity = '1'; }, 100);
-        return () => { globe.destroy(); window.removeEventListener('resize', onResize); };
+        return () => { 
+            if (globeRef.current) globeRef.current.destroy(); 
+            window.removeEventListener('resize', onResize); 
+        };
     }, [isDark]);
 
     /* ── Derived ───────────────────────────────────────────── */

@@ -105,11 +105,17 @@ const AnimatedRoutes = () => {
 };
 
 function App() {
-  const [splashDone, setSplashDone] = useState(false);
+  const [splashDone, setSplashDone] = useState(() => {
+    // On mobile / small screens, load immediately without 3.6s delay
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
   const handleSplashComplete = useCallback(() => setSplashDone(true), []);
 
   return (
-    <ReactLenis root options={{ lerp: 0.05, duration: 1.5, smoothTouch: true }}>
+    <ReactLenis root options={{ lerp: 0.08, duration: 1.2, smoothTouch: false }}>
       <div className="min-h-screen">
         <ErrorBoundary>
           <PerformanceProvider>

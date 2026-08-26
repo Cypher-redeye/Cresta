@@ -44,7 +44,7 @@ const SplashScreen = ({ onComplete }) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white dark:bg-black overflow-hidden transition-colors duration-500"
+      className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#121212] text-white overflow-hidden transition-colors duration-500"
       animate={{ opacity: fadeOut ? 0 : 1 }}
       transition={{ duration: 0.8, ease: [0.32, 0.72, 0, 1] }} // Apple custom ease
       style={{ pointerEvents: fadeOut ? 'none' : 'all' }}

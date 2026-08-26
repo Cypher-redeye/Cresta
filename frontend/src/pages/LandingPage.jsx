@@ -12,7 +12,13 @@ import { useTheme } from '../context/ThemeContext';
 const LandingPage = () => {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
-    const [introComplete, setIntroComplete] = useState(false);
+    const [introComplete, setIntroComplete] = useState(() => {
+        // On mobile / small touch screens, skip heavy 600vh scroll intro for instant native responsiveness
+        if (typeof window !== 'undefined') {
+            return window.innerWidth < 768 || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+        }
+        return false;
+    });
 
     const handleIntroComplete = () => {
         setIntroComplete(true);
