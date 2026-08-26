@@ -367,7 +367,12 @@ const IntroSequence = ({ onComplete, isDark }) => {
             }
         }, 200);
 
-        return () => globe.destroy();
+        return () => {
+            globe.destroy();
+            if (typeof window !== 'undefined') {
+                window.__CRESTA_INTRO_ACTIVE = false;
+            }
+        };
     }, []);
 
     /* ════════════════════════════════════════════════════════════════════

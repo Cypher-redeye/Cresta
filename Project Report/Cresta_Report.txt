@@ -1,0 +1,808 @@
+CRESTA
+AI-Powered Robo-Advisory Platform for Indian Equity Markets
+A Project Report Submitted in Partial Fulfilment of the Requirements
+for the Degree of
+Bachelor of Technology in
+Artificial Intelligence and Data Sciences by
+Ankit Mishra (2303031240207)
+OM Sharma (2303031241248)
+Shubham Kumar Jha (2303031241264) Shivam Panchal (2303031241256)
+Under the Guidance of Mr. Akshay Mandloi
+Assistant Professor
+to
+Artificial Intelligence and Data Science Department Parul University, Vadodara
+April 2026
+UNDERTAKING
+We declare that the work presented in this project report, entitled “CRESTA: AI-Powered Robo-Advisory Platform for Indian Equity Markets”, submitted to the Artificial Intelligence and Data Sciences Department, Parul University, Vadodara, for the award of the Bachelor of Technology degree in Artificial Intelligence and Data Sciences, is our original work. We have not plagiarised or submitted the same work for the award of any other degree. In case this undertaking is found incorrect, we accept that our degree may be unconditionally withdrawn.
+April, 2026 Vadodara
+Ankit Mishra (2303031240207):  OM Sharma (2303031241248): 
+Shubham Kumar Jha (2303031241264):  Shivam Panchal (2303031241256): 
+CERTIFICATE
+This is to certify that the work contained in this project report entitled “CRESTA: AI-Powered Robo-Advisory Platform for Indian Equity Markets”, by the following students bearing the respective Enroll numbers.
+Ankit Mishra (2303031240207)
+OM Sharma (2303031241248)
+Shubham Kumar Jha (2303031241264) Shivam Panchal (2303031241256)
+This is also certified that this work is submitted for partial fulfilment of the degree of Bachelor of Technology in Artificial Intelligence and Data Sciences from Parul University, Vadodara, under my supervision from January 2026 to April 2026, and to the best of my knowledge, has not been submitted elsewhere for any degree.
+Therefore, I deem this work fit and recommend it for submission for the award of the aforesaid degree.
+April, 2026 Vadodara
+                            (Mr. Akshay Mandloi), 
+Assistant Professor and Project Guide,
+AIDS Department, Parul University, Vadodara,
+ACKNOWLEDGEMENTS
+We express our sincere gratitude to Mr. Akshay Mandloi, Assistant Professor, Department of Artificial Intelligence and Data Science, Parul University, for his invaluable guidance, constant encouragement, and technical mentorship throughout the course of this project. His insights into machine learning and full-stack system design were instrumental in shaping Cresta into a production-grade platform.
+We are grateful to Dr. Mohammad Arif, Professor and Head, Department of AI & DS, for providing us with the academic framework and infrastructure necessary to undertake this project.
+We acknowledge the open-source community whose libraries — PyTorch, Django, React, XGBoost, HuggingFace Transformers, and Docker — form the technical backbone of this system. We also thank the FINRA Foundation for making the NFCS 2021 investor survey dataset publicly available, which powered our risk profiling engine.
+Finally, we thank our families and peers for their patience and support during the months of intensive development.
+Ankit Mishra | Shubham Kumar Jha | Shivam Panchal | Om Sharma
+B.Tech. (Artificial Intelligence), Batch 2023–2027 Parul University, Vadodara
+SYNOPSIS
+Project Title: Cresta — AI-Powered Robo-Advisory Platform for Indian Equity Markets
+Technology Stack: PyTorch · Django REST Framework · React 18 · XGBoost · FinBERT · Celery · Redis · PostgreSQL · Docker
+Academic Year: 2025–2026
+Cresta is a production-grade, full-stack AI robo-advisory platform designed specifically for the Indian equity market. The platform addresses a critical gap: over 200 million Indian retail investors participate in NSE/BSE markets without access to the institutional-grade analytical tooling that professional fund managers use.
+The system integrates three complementary machine learning models into a unified ensemble forecasting engine. An Attention-LSTM neural network captures long-horizon temporal price dependencies, an XGBoost regressor models tabular technical indicators, and an ARIMA baseline stabilises short-term variance. The ensemble achieves a weighted average of 72.3% directional accuracy across 7 Nifty50 stocks under strict walk-forward validation with no look-ahead bias. Peak directional accuracy reaches 85.2% on RELIANCE.NS.
+A separate XGBoost classifier trained on 25,000 investor profiles — including 2,578 real NFCS 2021 survey respondents — classifies users as Conservative, Moderate, or Aggressive with 84% accuracy. FinBERT processes daily news headlines for real-time sentiment scoring. SHAP explainability surfaces the reasoning behind every recommendation, making the platform fully fiduciary-transparent.
+Beyond ML, Cresta includes a vectorized backtesting engine with Sharpe ratio, maximum drawdown, CAGR, and Nifty50 benchmarking; a 3D interactive global exchange globe; deep
+localisation in Hindi, Gujarati, and Punjabi; JWT and Google OAuth authentication; email watchlist price-trigger alerts; and a complete Docker Compose containerisation across six microservices.
+TABLE OF CONTENTS
+Certificateiii
+Acknowledgementsiv
+Synopsisv
+Table of Contentsvii
+List of Tables and Figuresx
+Chapter 1: Introduction1
+Domain Overview1
+Problem Statement1
+Project Motivation2
+Objectives2
+Key Features and Expected Outcomes2
+Scope3
+Chapter 2: Literature Survey4
+Overview4
+Deep Learning for Stock Price Forecasting4
+Gradient Boosting for Tabular Data5
+Financial NLP and Sentiment Analysis5
+Portfolio Theory and Risk Profiling6
+Comparison of Related Systems6
+Chapter 3: Analysis / Software Requirements Specification7
+Purpose7
+Intended Users and Product Scope7
+Functional Requirements8
+Non-Functional Requirements8
+Hardware and Software Requirements9
+Chapter 4: System Design10
+High-Level System Architecture10
+ML Pipeline Design12
+Database Schema Design14
+Security and Authentication Design16
+Use Case Summary17
+Chapter 5: Methodology19
+Development Approach19
+ML Model Development Methodology20
+Technology Stack Selection Rationale20
+Project Timeline — Gantt Chart21
+Chapter 6: Implementation22
+Backend Implementation22
+Frontend Implementation23
+ML Performance Results27
+Docker Compose Containerisation30
+Chapter 7: Testing32
+Testing Strategy32
+Unit Test Cases33
+API Integration Testing34
+ML Model Validation34
+Performance Benchmarks35
+Chapter 8: Conclusion and Future Work35
+Summary of Achievements35
+Project Goals vs. Accomplishments36
+Limitations37
+Future Work37
+References38
+LIST OF TABLES AND FIGURES
+Tables
+Table 2.1 — Comparison of Related Systems
+6
+Table 3.1 — Functional Requirements
+8
+Table 3.2 — Non-Functional Requirements
+8
+Table 4.1 — Database Schema Summary
+14
+Table 5.1 — Technology Stack and Rationale
+20
+Table 5.2 — Project Gantt Chart
+21
+Table 6.1 — ML Ensemble Forecasting Performance
+28
+Table 6.2 — Risk Profiler Feature Importance (SHAP)
+28
+Table 7.1 — Unit Test Cases
+33
+Table 7.2 — System Performance Benchmarks
+34
+Table 8.1 — Project Goals vs. Accomplishments
+36
+Figures
+Figure 4.1 — High-Level System Architecture
+11
+Figure 4.2 — ML Pipeline Flowchart
+13
+Figure 4.3 — Entity-Relationship Diagram
+15
+Figure 4.4 — Use Case Diagram
+17
+Figure 4.5 — Deployment Architecture (Oracle Cloud, Vercel, Supabase,Upstash)
+17
+Figure 4.6 — Class Diagram
+18
+Figure 4.7 — Sequence Diagram
+18
+Figure 6.1 — Landing Page –Dark Mode with 3D COBE Globe and Live Market Data
+24
+Figure 6.2 — Landing Page – Light Mode
+24
+Figure 6.3 — Intelligent Features — AI Risk Profiling, Real-time Data, Rebalancing
+25
+Figure 6.4 — Login Page — JWT Authentication and Google OAuth
+25
+Figure 6.5 — Email Verification — Token-based 24-hour Expiry
+Figure 6.6 — Portfolio Dashboard — P&L Tracking and Asset Allocation (Dark Mode)
+Figure 6.7 — Holdings Table with AI Stock Advisor, Score Breakdown and News Feed
+Figure 6.8 — Market Watch — LT.NS with 7-Day AI Forecast (Blue Confidence Band)
+Figure 6.9 — Market Watch — Index Cards, Top Gainers and Personalized News Feed
+Figure 6.10 — Settings — Dark/Light Mode Toggle and Language Selection (Hindi, Gujarati, Punjabi)
+Figure 6.11 — Full Hindi Mode — Complete Dashboard Localisation
+Figure 6.12 — Backtest — Strategy Configuration and Performance Metrics (Sharpe, CAGR, Drawdown)
+Figure 6.13 — Backtest — Equity Curve Simulation vs Nifty 50 and Trade Log
+Figure 6.14 — Risk Assessment — AI-Driven Investor Profiling Questionnaire
+26
+26
+27
+27
+29
+29
+30
+31
+32
+32
+Chapter 1 Introduction
+Domain Overview
+The Indian equity market stands as one of the largest and fastest-growing retail investment ecosystems in the world. As of 2024, over 200 million Demat accounts are registered with CDSL and NSDL combined, representing a retail investor base that has grown nearly fivefold in the post-pandemic era. Yet the vast majority of these investors make buy-and-sell decisions without access to the quantitative tools routinely used by institutional funds — tools that integrate technical analysis, macroeconomic signals, fundamental valuation, and behavioural risk profiling into a single coherent framework.
+The field of robo-advisory, which applies algorithmic and machine-learning-driven decision support to personal investment management, has matured significantly in Western markets through platforms such as Wealthfront and Betterment. However, these systems are built for US markets, US regulatory structures, and English-speaking users. Equivalent Indian-market systems remain in early stages, with existing retail platforms such as Zerodha and Groww focusing on brokerage execution rather than AI-driven personalised advisory.
+Problem Statement
+Indian retail equity investors face a three-part structural disadvantage:
+Absence of personalised risk-aligned recommendations: No mainstream Indian platform integrates behavioural risk profiling with portfolio recommendation logic.
+Information asymmetry: Institutional-grade signals — NLP-driven sentiment analysis, ensemble price forecasting, and technical indicator synthesis — are unavailable to individual investors.
+Language barrier: Financial platforms operate exclusively in English, excluding the majority of India's investing population who are more comfortable in Hindi, Gujarati, or Punjabi.
+Project Motivation
+Cresta was conceived to address this structural gap. The core motivation is to build a system that reasons about stock investments the way a qualified financial analyst would — integrating price forecasting, sentiment analysis, risk profiling, and explainable AI — and make that reasoning accessible to any retail investor through a browser, in their own language.
+The platform targets the 200 million+ Indian retail investors who currently receive no personalised, data-driven advisory. It is built on the academic literature of modern portfolio theory, LSTM-based time series forecasting, and transformer-based financial NLP, implemented as a production-grade web application.
+Objectives
+Design and implement an ensemble ML forecasting engine (Attention-LSTM + XGBoost
++ ARIMA) achieving validated directional accuracy above 70% on Indian equity tickers.
+Build an explainable investor risk profiler using XGBoost trained on real NFCS 2021 survey data, achieving at least 80% classification accuracy.
+Integrate FinBERT NLP sentiment analysis on live NSE-listed company news into the advisory signal pipeline.
+Develop a complete full-stack web application with JWT/OAuth authentication, real-time portfolio tracking, vectorized backtesting, and email alert functionality.
+Deliver deep localisation in Hindi, Gujarati, and Punjabi across all application components including ML reasoning strings.
+Containerise the entire system using Docker Compose across six microservices for production-readiness.
+Key Features and Expected Outcomes
+AI Stock Advisor: Personalised BUY/SELL/HOLD signals with a 100-point score breakdown — 40 points sentiment, 40 points risk fit, 20 points valuation.
+7-Day Price Forecast: Ensemble model predictions with directional accuracy up to 85.2% on RELIANCE.NS, displayed as interactive charts with confidence shading.
+Investor Risk Profiling: XGBoost classifier with SHAP explainability, classifying users as Conservative, Moderate, or Aggressive.
+Backtesting Engine: Vectorized NumPy/Pandas engine computing Sharpe ratio, maximum drawdown, CAGR, and Nifty50 benchmark comparison.
+3D Global Exchange Globe: Interactive COBE globe showing 7 global exchanges with geographic synchronisation and live BSE/NSE data.
+Multilingual Interface: Full Hindi, Gujarati, and Punjabi UI support.
+Scope
+Cresta covers NSE/BSE equity markets for 8 validated Nifty50 tickers: RELIANCE.NS, ICICIBANK.NS, HDFCBANK.NS, MARUTI.NS, ONGC.NS, TCS.NS, SUNPHARMA.NS, and
+INFY.NS. The system provides 7-day short-horizon forecasts, daily sentiment updates, and portfolio-level analytics. It does not provide real-money brokerage, options analysis, or mutual fund advisory in its current version — these are identified as future extension modules.
+Chapter 2 Literature Survey
+Overview
+This chapter reviews the foundational academic literature and existing systems relevant to Cresta's three primary components: stock price forecasting using deep learning, investor risk profiling using machine learning, and financial NLP for sentiment-driven advisory.
+Deep Learning for Stock Price Forecasting
+Hochreiter and Schmidhuber (1997) introduced Long Short-Term Memory networks to address the vanishing gradient problem in recurrent neural networks. LSTM's gated architecture — comprising input, forget, and output gates — allows the model to retain long-range temporal dependencies in sequential data. This makes it directly applicable to financial time series, where price trends may persist across hundreds of trading days. Cresta's forecasting engine extends this with a learned temporal attention mechanism over LSTM hidden states.
+Vaswani et al. (2017) introduced the Transformer architecture with the paper "Attention Is All You Need," demonstrating that attention mechanisms can capture complex temporal dependencies without recurrence. Cresta incorporates the attention principle into the LSTM hidden-state weighting, allowing the model to selectively focus on the most predictive historical time steps rather than treating all past observations equally.
+Fischer and Krauss (2018) demonstrated that LSTM networks outperform random forests, deep neural networks, and logistic regression on S&P 500 directional classification. Their walk-forward backtesting methodology — which avoids look-ahead bias by training only on past data at each evaluation step — directly inspired Cresta's 3-fold expanding-window walk-forward validation protocol with a minimum 45-day fold size.
+Gradient Boosting for Tabular Financial Data
+Chen and Guestrin (2016) introduced XGBoost, a scalable gradient-boosted tree system achieving state-of-the-art performance on structured tabular data. XGBoost's regularisation framework, second-order gradient approximation, and parallel tree construction make it highly effective for financial feature sets. Cresta uses XGBoost both as a component of the forecasting ensemble (weight 0.10) and as the sole model for investor risk classification (84% accuracy, 5-fold stratified CV).
+Financial NLP and Sentiment Analysis
+Araci (2019) introduced FinBERT, a BERT-based model fine-tuned on financial news corpora. FinBERT outperforms general-purpose BERT and traditional lexicon-based sentiment tools such as the Loughran-McDonald dictionary on financial text classification tasks. Cresta integrates FinBERT through the HuggingFace Transformers library to process daily news headlines for NSE-listed companies fetched via the yfinance news API. Sentiment scores are aggregated as a mean daily score per ticker and fed into the 16-feature forecasting pipeline.
+Portfolio Theory and Risk Profiling
+Markowitz (1952) established modern portfolio theory, demonstrating that rational investors should construct portfolios that maximise expected return for a given level of risk. While Cresta does not implement full mean-variance optimisation in its current version, the risk profiling module operationalises this insight: investment recommendations must be aligned to individual risk tolerance, not applied uniformly. The NFCS 2021 dataset used for training incorporates Markowitz-aligned risk tolerance dimensions.
+Comparison of Related Systems
+Feature
+Zerodha / Groww
+Smallcase
+Wealthfront
+Cresta
+AI Stock Scoring
+No
+No
+Partial
+Ensemble ML (LSTM + XGBoost
++ ARIMA + FinBERT)
+Explainable Signals
+No
+No
+No
+SHAP + natural-language reasoning per stock
+Indian Language Support
+No
+No
+No
+Hindi, Gujarati, and Punjabi fully supported
+7-day Price Forecast
+No
+No
+No
+Walk-forward validated ensemble, up to 85.2% accuracy
+Feature
+Zerodha / Groww
+Smallcase
+Wealthfront
+Cresta
+Email Watchlist Alerts
+Yes
+No
+Yes
+Trigger-based, configurable price targets
+ML Risk Profiling
+No
+No
+Yes
+XGBoost trained on real NFCS 2021 survey data
+Backtesting Engine
+No
+No
+Partial
+Vectorized NumPy/Pandas with Nifty50 benchmark
+Docker / Open Source
+No
+No
+No
+Full 6-service Docker Compose containerisation
+Table 2.1: Comparison of Related Systems
+Chapter 3
+Analysis / Software Requirements Specification
+Purpose
+This chapter documents the formal requirements of Cresta — the intended users, product scope, functional capabilities, and non-functional constraints. It serves as the contractual specification against which the implementation (Chapter 6) and testing (Chapter 7) are evaluated.
+Intended Users and Product Scope
+Retail Equity Investors: Individual NSE/BSE market participants seeking AI-assisted BUY/SELL/HOLD guidance aligned to their personal risk profile.
+Student Researchers: Users exploring backtesting, ML-driven forecasting, and sentiment analysis as an educational demonstration platform.
+Developers and Evaluators: Technical users accessing the system via Docker Compose for assessment, extension, or institutional review.
+Functional Requirements
+ID
+Requirement Description
+Priority
+FR-01
+System shall authenticate users via JWT access tokens (15-minute expiry) and Google OAuth single sign-on.
+High
+FR-02
+System shall classify investors as Conservative, Moderate, or Aggressive using the XGBoost risk profiler with SHAP explainability.
+High
+FR-03
+System shall generate 7-day price forecasts for all 8 validated Nifty50 tickers using the ensemble model.
+High
+FR-04
+System shall produce BUY/SELL/HOLD signals with a 100-point AI score broken down into Sentiment, Risk Fit, and Valuation components.
+High
+FR-05
+System shall track portfolio holdings with real-time P&L, asset allocation, and invested vs. current value.
+High
+FR-06
+System shall send email alerts via Gmail SMTP when watchlist price targets are triggered.
+Medium
+FR-07
+System shall execute vectorized backtests with Sharpe ratio, maximum drawdown, CAGR, and Nifty50 benchmark comparison.
+Medium
+FR-08
+System shall support complete UI localisation in Hindi, Gujarati, and Punjabi across all components.
+Medium
+ID
+Requirement Description
+Priority
+FR-09
+System shall display a 3D interactive global exchange globe with 7 exchanges and geographic synchronisation.
+Low
+FR-10
+System shall display a personalised news feed filtered by portfolio holdings.
+Low
+Table 3.1: Functional Requirements
+Non-Functional Requirements
+ID
+Non-Functional Requirement
+Target / Metric
+NFR-01
+ML prediction latency for cached results
+Under 500 milliseconds
+NFR-02
+ML prediction latency for on-the-fly inference
+Under 30 seconds
+NFR-03
+REST API response time for non-ML endpoints
+Under 200 milliseconds
+NFR-04
+JWT access token expiry window
+15 minutes with HttpOnly refresh rotation
+NFR-05
+Email verification token validity
+24-hour expiry after registration
+NFR-06
+System containerisation standard
+Docker Compose across 6 microservices
+NFR-07
+Ensemble directional forecast accuracy target
+At least 70% average across validated tickers
+NFR-08
+Risk profiler classification accuracy target
+At least 80% on 5-fold stratified cross-validation
+NFR-09
+Production HTTPS security enforcement
+HSTS headers and SSL redirect active in production
+NFR-10
+Internationalisation coverage
+100% of UI strings and ML reasoning in all 4 languages
+Table 3.2: Non-Functional Requirements
+Hardware and Software Requirements Development Environment:
+OS: Linux / macOS / Windows (Docker abstraction layer removes OS dependency)
+RAM: Minimum 8 GB for local ML training; 16 GB recommended for parallel Celery workers
+Storage: 10 GB minimum for model artefacts, historical data, and Docker images
+The primary references used in developing this SRS include the NFCS 2021 Investor Survey (FINRA Foundation), SEBI’s 2020 Consultation Paper on Investment Advisers, and ISO/IEC 25010 Software Quality Standards.
+Production Environment (Oracle Cloud Free Tier):
+Compute: 4 OCPU (AMD) with 24 GB RAM
+Database: PostgreSQL hosted on Supabase free tier
+Cache and message broker: Redis hosted on Upstash free tier
+Frontend CDN: Vercel with custom domain (crestafinance.me)
+Core Software Dependencies:
+Python 3.11, PyTorch 2.x, Django 5, React 18, Node 20, Docker 24
+HuggingFace Transformers (FinBERT), XGBoost 2.x, statsmodels (ARIMA)
+Celery 5.x, Redis 7, PostgreSQL 15, Nginx 1.25, Gunicorn 21
+Chapter 4 System Design
+High-Level System Architecture
+Cresta follows a decoupled, microservices-oriented architecture with six containerised services orchestrated via Docker Compose. The architecture separates concerns cleanly across the presentation layer (React 18), API layer (Django DRF), asynchronous task layer (Celery + Redis), and data persistence layer (PostgreSQL).
+The end-to-end request flow for an AI advisory query proceeds as follows:
+The user triggers a stock analysis request from the React frontend over HTTPS.
+The request passes through Nginx reverse proxy to the Django DRF API, where JWT middleware validates the access token.
+Django checks the Redis prediction cache. If a valid result exists within the TTL window, it is returned immediately with sub-500ms latency.
+On a cache miss, Django dispatches a Celery task to the ML worker via the Redis message broker.
+The Celery worker executes the Attention-LSTM + XGBoost + ARIMA ensemble, processes FinBERT sentiment, computes the 100-point AI score, and writes the result to PostgreSQL and Redis.
+The complete response — 7-day forecast, AI score breakdown, and natural-language reasoning — is returned to the frontend.
+Figure 4.1: High-Level System Architecture Diagram
+ML Pipeline Design
+The ML pipeline processes raw OHLCV market data and news headlines through a structured feature engineering stage before model input.
+Feature Engineering — 16 Input Features:
+Price and volume: Close price, daily trading Volume
+Trend indicators: Simple Moving Average (SMA-5, SMA-20), MACD
+Momentum indicators: Relative Strength Index (RSI-14)
+Volatility indicators: Bollinger Bands (upper band, middle band, lower band)
+Volume flow: On-Balance Volume (OBV)
+Sentiment: FinBERT mean daily sentiment score from yfinance news API headlines
+Macroeconomic: USD/INR exchange rate, India VIX volatility index, Crude Oil Futures
+Ensemble Architecture and Weight Rationale:
+Attention-LSTM (weight 0.70): Captures long-horizon price trend dependencies. The attention mechanism assigns learned scalar weights to each LSTM hidden state across the lookback window, allowing the model to focus on the most predictive historical periods rather than treating all time steps equally.
+XGBoost Regressor (weight 0.10): Models non-linear interactions between technical indicators on the tabular feature set. Acts as a complementary signal to the LSTM's sequential learning.
+ARIMA (weight 0.20): Provides a statistical baseline that stabilises short-term variance and prevents LSTM overconfidence on low-signal, mean-reverting periods.
+Ensemble weights (0.70 / 0.10 / 0.20) were selected via validation MAPE minimisation across walk-forward folds — LSTM dominates long-horizon trend capture while ARIMA stabilises short-term noise.
+Figure 4.2: ML Pipeline Flowchart
+Database Schema Design
+The PostgreSQL database is structured around seven core entities:
+Entity
+Key Fields
+Relationships
+USER
+id, email, password_hash
+One-to-many with PORTFOLIO; one-to-one with INVESTOR_PROFILE
+INVESTOR_PROFILE
+id, age, income, risk_tolerance, user_class
+One-to-one with USER; stores Conservative / Moderate / Aggressive classification
+PORTFOLIO
+id, total_value, cash_balance
+One-to-many with HOLDING; one-to-one with USER
+HOLDING
+id, ticker, quantity, average_buy_price
+Many-to-one with PORTFOLIO; one-to-many with ALERT
+STOCK_PREDICTION
+ticker (PK), history_array (JSON), forecast_array (JSON), last_updated
+Standalone ML cache table; queried before triggering Celery inference
+ALERT
+id, ticker, signal (Buy/Sell/Hold), is_active
+Many-to-one with HOLDING; triggers email notification on status change
+WATCHLIST_ALERT
+id, ticker, target_price, condition (ABOVE/BELOW), triggered
+Many-to-one with USER; evaluated by Celery Beat every 15 minutes
+Table 4.1: Database Schema Summary
+Figure 4.3: Entity-Relationship Diagram
+Security and Authentication Design
+JWT Authentication: Access tokens expire in 15 minutes. Refresh tokens are stored in HttpOnly cookies with rotation on each use, preventing token replay attacks from compromised local storage.
+Email Verification: All new accounts require token-based email verification with a 24-hour expiry window, delivered via Gmail SMTP through Django's email backend.
+Google OAuth: Integrated for single-click login, reducing friction for new users while maintaining secure third-party authentication.
+Input Validation: Stock ticker inputs are validated against an NSE/BSE suffix whitelist (.NS / .BO), preventing injection of arbitrary strings into ML inference queries.
+Production Hardening: SECURE_SSL_REDIRECT, X-Frame-Options: DENY, strict HSTS headers, and Django REST Framework API rate limiting are configured for the production environment.
+DoS Mitigation: The 3-tier ML caching strategy (Redis TTL → filesystem pickle → on-the-fly Celery task) ensures that repeated prediction requests cannot trigger expensive model retraining.
+Use Case Summary
+The seven primary use cases are: (1) User Registration and Email Verification, (2) Investor Risk Profiling with SHAP explanation, (3) Portfolio Holdings Management and P&L Tracking, (4) AI Stock Advisory Query and Score Breakdown, (5) Market Watch and 7-Day Forecast View, (6) Backtesting Strategy Simulation, and (7) Watchlist Alert Configuration and Email Trigger.
+Figure 4.4: Use Case Diagram
+Figure 4.5: Cresta Deployment Architecture — Oracle Cloud, Vercel, Supabase and Upstash
+Figure 4.6: Cresta Class Diagram — Core Entities and Relationships
+Figure 4.7: Cresta Sequence Diagram — Stock Forecast Request Flow
+Chapter 5 Methodology
+Development Approach
+Cresta was developed using an Agile methodology with two-week sprint cycles. Development was structured in five major phases: ML Pipeline Design and Validation, Backend API Development, Frontend Implementation, Integration and Security Hardening, and Testing and Documentation. GitHub was used for version control with a feature-branch workflow, and all team members contributed to the shared repository at github.com/Cypher-redeye/Cresta.
+The Agile approach was selected over Waterfall because ML model performance is inherently iterative — ensemble weights, feature engineering choices, and hyperparameters required multiple validation cycles before convergence. Fixed two-week sprints with defined deliverables ensured consistent progress without scope creep.
+A user-centric design thinking approach guided all UI decisions, ensuring the platform remains accessible to retail investors with no prior trading experience.
+ML Model Development Methodology Data Collection:
+Historical price data: 20 years of daily Nifty50 OHLCV data sourced from Kaggle and supplemented via the yfinance Python library.
+Sentiment data: Daily news headlines for each NSE-listed ticker fetched via the yfinance news API and processed through FinBERT, aggregated as mean daily sentiment score per ticker.
+Risk profiling data: 2,578 real respondent records from the NFCS 2021 Investor Survey (FINRA Foundation), augmented with 22,422 synthetic profiles generated using SEBI income capacity guidelines and empirical behavioural noise, yielding 25,000 total training samples.
+Validation Strategy — Walk-Forward Cross-Validation:
+To eliminate look-ahead bias — a critical failure mode in financial ML where future data contaminates model training — Cresta implements strict walk-forward validation with a 3-fold expanding window and minimum 45-day fold size. At each fold, the model is trained only on data preceding the evaluation window. The random seed is fixed at 42 for full reproducibility across all runs. This validation protocol mirrors real-world trading conditions more accurately than standard k-fold cross-validation.
+For external validation, Cresta’s 7-day directional accuracy (72.3%) was benchmarked against Fischer and Krauss (2018), who reported 53–56% accuracy on S&P 500 with similar LSTM approaches, confirming our ensemble’s performance is competitive with published literature.
+Technology Stack Selection Rationale
+Technology
+Role in System
+Selection Rationale
+PyTorch
+Attention-LSTM engine
+Dynamic computation graphs ideal for custom attention mechanisms and sequential financial data
+XGBoost
+Tabular ML (risk + ensemble)
+Best-in-class performance on structured financial features; fast inference for real-time advisory
+FinBERT
+NLP sentiment analysis
+Finance-domain BERT fine-tuning outperforms general-purpose models and lexicon-based tools on financial text
+Django DRF
+REST API backend
+Mature ORM, serialisation, and authentication ecosystem; tight Celery integration for async ML dispatch
+React 18
+Frontend user interface
+Component-based architecture, performant rendering, and large ecosystem for interactive financial charts
+Celery + Redis
+Async task queue
+Asynchronous ML job dispatch prevents blocking of API threads during expensive model inference
+PostgreSQL
+Primary relational database
+ACID compliance, native JSON field support for forecast arrays, and proven production reliability
+Docker Compose
+Containerisation and orchestration
+Six-service orchestration enabling reproducible deployment across any Linux environment
+MLflow
+ML experiment tracking
+Cross-validation loss curves, hyperparameter logging, and model versioning for reproducible ML experiments
+Table 5.1: Technology Stack and Rationale
+Project Timeline — Gantt Chart
+Phase
+Task Description
+Duration
+Period
+Phase 1
+Literature survey and system architecture design
+2 weeks
+January 2026
+Phase 1
+Dataset collection, preprocessing, and feature engineering
+1 week
+January 2026
+Phase
+Task Description
+Duration
+Period
+Phase 2
+Attention-LSTM model training and walk-forward validation
+2 weeks
+January 2026
+Phase 2
+XGBoost risk profiler training and SHAP explainability integration
+1 week
+February 2026
+Phase 2
+ARIMA baseline implementation and ensemble weight optimisation
+1 week
+February 2026
+Phase 3
+Django DRF backend API development and Celery task queue setup
+2 weeks
+February 2026
+Phase 3
+Redis caching layer and 3-tier prediction strategy implementation
+1 week
+February 2026
+Phase 4
+React 18 frontend development — dashboard, market watch, globe
+2 weeks
+March 2026
+Phase 4
+Internationalisation (Hindi, Gujarati, Punjabi) via react-i18next
+1 week
+March 2026
+Phase 5
+Security hardening, Docker Compose configuration, and backtesting engine
+1 week
+March 2026
+Phase 5
+Testing, documentation, and project report writing
+1 week
+March 2026
+Table 5.2: Project Gantt Chart
+Chapter 6 Implementation
+Backend Implementation
+The Django 5 backend exposes a RESTful API consumed by the React frontend. All endpoints are protected by JWT middleware with 15-minute access token expiry. The backend is structured into four primary Django applications: accounts (authentication and user management), portfolio (holdings and P&L logic), market (forecasting, sentiment, and advisory), and alerts (watchlist and email trigger logic).
+ML Serving Layer: Django views delegate ML inference to Celery workers via the Redis message broker. A 3-tier caching strategy (Redis TTL → filesystem pickle → on-the-fly retraining) ensures prediction latency under 500ms for cached results. This architecture reduces average prediction latency by approximately 60% compared to synchronous inference on every request.
+Email Alert Engine: Celery Beat runs a scheduled task every 15 minutes to check all active watchlist alerts against live yfinance prices. On trigger, Gmail SMTP delivers a formatted HTML alert email to the registered user address.
+Risk Profiler API: The /api/risk-profile/ endpoint accepts age, income, investment goal, risk tolerance, and experience as inputs, runs XGBoost inference, computes SHAP feature contribution values, and returns the investor class with a natural-language explanation of the dominant risk factors.
+Backtesting API: The /api/backtest/ endpoint accepts ticker, date range, strategy parameters, and initial capital. The vectorized NumPy/Pandas engine simulates trades with 0.05% brokerage and 0.10% slippage, computing Sharpe ratio, maximum drawdown, CAGR, and Nifty50 benchmark comparison.
+Frontend Implementation
+The React 18 frontend is built with Vite for fast production builds, styled with TailwindCSS and a custom emerald design system (primary colour #10B981). The UI implements a complete
+dark/light mode toggle with ThemeContext propagating across all components, including the 3D COBE globe which adapts its colour palette to the active theme.
+Landing Page: Canvas-based breathing gradient animation with three independent radial emerald glows and 45 floating market data numbers. The 3D COBE globe displays 7 global exchanges with angular-distance geographic synchronisation.
+Portfolio Dashboard: Real-time P&L tracking via yfinance, asset allocation donut chart, live ticker tape showing SENSEX, NIFTY, BANK NIFTY, NIFTY IT, NASDAQ, S&P 500, USD/INR, and GOLD, plus AI alert cards.
+Market Watch: Fuzzy stock search with NSE/BSE alias resolution, 30-day historical chart merged with 7-day AI forecast displayed in blue with confidence shading. Dynamic green/red chart coloring based on price direction.
+Holdings and AI Advisor: Holdings table with sparkline trend column, BUY/SELL/HOLD signal badges, and 100-point AI Score breakdown across Sentiment (40 pts), Risk Fit (40 pts), and Valuation (20 pts) with natural-language reasoning string per stock.
+Localisation: react-i18next with JSON translation files covering 100% of UI strings, ML reasoning output, and email alert content across English, Hindi, Gujarati, and Punjabi.
+Figure 6.1: Landing Page — Dark Mode with 3D COBE Globe and Live Market Data
+Figure 6.2: Landing Page — Light Mode
+Figure 6.3: Intelligent Features — AI Risk Profiling, Real-time Data, Rebalancing
+Figure 6.4: Login Page — JWT Authentication and Google OAuth
+Figure 6.5: Email Verification — Token-based 24-hour Expiry
+                               
+Figure 6.6: Portfolio Dashboard — P&L Tracking and Asset Allocation (Dark Mode)
+Figure 6.7: Holdings Table with AI Stock Advisor, Score Breakdown and News Feed
+Figure 6.8: Market Watch — LT.NS with 7-Day AI Forecast (Blue Confidence Band)
+ML Performance Results
+Ticker
+Sector
+Directional Accuracy
+MAPE
+RELIANCE.NS
+Energy and Conglomerate
+85.2%
+10.84%
+ONGC.NS
+Energy
+78.5%
+12.73%
+HDFCBANK.NS
+Banking
+72.6%
+7.01%
+ICICIBANK.NS
+Banking
+70.4%
+6.75%
+MARUTI.NS
+Automobile
+70.4%
+17.38%
+Ticker
+Sector
+Directional Accuracy
+MAPE
+TCS.NS
+IT Services
+68.9%
+9.83%
+SUNPHARMA.NS
+Pharmaceuticals
+60.7%
+5.98%
+INFY.NS
+IT Services
+54.1%*
+10.66%
+Average (7 liquid stocks)
+—
+72.3%
+—
+Table 6.1: ML Ensemble Forecasting Performance (Walk-Forward Validated)
+* INFY.NS has insufficient 20-year historical coverage. The system suppresses recommendations and displays a data-limitation warning for any stock below the 60% directional accuracy threshold.
+Feature
+SHAP Importance Score
+Interpretation
+Risk Tolerance
+61.35%
+Dominant driver of investor classification — self-reported comfort with loss
+Income
+17.81%
+Higher income enables greater risk absorption capacity
+Investment Goal
+14.75%
+Growth vs. preservation goal shifts portfolio aggressiveness significantly
+Age
+3.88%
+Younger investors tolerate more risk; older investors prefer capital preservation
+Experience Level
+2.21%
+More experienced investors make more informed risk decisions
+Table 6.2: Risk Profiler Feature Importance (SHAP)
+Figure 6.9: Market Watch — Index Cards, Top Gainers and Personalized News Feed
+Figure 6.10: Settings — Dark/Light Mode Toggle and Language Selection (Hindi, Gujarati, Punjabi)
+Figure 6.11: Full Hindi Mode — Complete Dashboard Localisation
+Figure 6.12: Backtest — Strategy Configuration and Performance Metrics (Sharpe, CAGR, Drawdown)
+Figure 6.13: Backtest — Equity Curve Simulation vs Nifty 50 and Trade Log
+Figure 6.14: Risk Assessment — AI-Driven Investor Profiling Questionnaire (Step 1 of 9)
+Docker Compose Containerisation
+The entire Cresta stack is containerised across six Docker services:
+nginx: Reverse proxy and SSL termination, routing /api/ requests to the Django Gunicorn server and all other routes to the React static build.
+django: Django 5 application server running behind Gunicorn with 4 worker processes handling all API requests.
+celery_worker: Celery worker process consuming ML inference tasks from the Redis queue and executing Attention-LSTM + ARIMA + XGBoost ensemble predictions.
+celery_beat: Celery Beat scheduler triggering watchlist price-alert checks every 15 minutes and other periodic maintenance tasks.
+redis: Redis 7 instance serving simultaneously as the Celery message broker and the ML prediction result cache.
+postgres: PostgreSQL 15 database storing all persistent application data including users, portfolios, holdings, alerts, and prediction cache records.
+Chapter 7 Testing
+Testing Strategy
+Cresta's testing strategy covers four layers: unit testing of individual components, integration testing of all REST API endpoints, ML model validation via walk-forward cross-validation, and system-level performance benchmarking. The ML validation methodology is described in detail in Chapter 5 and represents the most rigorous component of the testing regime, given the financial consequences of poorly validated forecasting models.
+Unit Test Cases
+Test ID
+Component
+Test Description
+Expected Outcome
+Status
+UT-01
+Authentication
+JWT access token is rejected after 15-minute expiry
+401 Unauthorized returned to client
+Pass
+UT-02
+Authentication
+Email verification token expires correctly after 24 hours
+Token marked invalid; re-send email prompted
+Pass
+UT-03
+Risk Profiler
+Conservative investor profile is classified correctly
+user_class = Conservative returned
+Pass
+UT-04
+Risk Profiler
+Aggressive investor profile is classified correctly
+user_class = Aggressive returned
+Pass
+UT-05
+Forecasting
+Cached prediction returns within latency target
+Response delivered in under 500ms
+Pass
+UT-06
+Forecasting
+Invalid ticker string is rejected by whitelist validation
+400 Bad Request returned with error message
+Pass
+UT-07
+Backtesting
+Sharpe ratio computation matches manual NumPy calculation
+Values match to 4 decimal places
+Pass
+UT-08
+Backtesting
+Maximum drawdown computation matches manual calculation
+Values match to 4 decimal places
+Pass
+Test ID
+Component
+Test Description
+Expected Outcome
+Status
+UT-09
+Alerts
+Watchlist alert triggers email when price crosses target
+Email delivered within 15-minute Celery Beat cycle
+Pass
+UT-10
+Localisation
+Hindi mode renders all dashboard strings correctly in Hindi
+Zero English strings visible in Hindi mode
+Pass
+UT-11
+Portfolio
+P&L calculation matches live yfinance price data
+P&L accurate to 2 decimal places
+Pass
+UT-12
+OAuth
+Google OAuth creates user and profile record on first login
+User and InvestorProfile created in PostgreSQL
+Pass
+Table 7.1: Unit Test Cases
+API Integration Testing
+All REST API endpoints were tested using Postman with both valid and invalid authentication tokens, valid and malformed request bodies, and valid and invalid ticker symbols. The following key endpoint scenarios were validated:
+POST /api/auth/login/ — validates credentials and returns JWT access and refresh token pair
+POST /api/auth/register/ — creates user record and triggers email verification via Gmail SMTP
+GET /api/market/forecast/<ticker>/ — returns 7-day forecast from cache (fast path) and Celery (slow path)
+GET /api/portfolio/holdings/ — returns authenticated user's holdings with live P&L computed from yfinance
+POST /api/backtest/ — accepts strategy parameters and returns full backtesting metrics
+POST /api/alerts/watchlist/ — creates a price trigger alert for the authenticated user
+ML Model Validation
+The ensemble model was validated using 3-fold walk-forward expanding-window cross-validation. This methodology was chosen specifically to reflect real-world trading conditions,
+where a model can only use historical data available up to the point of prediction. The minimum fold size of 45 trading days prevents evaluation on artificially small windows where results would not generalise.
+The XGBoost risk profiler was evaluated separately using 5-fold stratified cross-validation on 25,000 investor profiles, with stratification ensuring proportional representation of all three investor classes across folds. Conservative class recall (84%) was specifically monitored as a fiduciary safety metric — misclassifying a conservative investor as aggressive carries substantially higher real-world financial risk than the reverse error.
+Performance Benchmarks
+Endpoint or Component
+Metric Measured
+Benchmark Result
+ML Prediction — Redis cache hit
+End-to-end response latency
+Under 400 milliseconds
+ML Prediction — on-the-fly Celery
+End-to-end response latency
+Under 28 seconds
+REST API — non-ML endpoints
+Response latency
+Under 180 milliseconds
+Risk Profiler inference
+XGBoost inference latency
+Under 50 milliseconds
+Backtesting — 1-year window
+Vectorized computation time
+Under 2 seconds
+Docker Compose full stack
+Cold start time
+Under 45 seconds
+Ensemble forecast accuracy
+Average directional accuracy
+72.3% across 7 liquid stocks
+Risk profiler accuracy
+5-fold stratified CV
+84% classification accuracy
+Table 7.2: System Performance Benchmarks
+Chapter 8 Conclusion and Future Work
+Summary of Achievements
+Cresta successfully delivers on all primary objectives defined in Chapter 1. The project demonstrates that production-grade AI-driven financial advisory is achievable within an academic capstone setting, with rigorous ML validation, real-world data, and enterprise-standard engineering practices.
+The ensemble forecasting engine achieves 72.3% average directional accuracy across 7 liquid Nifty50 stocks under strict walk-forward validation — a result competitive with published academic benchmarks on Indian equity forecasting. The investor risk profiler achieves 84% classification accuracy on a dataset grounded in real NFCS 2021 survey respondents, with SHAP explainability confirming that the model learned financially meaningful feature weights: risk tolerance at 61.35% and income at 17.81%.
+The full-stack implementation — spanning Django DRF, React 18, Celery, Redis, PostgreSQL, and Docker Compose across six microservices — reflects production-intent engineering that goes substantially beyond a typical academic project. The deep localisation in Hindi, Gujarati, and Punjabi directly addresses the language barrier identified as a structural problem for Indian retail investors.
+Project Goals vs. Accomplishments
+Objective
+Target Defined
+Result Achieved
+Ensemble directional forecast accuracy
+At least 70% average
+72.3% average across 7 validated tickers ✓
+Investor risk profiler accuracy
+At least 80% on 5-fold CV
+84% on 5-fold stratified cross-validation ✓
+Multilingual localisation
+Hindi and at least one other language
+Hindi, Gujarati, and Punjabi fully implemented ✓
+Objective
+Target Defined
+Result Achieved
+Full-stack production-grade application
+Docker Compose containerisation
+6-service Docker Compose stack operational ✓
+Explainable AI integration
+SHAP feature importance scores
+SHAP values and natural-language reasoning per stock ✓
+Backtesting engine
+Sharpe ratio, MDD, and CAGR metrics
+Vectorized engine with Nifty50 benchmark comparison ✓
+Security hardening
+JWT, HSTS, and API
+rate limiting
+All security measures implemented and tested ✓
+FinBERT sentiment pipeline
+Live news sentiment as ML feature
+yfinance API integration with daily aggregation ✓
+Table 8.1: Project Goals vs. Accomplishments
+Limitations
+Ticker coverage is limited to 8 validated Nifty50 stocks. Stocks with insufficient 20-year historical data (notably INFY.NS) fall below the 60% directional accuracy threshold and are excluded from advisory signals with an explicit data-limitation warning.
+The 7-day forecast horizon is short relative to long-term investment strategies. The system is designed for tactical short-horizon guidance rather than long-term portfolio construction or retirement planning.
+FinBERT sentiment analysis is derived exclusively from English-language news. Hindi and vernacular financial news sources are not currently processed, which may underweight sentiment signals for mid-cap domestic companies.
+The platform does not integrate with live brokerage APIs for trade execution. All BUY/SELL/HOLD signals are purely advisory and do not result in real-money transactions.
+Future Work
+Expanded Ticker Coverage: Extend the ensemble model to cover the full Nifty50 and top 100 NSE-listed stocks by market capitalisation, using automated data quality validation to enforce the 60% accuracy threshold.
+Options Chain Analyzer: Integrate implied volatility and Greek visualisation (Delta, Gamma, Theta, Vega) for F&O traders, who represent the highest-volume segment on NSE.
+Mutual Fund Advisory: Extend AI scoring to the top 50 Indian mutual funds, enabling SIP planning and goal-based investment recommendations.
+Mobile Application: React Native port of the platform with push-based watchlist alerts and offline portfolio viewing for users in low-connectivity environments.
+SEBI Compliance Pipeline: Implement auditable AI reasoning logs meeting SEBI's proposed Registered Investment Adviser (RIA) digital advisory regulatory framework.
+Vernacular NLP: Fine-tune a multilingual BERT variant on Hindi and Gujarati financial news to extend sentiment analysis beyond English-language sources.
+Transformer-based Forecasting: Evaluate a full Temporal Fusion Transformer (TFT) against the current Attention-LSTM ensemble to assess accuracy improvements on longer forecast horizons (14-day and 30-day windows).
+REFERENCES
+Hochreiter, S., & Schmidhuber, J. (1997). Long Short-Term Memory. Neural Computation, 9(8), 1735–1780.
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, L., & Polosukhin, I. (2017). Attention Is All You Need. Advances in Neural Information Processing Systems (NeurIPS), 30.
+Araci, D. (2019). FinBERT: Financial Sentiment Analysis with Pre-trained Language Models. arXiv preprint arXiv:1908.10063.
+Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, 785–794.
+Markowitz, H. (1952). Portfolio Selection. The Journal of Finance, 7(1), 77–91.
+Fischer, T., & Krauss, C. (2018). Deep learning with long short-term memory networks for financial market predictions. European Journal of Operational Research, 270(2), 654–669.
+Lundberg, S. M., & Lee, S. I. (2017). A unified approach to interpreting model predictions. Advances in Neural Information Processing Systems (NeurIPS), 30.
+FINRA Foundation. (2021). National Financial Capability Study (NFCS) — Investor Survey Dataset. Financial Industry Regulatory Authority.
+Box, G. E. P., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M. (2015). Time Series Analysis: Forecasting and Control (5th ed.). Wiley.
+Devlin, J., Chang, M. W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. Proceedings of NAACL-HLT 2019, 4171–4186.
+SEBI. (2020). Consultation Paper on Regulatory Framework for Investment Advisers. Securities and Exchange Board of India.
+Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. Annals of Statistics, 29(5), 1189–1232.

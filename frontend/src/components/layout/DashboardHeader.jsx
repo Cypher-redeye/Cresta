@@ -3,6 +3,7 @@ import { Bell, Search, User } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import ThemeToggle from '../common/ThemeToggle';
+import Logo from '../common/Logo';
 import { useSearch } from '../../context/SearchContext';
 import { useToast } from '../../context/ToastContext';
 import { useTranslation } from 'react-i18next';
@@ -67,12 +68,23 @@ const Header = () => {
 
 
     return (
-        <header className="flex items-center justify-between px-4 md:px-8 py-3.5 border-b border-notion-border bg-notion-bg/60 backdrop-blur-2xl sticky top-14 md:top-0 mt-14 md:mt-0 z-10 transition-colors duration-300 w-full overflow-hidden">
-            <div className="min-w-0 pr-4">
-                <h1 className="text-[18px] md:text-[20px] font-bold text-notion-text truncate tracking-tight">
-                    {t('welcome_back')}, <span className="text-notion-emerald">{displayName}</span>
-                </h1>
-                <p className="text-xs text-notion-muted hidden sm:block truncate">{t('whats_happening_today')}</p>
+        <header className="flex items-center justify-between px-4 md:px-8 py-3.5 border-b border-notion-border bg-notion-bg/60 backdrop-blur-2xl sticky top-0 z-30 transition-colors duration-300 w-full overflow-hidden">
+            {/* Left: Logo + Welcome */}
+            <div className="flex items-center gap-4 min-w-0">
+                {/* Logo branding (migrated from sidebar) */}
+                <div className="flex items-center gap-2 pr-4 border-r border-notion-border">
+                    <Logo width={28} height={28} />
+                    <span className="text-lg font-bold tracking-tight text-notion-text hidden sm:block">
+                        Cresta<span className="text-notion-emerald">.</span>
+                    </span>
+                </div>
+
+                <div className="min-w-0">
+                    <h1 className="text-[16px] md:text-[18px] font-bold text-notion-text truncate tracking-tight">
+                        {t('welcome_back')}, <span className="text-notion-emerald">{displayName}</span>
+                    </h1>
+                    <p className="text-xs text-notion-muted hidden sm:block truncate">{t('whats_happening_today')}</p>
+                </div>
             </div>
 
             <div className="flex items-center gap-6">
