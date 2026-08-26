@@ -133,8 +133,9 @@ Cresta eliminates costly intermediaries by democratizing institutional-grade qua
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ System Architectures
 
+### 1. High-Level Infrastructure & Request Flow
 ```mermaid
 graph TD
     User([Investor Client]) -->|HTTPS / WSS| NGINX[NGINX Reverse Proxy]
@@ -167,6 +168,112 @@ graph TD
         Django --> Redis[(Redis Cache & Broker)]
         Redis --> Celery[Celery Task Workers]
     end
+```
+
+### 2. Quantitative Machine Learning & Sentiment Pipeline
+```mermaid
+flowchart LR
+    A[Historical OHLCV + Ticker Feed] --> B[Feature Engineering (RSI, MACD, SMA)]
+    B --> C[Attention-LSTM Model 70%]
+    B --> D[ARIMA Model 20%]
+    B --> E[XGBoost Regressor 10%]
+    C & D & E --> F[Dynamic Weighted Ensemble]
+    F --> G[7-Day Price Forecast Bounds]
+
+    H[Live Financial News RSS] --> I[FinBERT Transformer NLP]
+    I --> J[Sentiment Score (-1.0 to +1.0)]
+
+    K[NFCS Investor Survey Dataset] --> L[XGBoost Risk Classifier]
+    L --> M[Conservative / Moderate / Aggressive Tier]
+
+    G & J & M --> N[Explainable Recommendation Engine]
+```
+
+### 3. Database Entity-Relationship (ER) Schema
+```mermaid
+erDiagram
+    USER ||--o{ HOLDING : owns
+    USER ||--o{ TRANSACTION : executes
+    USER ||--o{ WATCHLIST_ITEM : monitors
+    USER ||--o{ WATCHLIST_ALERT : configures
+    USER ||--o{ RISK_PROFILE : maintains
+    
+    USER {
+        int id PK
+        string username
+        string email
+        boolean is_email_verified
+        datetime date_joined
+    }
+    RISK_PROFILE {
+        int id PK
+        int user_id FK
+        string risk_category
+        float risk_score
+        json factor_breakdown
+        datetime last_assessed
+    }
+    HOLDING {
+        int id PK
+        int user_id FK
+        string ticker
+        string stock_name
+        int quantity
+        float avg_buy_price
+    }
+    TRANSACTION {
+        int id PK
+        int user_id FK
+        string ticker
+        string transaction_type
+        int quantity
+        float price
+        datetime executed_at
+    }
+    WATCHLIST_ALERT {
+        int id PK
+        int user_id FK
+        string ticker
+        float target_price
+        string direction
+        boolean is_triggered
+    }
+```
+
+---
+
+## 📂 Team & Repository Structure
+
+The codebase is organized into **4 independent core modules**, allowing each team lead to develop, test, and commit autonomously:
+
+```
+Cresta/
+├── frontend/               # 🎨 Om Sharma (Frontend Lead)
+│   ├── src/                # React 18, Tailwind, Framer Motion, i18n
+│   ├── public/             # Branding assets, SVGs, favicon
+│   └── package.json
+│
+├── backend/                # 🛠️ Ankit Mishra (Team Leader & Backend Lead)
+│   ├── advisor/            # Authentication, Portfolio, Market APIs
+│   ├── robo_advisor/       # Django settings, WSGI/ASGI, URLs
+│   ├── Dockerfile
+│   └── manage.py
+│
+├── ml_model/               # 🧠 Shivam Panchal (Machine Learning Lead)
+│   ├── recommender/        # Attention-LSTM, ARIMA, XGBoost ensemble
+│   ├── backtest.py         # Strategy backtesting runner
+│   ├── calc_accuracy.py    # Walk-forward accuracy validator
+│   └── README.md
+│
+├── chatbot/                # 🤖 Shubham Jha (Chatbot & NLP Lead)
+│   ├── views.py            # Multi-LLM failover (Groq + Gemini), SSE streaming
+│   ├── tools.py            # 7 autonomous LangChain financial execution tools
+│   ├── prompts.py          # Multilingual system prompts (EN/HI)
+│   ├── memory.py           # Conversation history manager
+│   └── README.md
+│
+├── docs/screenshots/       # 📸 Visual platform walkthroughs
+└── docker-compose.yml      # 🐳 Multi-container orchestration
 ```
 
 ---
