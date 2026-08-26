@@ -198,17 +198,22 @@ const CommandPalette = () => {
 
     useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
-    // Open externally (from Hero bar)
+    // Open externally (from Hero bar or Asset Allocation button)
     useEffect(() => {
         const handler = (e) => {
             setIsOpen(true);
             setAiMode(true);
-            if (e.detail?.query) {
-                setAiInput(e.detail.query);
+            const prompt = e.detail?.query || e.detail?.message || '';
+            if (prompt) {
+                setAiInput(prompt);
             }
         };
         window.addEventListener('open-command-palette-ai', handler);
-        return () => window.removeEventListener('open-command-palette-ai', handler);
+        window.addEventListener('open-cresta-chat', handler);
+        return () => {
+            window.removeEventListener('open-command-palette-ai', handler);
+            window.removeEventListener('open-cresta-chat', handler);
+        };
     }, []);
 
     /* ── Execute command ── */
@@ -324,7 +329,9 @@ const CommandPalette = () => {
                 const updated = [...prev];
                 updated[updated.length - 1] = {
                     role: 'assistant',
-                    content: 'Something went wrong. Please try again.',
+                    content: error.message?.includes('401')
+                        ? 'Your session expired. Please refresh the page to reconnect.'
+                        : (error.message || 'Something went wrong. Please try again.'),
                     followups: [],
                 };
                 return updated;

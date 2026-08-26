@@ -20,8 +20,8 @@ const Navbar = () => {
     }, []);
 
     const navLinks = [
-        { name: t('features'), path: '#features' },
-        { name: t('about_us'), path: '#about' },
+        { name: t('features'), path: '/#features' },
+        { name: t('about_us'), path: '/about' },
         { name: t('markets'), path: '/markets' },
     ];
 
@@ -46,12 +46,21 @@ const Navbar = () => {
                 <div className="hidden md:flex items-center gap-8">
                     {navLinks.map((link) => (
                         <MagneticWrapper key={link.name} strength={0.2}>
-                            <a 
-                                href={link.path}
-                                className="text-[13px] font-semibold text-notion-muted hover:text-notion-text transition-colors duration-250 block px-2 py-1"
-                            >
-                                {link.name}
-                            </a>
+                            {link.path.startsWith('/#') ? (
+                                <a 
+                                    href={link.path}
+                                    className="text-[13px] font-semibold text-notion-muted hover:text-notion-text transition-colors duration-250 block px-2 py-1"
+                                >
+                                    {link.name}
+                                </a>
+                            ) : (
+                                <Link 
+                                    to={link.path}
+                                    className="text-[13px] font-semibold text-notion-muted hover:text-notion-text transition-colors duration-250 block px-2 py-1"
+                                >
+                                    {link.name}
+                                </Link>
+                            )}
                         </MagneticWrapper>
                     ))}
                 </div>
@@ -84,14 +93,25 @@ const Navbar = () => {
             <div className={`fixed inset-0 bg-notion-bg z-40 transition-transform duration-300 pt-28 px-8 md:hidden flex flex-col ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
                 <div className="flex flex-col gap-8 text-center mt-10">
                     {navLinks.map((link) => (
-                        <a 
-                            key={link.name} 
-                            href={link.path}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-2xl font-semibold text-notion-muted hover:text-notion-text transition-colors duration-200"
-                        >
-                            {link.name}
-                        </a>
+                        link.path.startsWith('/#') ? (
+                            <a 
+                                key={link.name} 
+                                href={link.path}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-2xl font-semibold text-notion-muted hover:text-notion-text transition-colors duration-200"
+                            >
+                                {link.name}
+                            </a>
+                        ) : (
+                            <Link 
+                                key={link.name} 
+                                to={link.path}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-2xl font-semibold text-notion-muted hover:text-notion-text transition-colors duration-200"
+                            >
+                                {link.name}
+                            </Link>
+                        )
                     ))}
                     <Link
                         to="/auth"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X, Sparkles } from 'lucide-react';
 
 const STOCK_COLORS = [
     '#10B981', '#3B82F6', '#34D399', '#A78BFA', '#F472B6',
@@ -136,13 +136,27 @@ const AssetAllocation = ({ holdings = [], delay }) => {
                     {t('asset_allocation', 'Portfolio Allocation')}
                     {isSandbox && <span className="px-2 py-0.5 rounded text-[10px] bg-notion-emerald-bg text-notion-emerald font-bold tracking-widest uppercase animate-pulse">Sandbox</span>}
                 </h3>
-                <button
-                    onClick={() => setIsSandbox(!isSandbox)}
-                    className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${isSandbox ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' : 'bg-notion-hover text-notion-muted hover:text-notion-text'}`}
-                    title="Toggle Sandbox Mode"
-                >
-                    {isSandbox ? <X size={16} /> : <SlidersHorizontal size={16} />}
-                </button>
+                <div className="flex items-center gap-1.5">
+                    <button
+                        onClick={() => {
+                            window.dispatchEvent(new CustomEvent('open-command-palette-ai', {
+                                detail: { query: "Analyze my portfolio asset allocation and suggest optimal rebalancing." }
+                            }));
+                        }}
+                        className="p-1.5 rounded-lg bg-notion-hover hover:bg-notion-emerald/10 text-notion-muted hover:text-notion-emerald transition-colors flex items-center justify-center gap-1 text-xs"
+                        title="Analyze Allocation with Cresta AI Co-Pilot"
+                    >
+                        <Sparkles size={16} className="text-notion-emerald" />
+                        <span className="text-[11px] font-semibold text-notion-emerald hidden sm:inline">Ask AI</span>
+                    </button>
+                    <button
+                        onClick={() => setIsSandbox(!isSandbox)}
+                        className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${isSandbox ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' : 'bg-notion-hover text-notion-muted hover:text-notion-text'}`}
+                        title="Toggle Sandbox Mode"
+                    >
+                        {isSandbox ? <X size={16} /> : <SlidersHorizontal size={16} />}
+                    </button>
+                </div>
             </div>
             {isSandbox ? (
                 <div className="text-[10px] text-notion-muted mb-4 bg-notion-hover/50 p-2 rounded-lg border-[0.5px] border-notion-border flex items-start gap-2">

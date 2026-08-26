@@ -9,7 +9,7 @@ import AddHoldingModal from '../components/dashboard/AddHoldingModal';
 import AlertBanner from '../components/dashboard/AlertBanner';
 import PersonalizedTicker from '../components/dashboard/PersonalizedTicker';
 import {
-    DollarSign,
+    IndianRupee,
     Briefcase,
     Activity,
     Rocket,
@@ -67,21 +67,24 @@ const Dashboard = () => {
     const [hasLoadedHoldings, setHasLoadedHoldings] = useState(false);
 
     // Fetch holdings from backend
-    const fetchHoldings = useCallback(async () => {
+    const fetchHoldings = useCallback(async (isManual = false) => {
         if (!user) return;
         try {
             const res = await apiCall('/holdings/');
             if (res.ok) {
                 const data = await res.json();
-                setHoldings(data);
+                setHoldings(Array.isArray(data) ? data : []);
             }
         } catch (e) {
-            console.error("Failed to fetch holdings:", e);
-            showToast(t('failed_load_portfolio'), 'error');
+            console.warn("Could not fetch holdings:", e);
+            // Only show toast if user manually triggered an action, not during silent background initial load
+            if (isManual === true) {
+                showToast(t('failed_load_portfolio'), 'error');
+            }
         } finally {
             setHasLoadedHoldings(true);
         }
-    }, [user]);
+    }, [user, t, showToast]);
 
     // Fetch signals
     const fetchSignals = useCallback(async () => {
@@ -270,7 +273,7 @@ const Dashboard = () => {
             <AlertBanner alerts={alerts} onDismiss={dismissAlert} />
 
             {/* Risk Re-assessment Banner */}
-            {user?.needs_reassessment && showRiskBanner && (
+            {user?.needs_reassessment && localStorage.getItem('risk_assessment_completed') !== 'true' && showRiskBanner && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -314,7 +317,7 @@ const Dashboard = () => {
                 <div className="flex overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 hide-scrollbar">
                     <motion.div variants={itemVariants} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-0 snap-center shrink-0">
                         <StatCard title={t('total_invested')} value={`₹${totals.invested.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
-                            change={`${holdings.length} ${t('stocks')}`} isPositive={true} icon={DollarSign} delay={0}
+                            change={`${holdings.length} ${t('stocks')}`} isPositive={true} icon={IndianRupee} delay={0}
                             subtitle={t('in_portfolio')} />
                     </motion.div>
                     <motion.div variants={itemVariants} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-0 snap-center shrink-0">
@@ -330,7 +333,7 @@ const Dashboard = () => {
                     </motion.div>
                     <motion.div variants={itemVariants} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-0 snap-center shrink-0">
                         <StatCard title={t('total_pnl')} value={`₹${Math.abs(pnl).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
-                            change={`${pnl >= 0 ? '+' : '-'}${Math.abs(pnlPercent).toFixed(2)}%`} isPositive={pnl >= 0} icon={DollarSign} delay={0}
+                            change={`${pnl >= 0 ? '+' : '-'}${Math.abs(pnlPercent).toFixed(2)}%`} isPositive={pnl >= 0} icon={IndianRupee} delay={0}
                             subtitle={t('unrealised')} />
                     </motion.div>
                 </div>

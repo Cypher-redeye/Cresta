@@ -25,6 +25,10 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const BacktestPage = lazy(() => import('./pages/BacktestPage'));
 const VerifyEmailSent = lazy(() => import('./pages/VerifyEmailSent'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
 
 import LoadingScreen from './components/common/LoadingScreen';
 
@@ -78,6 +82,10 @@ const AnimatedRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/markets" element={<PageTransition><MarketsPage /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><AboutPage /></PageTransition>} />
+        <Route path="/contact" element={<PageTransition><ContactPage /></PageTransition>} />
+        <Route path="/privacy" element={<PageTransition><PrivacyPolicyPage /></PageTransition>} />
+        <Route path="/terms" element={<PageTransition><TermsPage /></PageTransition>} />
         <Route path="/backtest" element={
           <ProtectedRoute>
             <PageTransition><BacktestPage /></PageTransition>

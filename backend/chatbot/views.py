@@ -34,19 +34,43 @@ class ChatRateThrottle(UserRateThrottle):
     scope = 'chat'
 
 
-def _build_llm(api_key: str):
-    """Build a Gemini LLM with tools bound."""
-    from langchain_google_genai import ChatGoogleGenerativeAI
+def _build_llm(prefer_groq=True):
+    """Build an LLM with tools bound. Defaults to Groq (ultra fast, high quota) as requested, with Gemini available."""
+    gemini_key = os.environ.get('GEMINI_API_KEY', '').strip()
+    groq_key = os.environ.get('GROQ_API_KEY', '').strip()
 
-    llm = ChatGoogleGenerativeAI(
-        model=GEMINI_MODEL,
-        api_key=api_key,
-        streaming=True,
-        temperature=0.3,
-    )
+    if groq_key and prefer_groq:
+        from langchain_groq import ChatGroq
+        llm = ChatGroq(
+            model=os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b"),
+            api_key=groq_key,
+            streaming=True,
+            temperature=0.3,
+        )
+        return llm.bind_tools(CRESTA_TOOLS)
 
-    # Bind tools so the LLM knows about them
-    return llm.bind_tools(CRESTA_TOOLS)
+    if gemini_key:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        llm = ChatGoogleGenerativeAI(
+            model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
+            api_key=gemini_key,
+            streaming=True,
+            temperature=0.3,
+            max_retries=1,
+        )
+        return llm.bind_tools(CRESTA_TOOLS)
+
+    if groq_key:
+        from langchain_groq import ChatGroq
+        llm = ChatGroq(
+            model=os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b"),
+            api_key=groq_key,
+            streaming=True,
+            temperature=0.3,
+        )
+        return llm.bind_tools(CRESTA_TOOLS)
+
+    raise ValueError("Neither GROQ_API_KEY nor GEMINI_API_KEY is configured in .env")
 
 
 def _execute_tool(tool_call: dict) -> str:
@@ -102,10 +126,11 @@ def chat_stream(request):
         return JsonResponse({"error": "Message too long (max 2000 characters)"}, status=400)
 
     # Validate API key early
-    api_key = os.environ.get('GEMINI_API_KEY', '')
-    if not api_key:
+    gemini_key = os.environ.get('GEMINI_API_KEY', '').strip()
+    groq_key = os.environ.get('GROQ_API_KEY', '').strip()
+    if not gemini_key and not groq_key:
         return JsonResponse(
-            {"error": "GEMINI_API_KEY is not configured. Please set it in .env"},
+            {"error": "Neither GEMINI_API_KEY nor GROQ_API_KEY is configured. Please set one in .env"},
             status=500,
         )
 
@@ -136,7 +161,7 @@ def chat_stream(request):
         full_response = ""
 
         try:
-            llm = _build_llm(api_key)
+            llm = _build_llm()
         except Exception as e:
             import traceback
             logger.error(f"Failed to build LLM: {traceback.format_exc()}")
@@ -151,8 +176,17 @@ def chat_stream(request):
             for round_num in range(MAX_TOOL_ROUNDS):
                 logger.info(f"Chat round {round_num + 1} for user {user_id}")
 
-                # Call the LLM (non-streaming for tool rounds, streaming for final)
-                response = llm.invoke(current_messages)
+                # Call the LLM (non-streaming for tool rounds, streaming for final) with automatic failover
+                try:
+                    response = llm.invoke(current_messages)
+                except Exception as invoke_err:
+                    err_str = str(invoke_err)
+                    if ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "Quota" in err_str or "RemoteProtocolError" in err_str) and os.environ.get("GROQ_API_KEY"):
+                        logger.warning(f"Primary LLM exhausted ({err_str[:60]}). Automatically failing over to Groq.")
+                        llm = _build_llm(prefer_groq=True)
+                        response = llm.invoke(current_messages)
+                    else:
+                        raise invoke_err
 
                 # Check if the LLM wants to call tools
                 if response.tool_calls:

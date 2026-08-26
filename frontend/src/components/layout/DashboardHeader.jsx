@@ -1,6 +1,6 @@
-import React from 'react';
-import { Bell, Search, User } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Bell, Search, User, Settings, LogOut, ShieldCheck, ChevronDown } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import ThemeToggle from '../common/ThemeToggle';
 import Logo from '../common/Logo';
@@ -9,16 +9,31 @@ import { useToast } from '../../context/ToastContext';
 import { useTranslation } from 'react-i18next';
 
 const Header = () => {
-    const { user } = useUser();
+    const { user, logout } = useUser();
     const { setSearchQuery } = useSearch();
     const { showToast } = useToast();
     const { t } = useTranslation();
-    const displayName = user?.name || 'Investor';
+    const navigate = useNavigate();
+    const displayName = user?.name || user?.first_name || 'Investor';
+    const userEmail = user?.email || '';
     const location = useLocation();
+
+    const [showProfile, setShowProfile] = useState(false);
+    const profileRef = useRef(null);
+
+    // Close dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setShowProfile(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const normalizeQuery = (query) => {
         const q = query.trim().toUpperCase();
-        // Common name mappings
         const aliases = {
             'RELIANCE': 'RELIANCE.NS',
             'TCS': 'TCS.NS',
@@ -65,14 +80,14 @@ const Header = () => {
         }
     };
 
-
-
     return (
-        <header className="flex items-center justify-between px-4 md:px-8 py-3.5 border-b border-notion-border bg-notion-bg/60 backdrop-blur-2xl sticky top-0 z-30 transition-colors duration-300 w-full overflow-hidden">
+        <header className="flex items-center justify-between px-4 md:px-8 py-3.5 border-b border-notion-border bg-notion-bg/60 backdrop-blur-2xl sticky top-0 z-30 transition-colors duration-300 w-full overflow-visible">
             {/* Left: Logo + Welcome */}
             <div className="flex items-center gap-4 min-w-0">
-                {/* Logo branding (migrated from sidebar) */}
-                <div className="flex items-center gap-2 pr-4 border-r border-notion-border">
+                <div 
+                    onClick={() => navigate('/dashboard')}
+                    className="flex items-center gap-2 pr-4 border-r border-notion-border cursor-pointer hover:opacity-85 transition-opacity"
+                >
                     <Logo width={28} height={28} />
                     <span className="text-lg font-bold tracking-tight text-notion-text hidden sm:block">
                         Cresta<span className="text-notion-emerald">.</span>
@@ -87,7 +102,7 @@ const Header = () => {
                 </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 sm:gap-6">
                 {/* Search */}
                 {location.pathname === '/markets' && (
                     <div className="relative">
@@ -112,19 +127,69 @@ const Header = () => {
 
                 <ThemeToggle />
 
-                {/* Profile */}
-                <div className="flex items-center gap-3 pl-6 border-l border-notion-border">
-                    <div className="text-right hidden sm:block">
-                        <div className="text-sm font-medium text-notion-text">{displayName}</div>
-                        <div className="text-xs text-notion-muted">{t('premium_investor')}</div>
-                    </div>
-                    <div className="w-10 h-10 rounded-full border border-notion-border bg-notion-hover flex items-center justify-center overflow-hidden">
-                        {user?.picture ? (
-                            <img src={user.picture} alt="Profile" className="w-full h-full object-cover" />
-                        ) : (
-                            <User className="w-5 h-5 text-notion-muted" />
-                        )}
-                    </div>
+                {/* Profile Button & Interactive Dropdown */}
+                <div className="relative" ref={profileRef}>
+                    <button
+                        onClick={() => setShowProfile(!showProfile)}
+                        className="flex items-center gap-3 pl-3 sm:pl-4 border-l border-notion-border focus:outline-none group cursor-pointer text-left"
+                    >
+                        <div className="text-right hidden sm:block">
+                            <div className="text-sm font-medium text-notion-text group-hover:text-notion-emerald transition-colors">{displayName}</div>
+                            <div className="text-xs text-notion-muted">{user?.risk_profile ? `${user.risk_profile} Risk` : t('premium_investor')}</div>
+                        </div>
+                        <div className="w-10 h-10 rounded-full border border-notion-border bg-notion-hover flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-notion-emerald/40 transition-all duration-200">
+                            {user?.picture ? (
+                                <img src={user.picture} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <User className="w-5 h-5 text-notion-muted group-hover:text-notion-text" />
+                            )}
+                        </div>
+                        <ChevronDown size={14} className={`text-notion-muted transition-transform duration-200 ${showProfile ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {showProfile && (
+                        <div className="absolute right-0 mt-3 w-64 rounded-2xl bg-notion-bg border border-notion-border shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-xl">
+                            {/* User details header */}
+                            <div className="px-4 py-3 border-b border-notion-border/60">
+                                <div className="font-semibold text-sm text-notion-text truncate">{displayName}</div>
+                                {userEmail && <div className="text-xs text-notion-muted truncate mt-0.5">{userEmail}</div>}
+                                <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-notion-emerald/10 text-notion-emerald">
+                                    <ShieldCheck size={12} />
+                                    {user?.risk_profile ? `${user.risk_profile} Investor` : 'Verified Account'}
+                                </div>
+                            </div>
+
+                            {/* Menu Actions */}
+                            <div className="py-1">
+                                <button
+                                    onClick={() => { setShowProfile(false); navigate('/settings'); }}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-notion-text hover:bg-notion-hover transition-colors text-left"
+                                >
+                                    <Settings size={15} className="text-notion-muted" />
+                                    <span>{t('settings')}</span>
+                                </button>
+                                <button
+                                    onClick={() => { setShowProfile(false); navigate('/risk-assessment'); }}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-notion-text hover:bg-notion-hover transition-colors text-left"
+                                >
+                                    <ShieldCheck size={15} className="text-notion-muted" />
+                                    <span>{t('risk_assessment_title')}</span>
+                                </button>
+                            </div>
+
+                            {/* Logout */}
+                            <div className="border-t border-notion-border/60 pt-1">
+                                <button
+                                    onClick={() => { setShowProfile(false); logout(); navigate('/auth'); }}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-red-500 hover:bg-red-500/10 transition-colors text-left"
+                                >
+                                    <LogOut size={15} />
+                                    <span>{t('logout')}</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>

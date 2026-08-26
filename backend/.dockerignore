@@ -4,6 +4,7 @@ __pycache__/
 *.egg-info/
 .git/
 .venv/
+venv/
 .env
 db.sqlite3
 mlruns/

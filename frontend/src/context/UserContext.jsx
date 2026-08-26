@@ -147,9 +147,18 @@ export const UserProvider = ({ children }) => {
         localStorage.removeItem('ai_insights_data');
     };
 
-    const completeRiskAssessment = () => {
+    const completeRiskAssessment = (profileData = {}) => {
         setHasCompletedRiskAssessment(true);
         localStorage.setItem('risk_assessment_completed', 'true');
+        setUser(prev => {
+            const updated = {
+                ...prev,
+                ...profileData,
+                needs_reassessment: false
+            };
+            localStorage.setItem('user', JSON.stringify(updated));
+            return updated;
+        });
     };
 
     return (

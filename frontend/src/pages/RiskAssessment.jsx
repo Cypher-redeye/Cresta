@@ -113,6 +113,9 @@ const RiskAssessment = () => {
                 body: JSON.stringify(profilePayload)
             });
 
+            // Update user state and clear needs_reassessment
+            completeRiskAssessment(profilePayload);
+
             // 2. Get AI Recommendations
             const recommendPayload = {
                 Age: parseInt(age) || 25,
@@ -138,11 +141,11 @@ const RiskAssessment = () => {
     const currentQuestion = questions[step];
 
     return (
-        <DashboardLayout>
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+        <DashboardLayout hideDock={!showResult}>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 pb-16">
                 <AnimatePresence mode="wait">
                     {!showResult ? (
-                        <div className="grid lg:grid-cols-12 gap-12 items-center min-h-[70vh]">
+                        <div className="grid lg:grid-cols-12 gap-12 items-start min-h-[50vh]">
                             {/* Left: Questionnaire (7 cols) */}
                             <motion.div
                                 key={`content-${step}`}
@@ -218,7 +221,7 @@ const RiskAssessment = () => {
                                     </div>
                                 )}
 
-                                <div className="pt-10 ml-12 flex justify-between items-center">
+                                <div className="pt-6 ml-12 flex justify-between items-center gap-4">
                                     <button
                                         onClick={handleBack}
                                         disabled={step === 0}
@@ -229,7 +232,7 @@ const RiskAssessment = () => {
                                     <button
                                         onClick={handleNext}
                                         disabled={(step < questions.length && !answers[step]) || (step === questions.length && (!age || !income))}
-                                        className="stark-btn-primary !px-8 !py-3 rounded-lg font-bold flex items-center gap-2 group hover:scale-[1.02] transition-transform duration-200 disabled:opacity-50 disabled:pointer-events-none text-xs"
+                                        className="stark-btn-primary !px-8 !py-3 rounded-xl font-bold flex items-center gap-2 group hover:scale-[1.02] transition-transform duration-200 disabled:opacity-50 disabled:pointer-events-none text-xs shadow-lg shadow-emerald-500/10"
                                     >
                                         {step === questions.length ? (isLoadingAI ? t('mapping_ai_neural') : t('unlock_my_strategy')) : t('continue_phase')}
                                         {isLoadingAI ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight className="group-hover:translate-x-1 transition-transform" size={16} />}

@@ -93,6 +93,18 @@ const ChatBot = () => {
         }
     }, [isOpen]);
 
+    // Listen for external open triggers (e.g. from Asset Allocation card)
+    useEffect(() => {
+        const handleExternalOpen = (e) => {
+            setIsOpen(true);
+            if (e.detail?.message) {
+                setInput(e.detail.message);
+            }
+        };
+        window.addEventListener('open-cresta-chat', handleExternalOpen);
+        return () => window.removeEventListener('open-cresta-chat', handleExternalOpen);
+    }, []);
+
     // Parse followups from the response
     const parseFollowups = (text) => {
         try {

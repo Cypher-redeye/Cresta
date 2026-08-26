@@ -6,6 +6,8 @@ charset-normalizer==3.4.4
 curl_cffi==0.13.0
 Django==6.0.1
 djangorestframework==3.16.1
+djangorestframework-simplejwt
+django-cors-headers
 frozendict==2.4.7
 idna==3.11
 joblib==1.5.3
@@ -38,3 +40,5 @@ xgboost
 pmdarima
 langchain>=0.3.0
 langchain-google-genai>=2.0.0
+groq
+langchain-groq

@@ -1,6 +1,6 @@
 // Centralized API configuration with JWT support
-// P0-1 FIX: Use env var for API base URL (no hardcoded localhost)
-export const API_BASE = import.meta.env.VITE_API_BASE || '/api';
+// Default to /api to use Vite dev proxy (eliminates all CORS & browser connection drops)
+export const API_BASE = '/api';
 
 /**
  * Utility to get a cookie value by name.
@@ -51,15 +51,20 @@ export async function apiCall(url, options = {}) {
     if (response.status === 401) {
         const refreshed = await refreshToken();
         if (refreshed) {
-            // Retry request; browser will automatically attach the new HttpOnly cookie
-            response = await fetch(fullUrl, { ...options, headers, credentials: 'include' });
+            // Retry request with the newly refreshed access token
+            const newToken = localStorage.getItem('access_token');
+            const retryHeaders = { ...headers };
+            if (newToken) {
+                retryHeaders['Authorization'] = `Bearer ${newToken}`;
+            }
+            response = await fetch(fullUrl, { ...options, headers: retryHeaders, credentials: 'include' });
         }
     }
     return response;
 }
 
 /**
- * Refresh the access token using httpOnly refresh cookie.
+ * Refresh the access token using httpOnly refresh cookie or stored refresh token.
  */
 export async function refreshToken() {
     try {
@@ -69,17 +74,24 @@ export async function refreshToken() {
             headers['X-CSRFToken'] = csrfToken;
         }
 
+        const storedRefresh = localStorage.getItem('refresh_token');
         const response = await fetch(`${API_BASE}/auth/refresh/`, {
             method: 'POST',
             headers,
             credentials: 'include',
-            body: JSON.stringify({}),
+            body: JSON.stringify({ refresh: storedRefresh || undefined }),
         });
         
         if (response.ok) {
+            const data = await response.json();
+            if (data.tokens?.access) {
+                localStorage.setItem('access_token', data.tokens.access);
+                if (data.tokens.refresh) {
+                    localStorage.setItem('refresh_token', data.tokens.refresh);
+                }
+            }
             return true;
         } else {
-            localStorage.removeItem('user');
             return false;
         }
     } catch {

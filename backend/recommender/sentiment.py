@@ -1,21 +1,25 @@
 import yfinance as yf
-from transformers import pipeline
 
-# Global cache for the pipeline — loaded at startup via AppConfig.ready()
+# Global cache for the pipeline
 _finbert_pipeline = None
 
 
 def load_finbert():
-    """Load FinBERT model. Called at Django startup via AppConfig.ready()."""
+    """Load FinBERT model safely. Falls back cleanly if unavailable."""
     global _finbert_pipeline
     if _finbert_pipeline is None:
-        print("[ML] Loading FinBERT model at startup...")
-        _finbert_pipeline = pipeline(
-            "sentiment-analysis",
-            model="ProsusAI/finbert",
-            tokenizer="ProsusAI/finbert"
-        )
-        print("[ML] FinBERT loaded successfully.")
+        try:
+            print("[ML] Attempting to load FinBERT model...")
+            from transformers import pipeline
+            _finbert_pipeline = pipeline(
+                "sentiment-analysis",
+                model="ProsusAI/finbert",
+                tokenizer="ProsusAI/finbert"
+            )
+            print("[ML] FinBERT loaded successfully.")
+        except Exception as e:
+            print(f"[ML] Notice: FinBERT could not be loaded ({e}), using fast rule-based sentiment.")
+            _finbert_pipeline = "fallback"
     return _finbert_pipeline
 
 
@@ -25,6 +29,21 @@ def get_finbert():
     if _finbert_pipeline is None:
         load_finbert()
     return _finbert_pipeline
+
+
+def _rule_based_sentiment(text: str) -> dict:
+    """Fast, dependency-free sentiment analysis fallback for financial headlines."""
+    pos_words = {'surge', 'gain', 'profit', 'rise', 'jump', 'up', 'high', 'record', 'growth', 'bullish', 'strong', 'beat', 'rally', 'boost', 'positive'}
+    neg_words = {'drop', 'fall', 'loss', 'down', 'low', 'plunge', 'decline', 'bearish', 'weak', 'miss', 'slump', 'crash', 'negative', 'warning', 'risk'}
+    words = set(text.lower().split())
+    pos_count = len(words & pos_words)
+    neg_count = len(words & neg_words)
+
+    if pos_count > neg_count:
+        return {'label': 'positive', 'score': 0.75}
+    elif neg_count > pos_count:
+        return {'label': 'negative', 'score': 0.75}
+    return {'label': 'neutral', 'score': 0.60}
 
 
 def get_market_sentiment(ticker: str) -> dict:
@@ -42,7 +61,6 @@ def get_market_sentiment(ticker: str) -> dict:
     if not news:
         return {"score": 0.0, "confidence": 0.0, "headlines": []}
 
-    # Handle new yfinance format: title is under item['content']['title']
     headlines = []
     for item in news:
         content = item.get('content', item)
@@ -54,7 +72,13 @@ def get_market_sentiment(ticker: str) -> dict:
         return {"score": 0.0, "confidence": 0.0, "headlines": []}
 
     # Analyze sentiment for each headline
-    results = pipe(headlines[:3])  # Limit to 3 for speed
+    if pipe and pipe != "fallback":
+        try:
+            results = pipe(headlines[:3])
+        except Exception:
+            results = [_rule_based_sentiment(h) for h in headlines[:3]]
+    else:
+        results = [_rule_based_sentiment(h) for h in headlines[:3]]
 
     scored_headlines = []
     weighted_score = 0.0

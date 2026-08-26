@@ -9,7 +9,7 @@ import {
     ResponsiveContainer, Legend, ReferenceLine
 } from 'recharts';
 import {
-    TrendingUp, TrendingDown, BarChart3, Clock, DollarSign,
+    TrendingUp, TrendingDown, BarChart3, Clock, IndianRupee,
     Target, Shield, Zap, AlertTriangle, Play, Pause, FastForward, Loader2, Info
 } from 'lucide-react';
 
@@ -319,7 +319,7 @@ const BacktestPage = () => {
                             {/* Stat Cards */}
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                 <StatCard
-                                    icon={DollarSign}
+                                    icon={IndianRupee}
                                     label={t('total_return')}
                                     value={`${stats.total_return_pct >= 0 ? '+' : ''}${stats.total_return_pct}%`}
                                     sub={`${t('final_equity')}: ₹${stats.final_equity?.toLocaleString()}`}
