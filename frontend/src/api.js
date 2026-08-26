@@ -1,6 +1,5 @@
 // Centralized API configuration with JWT support
-// Default to /api to use Vite dev proxy (eliminates all CORS & browser connection drops)
-export const API_BASE = '/api';
+export const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 /**
  * Utility to get a cookie value by name.
