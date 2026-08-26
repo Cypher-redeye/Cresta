@@ -35,7 +35,7 @@ const teamMembers = [
         name: "Om Sharma",
         role: "Frontend Lead",
         institution: "Parul University",
-        bio: "Leads complete frontend development, Apple-inspired UX/UI architecture, Framer Motion interactions, responsive layouts, and client-side performance optimization.",
+        bio: "Leads complete frontend development, Modern UX/UI architecture, Framer Motion interactions, responsive layouts, and client-side performance optimization.",
         focus: ["Frontend Architecture", "React & Vite", "Framer Motion", "Tailwind CSS"],
         github: "https://github.com/Cypher-redeye",
         linkedin: "https://www.linkedin.com/in/om-sharma38",
