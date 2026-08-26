@@ -173,20 +173,24 @@ graph TD
 ### 2. Quantitative Machine Learning & Sentiment Pipeline
 ```mermaid
 flowchart LR
-    A[Historical OHLCV + Ticker Feed] --> B[Feature Engineering (RSI, MACD, SMA)]
-    B --> C[Attention-LSTM Model 70%]
-    B --> D[ARIMA Model 20%]
-    B --> E[XGBoost Regressor 10%]
-    C & D & E --> F[Dynamic Weighted Ensemble]
-    F --> G[7-Day Price Forecast Bounds]
+    A["Historical OHLCV + Ticker Feed"] --> B["Feature Engineering (RSI, MACD, SMA)"]
+    B --> C["Attention-LSTM Model (70%)"]
+    B --> D["ARIMA Model (20%)"]
+    B --> E["XGBoost Regressor (10%)"]
+    C --> F["Dynamic Weighted Ensemble"]
+    D --> F
+    E --> F
+    F --> G["7-Day Price Forecast Bounds"]
 
-    H[Live Financial News RSS] --> I[FinBERT Transformer NLP]
-    I --> J[Sentiment Score (-1.0 to +1.0)]
+    H["Live Financial News RSS"] --> I["FinBERT Transformer NLP"]
+    I --> J["Sentiment Score (-1.0 to +1.0)"]
 
-    K[NFCS Investor Survey Dataset] --> L[XGBoost Risk Classifier]
-    L --> M[Conservative / Moderate / Aggressive Tier]
+    K["NFCS Investor Survey Dataset"] --> L["XGBoost Risk Classifier"]
+    L --> M["Investor Risk Category (Conservative / Moderate / Aggressive)"]
 
-    G & J & M --> N[Explainable Recommendation Engine]
+    G --> N["Explainable Recommendation Engine"]
+    J --> N
+    M --> N
 ```
 
 ### 3. Database Entity-Relationship (ER) Schema
