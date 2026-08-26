@@ -52,3 +52,4 @@ results.txt
 
 # Build tools
 .vite/
+dev-dist/
