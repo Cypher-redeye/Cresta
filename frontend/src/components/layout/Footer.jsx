@@ -27,9 +27,6 @@ const Footer = () => {
                             <a href="https://github.com/ankitrmishra01/Cresta" target="_blank" rel="noopener noreferrer" className="text-notion-muted hover:text-notion-text transition-colors">
                                 <Github className="w-5 h-5" />
                             </a>
-                            <a href="https://www.linkedin.com/in/ankitrmishra01" target="_blank" rel="noopener noreferrer" className="text-notion-muted hover:text-notion-text transition-colors">
-                                <Linkedin className="w-5 h-5" />
-                            </a>
                         </div>
 
                         {/* Team LinkedIn Quick Badges */}
