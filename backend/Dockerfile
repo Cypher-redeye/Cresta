@@ -18,10 +18,10 @@ RUN python manage.py collectstatic --noinput 2>/dev/null || true
 # Create dirs for model storage
 RUN mkdir -p saved_models recommender/saved_models logs
 
-# P1-6 FIX: Run as non-root user
-RUN useradd -m -r appuser && chown -R appuser:appuser /app
-USER appuser
+# P1-6 FIX: Run as non-root user (Hugging Face Spaces requires UID 1000)
+RUN useradd -m -u 1000 user && chown -R user:user /app
+USER user
 
-EXPOSE 8000
+EXPOSE 7860
 
-CMD ["gunicorn", "robo_advisor.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]
+CMD ["gunicorn", "robo_advisor.wsgi:application", "--bind", "0.0.0.0:7860", "--workers", "3", "--timeout", "120"]
