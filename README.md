@@ -54,7 +54,7 @@ Cresta eliminates costly intermediaries by democratizing institutional-grade qua
       <br /><sub><b>Portfolio Dashboard</b> — Real-time INR (₹) holdings valuation, P&L, allocation donut, and AI alerts.</sub>
     </td>
     <td align="center" width="50%">
-      <img src="docs/screenshots/07-holdings-ai-advisor.png" alt="Holdings and AI Advisor" width="100%" />
+      <img src="docs/screenshots/07-Holdings-&-Signal-Breakdown.png" alt="Holdings and AI Advisor" width="100%" />
       <br /><sub><b>Holdings & Signal Breakdown</b> — BUY/SELL/HOLD scoring based on Sentiment, Risk Fit, and Valuation.</sub>
     </td>
   </tr>
