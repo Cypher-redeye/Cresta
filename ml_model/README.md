@@ -15,7 +15,7 @@ This directory contains the core machine learning models, quantitative predictor
 
 ### 2. FinBERT Financial News Sentiment
 - Pre-trained transformer (`ProsusAI/finbert`) fine-tuned on financial phrasebanks.
-- Ingests live RSS headlines for NSE-listed equities from Reuters, Economic Times, and Yahoo Finance.
+- Ingests live RSS headlines for NSE-listed equities via Yahoo Finance (using `yfinance`).
 - Scores sentiment continuously from `-1.0` (Strongly Bearish) to `+1.0` (Strongly Bullish).
 
 ### 3. Behavioral Risk Classification

@@ -111,7 +111,7 @@ Cresta eliminates costly intermediaries by democratizing institutional-grade qua
   * **Attention LSTM (70% weight):** Captures multi-day temporal sequence dependencies.
   * **ARIMA (20% weight):** Accounts for linear trend lines and mean reversion.
   * **XGBoost (10% weight):** Ingests technical momentum indicators (RSI, MACD, Bollinger Bands).
-* **FinBERT Sentiment Analysis:** Pre-trained NLP model analyzes live headlines from Reuters, Economic Times, and Yahoo Finance, scoring sentiment from `-1.0` (Bearish) to `+1.0` (Bullish).
+* **FinBERT Sentiment Analysis:** Pre-trained NLP model analyzes live headlines from Yahoo Finance API (via `yfinance`), scoring sentiment from `-1.0` (Bearish) to `+1.0` (Bullish).
 * **Behavioral Risk Profiler:** XGBoost classifier trained on real investor survey datasets to assign Conservative, Moderate, or Aggressive profiles with dynamic reassessment scheduling.
 
 ### 3. 🧪 Historical Backtesting Engine
