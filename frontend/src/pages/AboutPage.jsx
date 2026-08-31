@@ -33,14 +33,14 @@ const teamMembers = [
     },
     {
         name: "Om Sharma",
-        role: "Frontend Lead",
+        role: "Frontend & Deployment Lead",
         institution: "Parul University",
-        bio: "Leads complete frontend development, Modern UX/UI architecture, Framer Motion interactions, responsive layouts, and client-side performance optimization.",
-        focus: ["Frontend Architecture", "React & Vite", "Framer Motion", "Tailwind CSS"],
+        bio: "Leads complete frontend development, modern UX/UI architecture, deployment pipelines, Framer Motion interactions, responsive layouts, and client-side performance optimization.",
+        focus: ["UI/UX Architecture", "React & Vite", "Framer Motion", "Deployment"],
         github: "https://github.com/Cypher-redeye",
         linkedin: "https://www.linkedin.com/in/om-sharma38",
         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=faces",
-        tag: "Frontend & UX"
+        tag: "Frontend, UX & Deployment"
     },
     {
         name: "Shivam Panchal",

@@ -27,12 +27,12 @@ const teamContacts = [
     },
     {
         name: "Om Sharma",
-        role: "Frontend Lead",
+        role: "Frontend & Deployment Lead",
         institution: "Parul University",
         linkedin: "https://www.linkedin.com/in/om-sharma38",
         github: "https://github.com/Cypher-redeye",
         email: "omsharma@crestafinance.me",
-        tag: "UI/UX & Frontend Lead"
+        tag: "UI/UX, Frontend & Deployment Lead"
     },
     {
         name: "Shivam Panchal",

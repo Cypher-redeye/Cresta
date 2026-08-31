@@ -37,9 +37,9 @@ const Footer = () => {
                                     <Linkedin className="w-3 h-3" />
                                     <span>Ankit (Lead)</span>
                                 </a>
-                                <a href="https://www.linkedin.com/in/om-sharma38" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-notion-hover hover:bg-accent-blue/15 hover:text-accent-blue text-[11px] text-notion-muted transition-colors" title="Om Sharma - Frontend Lead">
+                                <a href="https://www.linkedin.com/in/om-sharma38" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-notion-hover hover:bg-accent-blue/15 hover:text-accent-blue text-[11px] text-notion-muted transition-colors" title="Om Sharma - Frontend & Deployment Lead">
                                     <Linkedin className="w-3 h-3" />
-                                    <span>Om (Frontend)</span>
+                                    <span>Om (Frontend & Deploy)</span>
                                 </a>
                                 <a href="https://www.linkedin.com/in/shivam-panchal-7471052a5" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-notion-hover hover:bg-accent-blue/15 hover:text-accent-blue text-[11px] text-notion-muted transition-colors" title="Shivam Panchal - ML Lead">
                                     <Linkedin className="w-3 h-3" />
