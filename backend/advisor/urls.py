@@ -13,6 +13,8 @@ urlpatterns = [
     # Auth (JWT)
     path("auth/login/", views.VerifiedTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path("auth/signup/", views.signup, name='signup'),
+    path("auth/forgot-password/", views.forgot_password, name='forgot_password'),
+    path("auth/reset-password/", views.reset_password, name='reset_password'),
     path("auth/verify-email/", views.verify_email),
     path("auth/google/", views.google_login),
     path("auth/refresh/", views.token_refresh),

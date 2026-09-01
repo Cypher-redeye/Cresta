@@ -193,7 +193,7 @@ const AddHoldingModal = ({ isOpen, onClose, onAdd }) => {
                                     type="date"
                                     value={purchaseDate}
                                     onChange={e => setPurchaseDate(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-notion-bg border border-notion-border rounded-xl text-sm text-notion-text focus:ring-1 focus:ring-notion-emerald focus:border-notion-emerald outline-none"
+                                    className="w-full px-4 py-2.5 bg-notion-bg border border-notion-border rounded-xl text-sm text-notion-text focus:ring-1 focus:ring-notion-emerald focus:border-notion-emerald outline-none [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                                 />
                             </div>
 

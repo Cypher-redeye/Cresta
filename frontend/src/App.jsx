@@ -23,6 +23,8 @@ const RiskAssessment = lazy(() => import('./pages/RiskAssessment'));
 const MarketsPage = lazy(() => import('./pages/MarketsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const BacktestPage = lazy(() => import('./pages/BacktestPage'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const VerifyEmailSent = lazy(() => import('./pages/VerifyEmailSent'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -71,6 +73,8 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
         <Route path="/auth" element={<PageTransition><AuthPage /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <PageTransition><Dashboard /></PageTransition>

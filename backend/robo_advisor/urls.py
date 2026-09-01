@@ -37,6 +37,7 @@ urlpatterns = [
     path("api/", include("advisor.urls")),
     path("api/", include("chatbot.urls")),
     path("health/", health_check, name='health_check'),
+    path("", health_check, name='root_health_check'),  # HF health check
 ]
 
 if settings.DEBUG:

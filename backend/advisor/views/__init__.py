@@ -11,7 +11,7 @@ from .markets import (
     get_top_movers,
 )
 
-from .auth import google_login, token_refresh, get_me, signup, verify_email, VerifiedTokenObtainPairView
+from .auth import google_login, token_refresh, get_me, signup, verify_email, VerifiedTokenObtainPairView, forgot_password, reset_password
 
 from .ml import recommend_api, get_prediction, get_prediction_status, sector_sentiment
 

@@ -285,13 +285,12 @@ const AuthPage = () => {
 
                             {isLogin && (
                                 <div className="flex justify-end">
-                                    <a
-                                        href="#"
-                                        onClick={(e) => { e.preventDefault(); showToast('Password reset link sent to your email', 'success'); }}
+                                    <Link
+                                        to="/forgot-password"
                                         className="text-xs font-bold text-notion-muted hover:text-notion-emerald transition-colors"
                                     >
                                         {t('forgot_password')}
-                                    </a>
+                                    </Link>
                                 </div>
                             )}
 
