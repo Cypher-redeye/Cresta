@@ -19,6 +19,7 @@ const Header = () => {
     const location = useLocation();
 
     const [showProfile, setShowProfile] = useState(false);
+    const [localQuery, setLocalQuery] = useState('');
     const profileRef = useRef(null);
 
     // Close dropdown on click outside
@@ -74,9 +75,11 @@ const Header = () => {
     };
 
     const handleSearch = (e) => {
-        if (e.key === 'Enter') {
-            const ticker = normalizeQuery(e.target.value);
+        if (e.key === 'Enter' && localQuery.trim()) {
+            const ticker = normalizeQuery(localQuery);
             setSearchQuery(ticker);
+            setLocalQuery('');
+            e.target.blur(); // Optionally dismiss keyboard
         }
     };
 
@@ -110,6 +113,8 @@ const Header = () => {
                         <input
                             type="text"
                             placeholder={t('search_placeholder')}
+                            value={localQuery}
+                            onChange={(e) => setLocalQuery(e.target.value)}
                             onKeyDown={handleSearch}
                             className="bg-notion-hover border border-notion-border rounded-lg pl-10 pr-4 py-1.5 text-xs text-notion-text focus:outline-none focus:bg-notion-bg focus:border-notion-text w-32 sm:w-48 md:w-64 transition-all duration-200 placeholder:text-notion-muted"
                         />

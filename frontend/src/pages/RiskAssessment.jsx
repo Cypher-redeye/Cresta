@@ -53,7 +53,7 @@ const RiskAssessment = () => {
     // Calculate dynamic "Draft Allocation" preview
     const draftAllocation = useMemo(() => {
         const scoresArr = Object.values(answers);
-        if (scoresArr.length === 0) return profiles.balanced.allocation;
+        if (scoresArr.length === 0) return [{ name: 'Awaiting', value: 100, color: 'var(--notion-hover)' }];
 
         const avgScore = scoresArr.reduce((a, b) => a + b, 0) / scoresArr.length;
         if (avgScore <= 1.5) return profiles.conservative.allocation;

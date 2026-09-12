@@ -350,9 +350,9 @@ const BacktestPage = () => {
 
                             {/* Secondary Stats */}
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                <StatCard icon={BarChart3} label={t('total_trades')} value={stats.total_trades} color="blue" />
+                                <StatCard icon={BarChart3} label={t('total_trades', 'Completed Trades')} value={(stats.winning_trades || 0) + (stats.losing_trades || 0)} color="blue" />
                                 <StatCard icon={Shield} label={t('win_rate')} value={`${stats.win_rate_pct}%`} sub={`${stats.winning_trades}W / ${stats.losing_trades}L`} color="amber" />
-                                <StatCard icon={TrendingUp} label={t('profit_factor')} value={stats.profit_factor} color="purple" />
+                                <StatCard icon={TrendingUp} label={t('profit_factor')} value={(stats.winning_trades === 0 && stats.losing_trades === 0) ? 'N/A' : stats.profit_factor} color="purple" />
                                 <StatCard icon={Clock} label={t('execution_time')} value={`${stats.elapsed_seconds}s`} sub={`${result.dates.length} ${t('trading_days')}`} color="cyan" />
                             </div>
 

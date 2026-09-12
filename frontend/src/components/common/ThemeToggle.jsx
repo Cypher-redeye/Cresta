@@ -21,9 +21,9 @@ const ThemeToggle = () => {
                     transition={{ duration: 0.2 }}
                 >
                     {theme === 'dark' ? (
-                        <Moon className="w-5 h-5 text-neon-emerald" />
-                    ) : (
                         <Sun className="w-5 h-5 text-yellow-500" />
+                    ) : (
+                        <Moon className="w-5 h-5 text-neon-emerald" />
                     )}
                 </motion.div>
             </AnimatePresence>

@@ -116,7 +116,7 @@ const PortfolioChart = ({ delay }) => {
                                 tickLine={false}
                                 tick={{ fill: 'var(--notion-muted)', fontSize: 9, fontFamily: 'JetBrains Mono' }}
                                 width={60}
-                                tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`}
+                                tickFormatter={v => v >= 1000 ? `₹${(v / 1000).toFixed(1)}k` : `₹${v.toFixed(0)}`}
                                 domain={['dataMin * 0.98', 'dataMax * 1.02']}
                             />
                             <Tooltip
