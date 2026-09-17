@@ -321,6 +321,7 @@ const IntroSequence = ({ onComplete, isDark }) => {
 
         let width = 800;
         const startPhi = -72.83 * Math.PI / 180;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
         const palette = {
             dark: 0,
@@ -333,9 +334,9 @@ const IntroSequence = ({ onComplete, isDark }) => {
         };
 
         const globe = createGlobe(globeCanvasRef.current, {
-            devicePixelRatio: 2,
-            width: width * 2,
-            height: width * 2,
+            devicePixelRatio: dpr,
+            width: width * dpr,
+            height: width * dpr,
             phi: startPhi,
             theta: 0.15,
             ...palette,
@@ -356,8 +357,8 @@ const IntroSequence = ({ onComplete, isDark }) => {
                         }
                     }
                 }
-                state.width = width * 2;
-                state.height = width * 2;
+                state.width = width * dpr;
+                state.height = width * dpr;
             },
         });
 

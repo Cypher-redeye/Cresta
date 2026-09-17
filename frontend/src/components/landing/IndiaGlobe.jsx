@@ -187,12 +187,14 @@ const IndiaGlobe = () => {
 
         const palette = isDark ? DARK_GLOBE : LIGHT_GLOBE;
 
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
         let globe = null;
         try {
             globe = createGlobe(canvasRef.current, {
-                devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-                width: width * 2,
-                height: width * 2,
+                devicePixelRatio: dpr,
+                width: width * dpr,
+                height: width * dpr,
                 phi: startPhi,
                 theta: GLOBE_THETA,
                 ...palette,
@@ -216,8 +218,8 @@ const IndiaGlobe = () => {
                 }
                 
                 state.phi = currentPhi;
-                state.width = width * 2;
-                state.height = width * 2;
+                state.width = width * dpr;
+                state.height = width * dpr;
 
                 const best = findActiveExchange(phiRef.current);
                 setActiveExchange(prev => prev.id !== best.id ? best : prev);
