@@ -24,4 +24,4 @@ USER user
 
 EXPOSE 7860
 
-CMD ["gunicorn", "robo_advisor.wsgi:application", "--bind", "0.0.0.0:7860", "--workers", "3", "--timeout", "120"]
+CMD ["gunicorn", "robo_advisor.wsgi:application", "--bind", "0.0.0.0:7860", "--workers", "1", "--preload", "--timeout", "120"]
