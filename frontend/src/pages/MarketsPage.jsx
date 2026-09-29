@@ -109,7 +109,7 @@ const MarketsPage = () => {
                 };
 
                 const responses = await Promise.all(
-                    endpoints.map(endpoint => fetchWithTimeout(`${API_BASE}/${endpoint}/`, 8000))
+                    endpoints.map(endpoint => fetchWithTimeout(`${API_BASE}/${endpoint}/`, 20000))
                 );
 
                 const mappedData = responses.map((data) => ({
@@ -260,10 +260,7 @@ const MarketsPage = () => {
                             <p className="font-bold">⚠️ {t('connection_error')}</p>
                             <p>{error}</p>
                             <p className="text-xs mt-1 text-notion-muted">
-                                {t('troubleshooting')}:<br />
-                                1. Ensure backend is running at <code className="bg-notion-hover px-1 rounded">http://127.0.0.1:8000</code><br />
-                                2. Check console logs (F12) for detailed error.<br />
-                                3. Try disabling ad blockers or VPN.
+                                Market data is temporarily unavailable. It will refresh automatically.
                             </p>
                         </div>
                     )}

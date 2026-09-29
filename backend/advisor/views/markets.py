@@ -394,15 +394,14 @@ def search_stock(request):
 
 
 def get_news(request):
-    from django.views.decorators.csrf import csrf_exempt
     symbol_param = request.GET.get('symbol', '^NSEI')
-
     symbols = [s.strip() for s in symbol_param.split(',') if s.strip()]
 
     try:
         all_news = []
         seen_titles = set()
 
+        # Attempt 1: yfinance news (may return empty in newer versions)
         for symbol in symbols[:5]:
             try:
                 ticker = yf.Ticker(symbol)
@@ -455,10 +454,92 @@ def get_news(request):
                 print(f"News fetch error for {symbol}: {e}")
                 continue
 
+        # Attempt 2: If yfinance returned nothing, use Google News RSS
+        if not all_news:
+            try:
+                all_news = _fetch_google_news_rss(symbols)
+            except Exception as e:
+                print(f"Google News RSS fallback error: {e}")
+
         all_news.sort(key=lambda x: x.get('time') or 0, reverse=True)
         return JsonResponse(all_news[:15], safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def _fetch_google_news_rss(symbols, max_items=15):
+    """Fetch market news from Google News RSS as a fallback source."""
+    import requests as http_requests
+    from bs4 import BeautifulSoup
+    from datetime import datetime
+    import warnings
+    from bs4 import XMLParsedAsHTMLWarning
+    warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+    # Build search queries from symbols
+    queries = []
+    for sym in symbols[:3]:
+        clean = sym.replace('.NS', '').replace('.BO', '').replace('^', '')
+        queries.append(f"{clean} stock India")
+    if not queries:
+        queries = ["Indian stock market"]
+
+    all_news = []
+    seen_titles = set()
+
+    for query in queries:
+        try:
+            url = f"https://news.google.com/rss/search?q={query.replace(' ', '+')}&hl=en-IN&gl=IN&ceid=IN:en"
+            resp = http_requests.get(url, timeout=10, headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; Cresta/1.0)'
+            })
+            if resp.status_code != 200:
+                continue
+
+            soup = BeautifulSoup(resp.content, 'html.parser')
+            items = soup.find_all('item')[:7]
+
+            for item in items:
+                title = item.title.text.strip() if item.title else ''
+                if not title or title in seen_titles:
+                    continue
+                seen_titles.add(title)
+
+                # Google News RSS puts the link as text after the <link> tag
+                link = ''
+                link_tag = item.find('link')
+                if link_tag and link_tag.next_sibling:
+                    link = str(link_tag.next_sibling).strip()
+                if not link:
+                    link = f"https://news.google.com/search?q={query.replace(' ', '+')}"
+
+                publisher = item.source.text.strip() if item.source else 'Market News'
+
+                pub_time = None
+                if item.pubdate:
+                    try:
+                        dt = datetime.strptime(item.pubdate.text.strip(), '%a, %d %b %Y %H:%M:%S %Z')
+                        pub_time = int(dt.timestamp())
+                    except:
+                        pub_time = None
+
+                symbol_tag = query.split()[0].upper()
+                all_news.append({
+                    'title': title,
+                    'publisher': publisher,
+                    'link': link,
+                    'time': pub_time,
+                    'type': 'STORY',
+                    'symbol': symbol_tag,
+                })
+
+                if len(all_news) >= max_items:
+                    break
+        except Exception as e:
+            print(f"Google News RSS error for '{query}': {e}")
+            continue
+
+    return all_news
 
 
 def get_top_movers(request):
