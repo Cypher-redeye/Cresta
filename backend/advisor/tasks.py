@@ -87,49 +87,9 @@ def get_cached_sentiment(ticker):
     if cached and time.time() - cached.get('timestamp', 0) < 86400:
         return cached
 
-    # Fallback 1: call live FinBERT sentiment
-    try:
-        from recommender.sentiment import get_market_sentiment
-        live = get_market_sentiment(ticker)
-        if live.get('headlines'):
-            result = {
-                'score': live['score'],
-                'confidence': live.get('confidence', 0.5),
-                'headlines': live['headlines'],
-                'timestamp': time.time()
-            }
-            cache.set(f'sentiment:{ticker}', result, timeout=86400)
-            return result
-    except Exception as e:
-        print(f"[SENTIMENT] FinBERT fallback failed for {ticker}: {e}")
-
-    # Fallback 2: fetch raw headlines from yfinance WITHOUT FinBERT
-    try:
-        import yfinance as yf
-        stock = yf.Ticker(ticker)
-        news = stock.news
-        if news:
-            raw_headlines = []
-            for item in news[:5]:
-                content = item.get('content', item)
-                title = content.get('title', '') or item.get('title', '')
-                if title:
-                    raw_headlines.append({
-                        "text": title,
-                        "sentiment": "neutral",
-                        "confidence": 0.5
-                    })
-            if raw_headlines:
-                result = {
-                    'score': 0.0,
-                    'confidence': 0.5,
-                    'headlines': raw_headlines,
-                    'timestamp': time.time()
-                }
-                cache.set(f'sentiment:{ticker}', result, timeout=86400)
-                return result
-    except Exception as e:
-        print(f"[SENTIMENT] Raw news fallback failed for {ticker}: {e}")
+    # Fallback: Instead of computing live FinBERT for 50 stocks synchronously (which blocks Gunicorn),
+    # just return neutral sentiment. Celery beat will eventually pre-compute the real sentiment.
+    pass
 
     # Final fallback: neutral with empty headlines
     return {
