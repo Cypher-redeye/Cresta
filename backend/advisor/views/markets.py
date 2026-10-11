@@ -4,7 +4,7 @@ from django.http import JsonResponse
 
 # ============= CACHE =============
 market_cache = {}
-CACHE_DURATION = 600  # 10 minutes
+CACHE_DURATION = 120  # 2 minutes — keeps prices close to real-time
 
 STOCK_NAME_MAPPING = {
     "RELIANCE": "RELIANCE.NS",
@@ -82,38 +82,38 @@ def get_market_data(symbol, name):
                 "percent": f"{'+' if percent_change >= 0 else ''}{percent_change}%"
             }
 
-    # Fetch from API
+    # Fetch from API — prefer ticker.info for live/last-traded price
     try:
+        import math
         ticker = yf.Ticker(symbol)
-        data = ticker.history(period="5d")
+        info = ticker.info
 
-        if data.empty or "Close" not in data.columns:
-            raise ValueError("No data found")
-            
-        data = data.dropna(subset=["Close"])
-        if data.empty:
-            raise ValueError("No valid data found")
+        # Primary: live price from info (real-time during market hours)
+        latest_price = info.get('regularMarketPrice') or info.get('currentPrice')
+        prev_close = info.get('previousClose') or info.get('regularMarketPreviousClose')
 
-        latest_price = round(data["Close"].iloc[-1], 2)
+        # Fallback: use history() if info didn't return a price
+        if not latest_price or (isinstance(latest_price, float) and math.isnan(latest_price)):
+            data = ticker.history(period="5d")
+            if not data.empty and "Close" in data.columns:
+                data = data.dropna(subset=["Close"])
+                if not data.empty:
+                    latest_price = data["Close"].iloc[-1]
+                    if not prev_close and len(data) >= 2:
+                        prev_close = data["Close"].iloc[-2]
 
-        # Calculate change
-        if len(data) >= 2:
-            prev_close = data["Close"].iloc[-2]
-            change = round(latest_price - prev_close, 2)
-            percent_change = round((change / prev_close) * 100, 2)
+        if not latest_price or (isinstance(latest_price, float) and math.isnan(latest_price)):
+            raise ValueError("No price available")
+
+        latest_price = round(float(latest_price), 2)
+
+        # Calculate change against previous close
+        if prev_close and not (isinstance(prev_close, float) and math.isnan(prev_close)) and prev_close > 0:
+            change = round(latest_price - float(prev_close), 2)
+            percent_change = round((change / float(prev_close)) * 100, 2)
         else:
-            prev_close = latest_price
             change = 0.0
             percent_change = 0.0
-
-            try:
-                info = ticker.info
-                if 'previousClose' in info and info['previousClose']:
-                    prev_close = info['previousClose']
-                    change = round(latest_price - prev_close, 2)
-                    percent_change = round((change / prev_close) * 100, 2)
-            except:
-                pass
 
         # Update cache
         market_cache[symbol] = {
@@ -249,32 +249,44 @@ def search_stock(request):
     
     for symbol in tickers_to_try:
         try:
-            ticker = yf.Ticker(symbol)
-            data = ticker.history(period="5d")
-
-            if data.empty or "Close" not in data.columns:
-                continue
-                
-            data = data.dropna(subset=["Close"])
-            if data.empty:
-                continue
-
-            latest_price = round(data["Close"].iloc[-1], 2)
-            average_price = data["Close"].mean()
-            
             import math
-            if math.isnan(latest_price):
+            ticker = yf.Ticker(symbol)
+            info = ticker.info
+
+            # Primary: live price from info (matches Google)
+            latest_price = info.get('regularMarketPrice') or info.get('currentPrice')
+            previous_close = info.get('previousClose', 0)
+
+            # Fallback: use history() if info didn't return a price
+            if not latest_price or (isinstance(latest_price, float) and math.isnan(latest_price)):
+                data = ticker.history(period="5d")
+                if data.empty or "Close" not in data.columns:
+                    continue
+                data = data.dropna(subset=["Close"])
+                if data.empty:
+                    continue
+                latest_price = data["Close"].iloc[-1]
+                if not previous_close and len(data) >= 2:
+                    previous_close = data["Close"].iloc[-2]
+
+            if not latest_price or (isinstance(latest_price, float) and math.isnan(latest_price)):
                 continue
 
-            info = ticker.info
-            # Some tickers return info but no price, check for valid price
-            if not info.get('regularMarketPrice') and not info.get('currentPrice') and data.empty:
-                continue
+            latest_price = round(float(latest_price), 2)
 
             name = info.get('longName', symbol)
-            previous_close = info.get('previousClose', latest_price)
-            change = round(((latest_price - previous_close) / previous_close) * 100, 2)
+            if previous_close and not (isinstance(previous_close, float) and math.isnan(previous_close)) and previous_close > 0:
+                change = round(((latest_price - float(previous_close)) / float(previous_close)) * 100, 2)
+            else:
+                change = 0.0
             volume = info.get('volume', 0)
+
+            # Use history average for suggestion only
+            try:
+                hist = ticker.history(period="5d")
+                average_price = hist["Close"].mean() if not hist.empty else latest_price
+            except Exception:
+                average_price = latest_price
 
             # Default simple suggestion
             suggestion = "Buy" if latest_price < average_price else "Hold"
@@ -379,6 +391,7 @@ def search_stock(request):
                 "symbol": symbol,
                 "name": name,
                 "price": latest_price,
+                "previous_close": round(float(previous_close), 2) if previous_close else None,
                 "change_percent": change,
                 "volume": volume,
                 "suggestion": suggestion,
@@ -556,34 +569,39 @@ def get_top_movers(request):
     movers = []
     for ticker_symbol in TOP_MOVERS_TICKERS:
         try:
-            ticker = yf.Ticker(ticker_symbol)
-            data = ticker.history(period="5d")  # Fetched 5d instead of 2d to ensure we have at least 2 valid days
-
-            if data.empty or "Close" not in data.columns:
-                continue
-                
-            data = data.dropna(subset=["Close"])
-            if len(data) < 2:
-                continue
-
-            latest_price = round(float(data["Close"].iloc[-1]), 2)
-            prev_close = float(data["Close"].iloc[-2])
-            change_pct = round(((latest_price - prev_close) / prev_close) * 100, 2)
-            
             import math
-            if math.isnan(latest_price) or math.isnan(change_pct):
-                continue
-                
-            volume = int(data["Volume"].iloc[-1]) if "Volume" in data.columns else 0
-
-            # Friendly name from mapping or ticker
+            ticker = yf.Ticker(ticker_symbol)
+            info = ticker.info
             base = ticker_symbol.replace('.NS', '')
-            name = base
-            try:
-                info = ticker.info
-                name = info.get('shortName', info.get('longName', base))
-            except:
-                pass
+
+            # Primary: live price from info
+            latest_price = info.get('regularMarketPrice') or info.get('currentPrice')
+            prev_close = info.get('previousClose')
+
+            # Fallback to history()
+            if not latest_price or (isinstance(latest_price, float) and math.isnan(latest_price)):
+                data = ticker.history(period="5d")
+                if data.empty or "Close" not in data.columns:
+                    continue
+                data = data.dropna(subset=["Close"])
+                if len(data) < 2:
+                    continue
+                latest_price = data["Close"].iloc[-1]
+                if not prev_close:
+                    prev_close = data["Close"].iloc[-2]
+
+            if not latest_price or (isinstance(latest_price, float) and math.isnan(latest_price)):
+                continue
+
+            latest_price = round(float(latest_price), 2)
+
+            if prev_close and not (isinstance(prev_close, float) and math.isnan(prev_close)) and prev_close > 0:
+                change_pct = round(((latest_price - float(prev_close)) / float(prev_close)) * 100, 2)
+            else:
+                continue  # Can't compute change without previous close
+
+            volume = info.get('volume', 0) or 0
+            name = info.get('shortName', info.get('longName', base))
 
             # Format volume
             if volume >= 1_000_000:

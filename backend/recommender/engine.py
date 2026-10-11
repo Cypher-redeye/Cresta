@@ -66,7 +66,7 @@ def get_stock_profile(ticker: str):
             "week52_high": week52_high,
             "week52_low": week52_low
         }
-        cache.set(cache_key, result, timeout=86400) # Cache for 24h
+        cache.set(cache_key, result, timeout=3600)  # Cache for 1h
         return result
     except Exception as e:
         print(f"Error fetching profile for {ticker}: {e}")
