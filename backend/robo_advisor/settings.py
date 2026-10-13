@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR / '.env', override=True)
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -196,8 +196,8 @@ SIMPLE_JWT = {
 
 
 # ============= CACHE =============
-REDIS_URL = os.environ.get('REDIS_URL', '')
-if REDIS_URL:
+REDIS_URL = os.environ.get('REDIS_URL', '').strip()
+if REDIS_URL and 'redis:6379' not in REDIS_URL:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',

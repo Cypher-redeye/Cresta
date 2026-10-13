@@ -110,10 +110,12 @@ def chat_stream(request):
         data: {"token": " your holdings..."}
         data: [DONE]
     """
-    try:
-        body = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    body = request.data if hasattr(request, 'data') and isinstance(request.data, dict) else {}
+    if not body:
+        try:
+            body = json.loads(request.body)
+        except Exception:
+            body = {}
 
     message = body.get("message", "").strip()
     lang = body.get("lang", "en")

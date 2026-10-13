@@ -94,7 +94,19 @@ def recommend_stocks(user_profile: dict, max_recommendations: int = 5, lang: str
     model = export_data['model']
     encoder = export_data['goal_encoder']
 
-    encoded_goal = encoder.transform([user_profile['Investment_Goal']])[0]
+    goal_input = user_profile.get('Investment_Goal', 'Wealth')
+    goal_mapping = {
+        'growth': 'Wealth', 'wealth': 'Wealth', 'capital appreciation': 'Wealth',
+        'income': 'Income', 'dividend': 'Income',
+        'retirement': 'Retirement', 'pension': 'Retirement',
+        'education': 'Education', 'college': 'Education',
+        'tax': 'Tax', 'tax saving': 'Tax'
+    }
+    normalized_goal = goal_mapping.get(str(goal_input).lower().strip(), 'Wealth')
+    if normalized_goal not in encoder.classes_:
+        normalized_goal = 'Wealth'
+
+    encoded_goal = encoder.transform([normalized_goal])[0]
 
     feature_dict = {
         'Age': user_profile['Age'],

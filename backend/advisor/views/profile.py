@@ -13,10 +13,20 @@ from ..serializers import UserProfileSerializer, WatchlistSerializer
 def get_profile(request):
     """Get user profile data."""
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    
+    picture_url = None
+    if profile.picture:
+        if hasattr(profile.picture, 'url'):
+            picture_url = request.build_absolute_uri(profile.picture.url)
+        elif str(profile.picture).startswith(('http://', 'https://')):
+            picture_url = str(profile.picture)
+        else:
+            picture_url = request.build_absolute_uri(str(profile.picture))
+
     return Response({
         'email': request.user.email,
         'name': request.user.get_full_name() or request.user.username,
-        'picture': request.build_absolute_uri(profile.picture.url) if profile.picture else None,
+        'picture': picture_url,
         'risk_score': profile.risk_score,
         'risk_profile': profile.risk_profile,
         'investment_goal': profile.investment_goal,
